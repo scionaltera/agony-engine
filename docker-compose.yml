@@ -6,3 +6,15 @@ services:
     ports:
      - "8080:8080"
      - "5005:5005"
+    links:
+     - postgres
+    env_file:
+     - agonyengine.env
+  postgres:
+    image: postgres:9.6
+    ports:
+     - "5432:5432"
+    environment:
+      POSTGRES_USER: agonyengine
+      POSTGRES_PASSWORD: agonyengine
+      POSTGRES_DB: agonyengine
