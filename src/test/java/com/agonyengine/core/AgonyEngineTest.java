@@ -14,7 +14,7 @@ public class AgonyEngineTest {
     }
 
     @Test
-    public void test() {
+    public void testEngine() {
         assertNotNull(engine);
     }
 }
