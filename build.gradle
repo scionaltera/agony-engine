@@ -2,8 +2,26 @@ group 'com.agonyengine'
 version '0.1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'docker'
+apply plugin: 'info.solidsoft.pitest'
+apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'org.kordamp.gradle.stats'
 
 sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.3.0'
+        classpath 'org.owasp:dependency-check-gradle:3.1.1'
+        classpath 'org.kordamp.gradle:stats-gradle-plugin:0.2.2'
+    }
+}
 
 repositories {
     mavenCentral()
@@ -12,3 +30,31 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+task buildDocker(type: Docker) {
+    push = false
+    applicationName = jar.getBaseName()
+    dockerfile = file('src/main/docker/local/Dockerfile')
+    tagVersion = "latest"
+    tag = "scionaltera/${applicationName}"
+    doFirst {
+        copy {
+            from jar
+            into stageDir
+        }
+    }
+}
+
+build.dependsOn project.tasks.buildDocker
+
+pitest {
+    coverageThreshold = 70
+    mutationThreshold = 70
+    timestampedReports = false
+}
+
+dependencyCheck {
+    suppressionFile "codequality/cve-suppressions.xml"
+}
+
+check.dependsOn project.tasks.pitest, project.tasks.dependencyCheckAnalyze, project.tasks.stats
