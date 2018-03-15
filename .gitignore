@@ -31,3 +31,8 @@ out/
 # Gradle
 .gradle/
 build/
+
+# Codeship
+codeship.aes
+credentials.env
+dockercfg
