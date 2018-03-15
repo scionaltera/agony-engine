@@ -6,7 +6,7 @@ RUN cd /opt/build \
 && apk update \
 && apk upgrade \
 && apk add --no-cache bash \
-&& ./gradlew clean build -x check
+&& ./gradlew --console=plain clean build -x buildDocker -x dependencyCheckAnalyze
 
 FROM frolvlad/alpine-oraclejre8:slim
 MAINTAINER Peter Keeler <scion@agonyengine.com>
