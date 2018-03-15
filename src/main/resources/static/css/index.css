@@ -1,0 +1,12 @@
+body {
+    background-color: black;
+    color: #ccc;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 400
+}
+
+.heading {
+    font-family: 'Rock Salt', cursive;
+    font-weight: 700;
+    font-size: 72px;
+}
