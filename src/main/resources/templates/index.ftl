@@ -15,6 +15,7 @@
         <div class="col offset-1">
             <h1>A Modern MUD</h1>
             <p>The Agony Engine is a modern, customizable engine for web based MUDs.</p>
+            <p><a href="<@spring.url '/play'/>">Play!</a></p>
         </div>
     </div>
 </div>

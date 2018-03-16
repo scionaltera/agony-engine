@@ -1,0 +1,57 @@
+body {
+    background-color: black;
+    color: #ccc;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 400;
+}
+
+.table {
+    width: unset;
+    max-width: unset;
+    margin-bottom: unset;
+}
+
+.table>tbody>tr>th {
+    padding: 0 8px 0 0;
+    border: none;
+}
+
+.table>tbody>tr>td {
+    padding: 0 8px 0 0;
+    border: none;
+}
+
+#output-box {
+    font-family: 'Inconsolata', monospace;
+    font-size: small;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 0;
+    bottom: 36px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#output-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#input-box {
+    color: black;
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+}
+
+#user-input {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    display: block;
+}
