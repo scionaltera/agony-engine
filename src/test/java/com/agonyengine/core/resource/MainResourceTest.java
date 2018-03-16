@@ -17,4 +17,9 @@ public class MainResourceTest {
     public void testIndex() {
         assertEquals("index", resource.index());
     }
+
+    @Test
+    public void testPlay() {
+        assertEquals("play", resource.play());
+    }
 }

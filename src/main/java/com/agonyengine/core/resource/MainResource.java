@@ -13,4 +13,9 @@ public class MainResource {
     public String index() {
         return "index";
     }
+
+    @RequestMapping("/play")
+    public String play() {
+        return "play";
+    }
 }

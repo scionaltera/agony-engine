@@ -1,0 +1,67 @@
+.default {
+    color: #CCCCCC;
+}
+
+.dblack {
+    color: #333333;
+}
+
+.black {
+    color: #666666;
+}
+
+.dwhite {
+    color: #CCCCCC;
+}
+
+.white {
+    color: #FFFFFF;
+}
+
+.dred {
+    color: #660000;
+}
+
+.red {
+    color: #FF0000;
+}
+
+.dyellow {
+    color: #CC9900;
+}
+
+.yellow {
+    color: #FFFF00;
+}
+
+.dgreen {
+    color: #006600;
+}
+
+.green {
+    color: #00FF00;
+}
+
+.dcyan {
+    color: #009999;
+}
+
+.cyan {
+    color: #00CCCC;
+}
+
+.dblue {
+    color: #000099;
+}
+
+.blue {
+    color: #0000FF;
+}
+
+.dmagenta {
+    color: #660066;
+}
+
+.magenta {
+    color: #FF00FF;
+}
