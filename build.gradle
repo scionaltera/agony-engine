@@ -60,6 +60,14 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.16.0'
 }
 
+bootJar {
+    manifest {
+        attributes(
+                "Implementation-Title": rootProject.name,
+                "Implementation-Version": version)
+    }
+}
+
 task buildDocker(type: Docker) {
     push = false
     applicationName = jar.getBaseName()
