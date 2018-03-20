@@ -85,9 +85,9 @@ public class MainResource {
         }
 
         UserDetails user = new User(
-                registration.getUsername(),
-                passwordEncoder.encode(registration.getPassword()),
-                Collections.singletonList(new SimpleGrantedAuthority("USER")));
+            registration.getUsername(),
+            passwordEncoder.encode(registration.getPassword()),
+            Collections.singletonList(new SimpleGrantedAuthority("USER")));
 
         userDetailsManager.createUser(user);
 

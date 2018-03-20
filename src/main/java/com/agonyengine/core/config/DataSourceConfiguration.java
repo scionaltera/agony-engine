@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfiguration {
     @Bean
-    @ConfigurationProperties(prefix="agony.datasource")
+    @ConfigurationProperties(prefix = "agony.datasource")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
