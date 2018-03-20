@@ -6,8 +6,8 @@ var commandHistoryIndex = -1;
 var commandHistoryLength = 50;
 var scrollBackLength = 500;
 
-$(document).ready(function() {
-    $("#user-input-form").submit(function(event) {
+$(document).ready(function () {
+    $("#user-input-form").submit(function (event) {
         sendInput();
         event.preventDefault();
         return false;
@@ -16,7 +16,7 @@ $(document).ready(function() {
     connect();
 });
 
-$(document).keyup(function(event) {
+$(document).keyup(function (event) {
     if (event.which === 38) { // up arrow
         commandHistoryIndex++;
 
@@ -50,23 +50,23 @@ function connect() {
     socket = new SockJS('/mud');
     stompClient = webstomp.over(socket);
     stompClient.connect(
-    {},
-    function(frame) {
-        console.log('Connected: ' + frame);
-        showOutput(["[green]Connected to server."]);
+        {},
+        function (frame) {
+            console.log('Connected: ' + frame);
+            showOutput(["[green]Connected to server."]);
 
-        stompClient.subscribe('/user/queue/output', function(message) {
-            var msg = JSON.parse(message.body);
-            showOutput(msg.output);
+            stompClient.subscribe('/user/queue/output', function (message) {
+                var msg = JSON.parse(message.body);
+                showOutput(msg.output);
+            });
+
+            setConnected(true);
+        },
+        function () {
+            setConnected(false);
+            console.log('Disconnected.');
+            showOutput(["[red]Disconnected from server."])
         });
-
-        setConnected(true);
-    },
-    function() {
-        setConnected(false);
-        console.log('Disconnected.');
-        showOutput(["[red]Disconnected from server."])
-    });
 }
 
 function sendInput() {
@@ -81,7 +81,7 @@ function sendInput() {
 
     $("#output-list").find("li:last-child").append("<span class='yellow'> " + htmlEscape(inputBox.val()) + "</span>");
 
-    stompClient.send("/app/input", JSON.stringify({ 'input': inputBox.val() }));
+    stompClient.send("/app/input", JSON.stringify({'input': inputBox.val()}));
     inputBox.val('');
 }
 

@@ -11,13 +11,14 @@
         <ul id="output-list">
             <noscript>
                 <li style="color: #ff0000">It seems your browser doesn't support Javascript! Websocket relies on
-                    Javascript being enabled. Please enable Javascript and reload this page!</li>
+                    Javascript being enabled. Please enable Javascript and reload this page!
+                </li>
             </noscript>
         </ul>
     </div>
     <div id="input-box">
         <form id="user-input-form">
-            <input type="text" id="user-input" autocomplete="off" autofocus />
+            <input type="text" id="user-input" autocomplete="off" autofocus/>
         </form>
     </div>
 </div>

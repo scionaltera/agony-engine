@@ -20,7 +20,8 @@
                 <div class="form-group">
                     <div class="col">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" name="username" id="username" value="${username!""}" placeholder="Username" autofocus>
+                        <input type="text" class="form-control" name="username" id="username" value="${username!""}"
+                               placeholder="Username" autofocus>
                     </div>
                 </div>
 

@@ -22,9 +22,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         super();
 
         this.userDetailsManager = auth
-                .jdbcAuthentication()
-                .dataSource(dataSource)
-                .getUserDetailsService();
+            .jdbcAuthentication()
+            .dataSource(dataSource)
+            .getUserDetailsService();
     }
 
     @Bean
@@ -40,19 +40,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.antMatcher("/**")
-                .authorizeRequests()
-                .antMatchers(
-                        "/",
-                        "/public/**",
-                        "/login/**",
-                        "/webjars/**",
-                        "/img/**",
-                        "/css/**",
-                        "/js/**",
-                        "/robots.txt")
-                .permitAll()
-                .anyRequest().authenticated()
-                .and().logout().logoutSuccessUrl("/").permitAll()
-                .and().formLogin().loginPage("/login").defaultSuccessUrl("/play", true);
+            .authorizeRequests()
+            .antMatchers(
+                "/",
+                "/public/**",
+                "/login/**",
+                "/webjars/**",
+                "/img/**",
+                "/css/**",
+                "/js/**",
+                "/robots.txt")
+            .permitAll()
+            .anyRequest().authenticated()
+            .and().logout().logoutSuccessUrl("/").permitAll()
+            .and().formLogin().loginPage("/login").defaultSuccessUrl("/play", true);
     }
 }

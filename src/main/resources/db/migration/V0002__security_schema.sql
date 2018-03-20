@@ -1,15 +1,16 @@
 CREATE EXTENSION IF NOT EXISTS "citext";
 
-create table users(
-  username citext not null primary key,
-  password citext not null,
-  enabled boolean not null
+CREATE TABLE users (
+  username CITEXT  NOT NULL PRIMARY KEY,
+  password CITEXT  NOT NULL,
+  enabled  BOOLEAN NOT NULL
 );
 
-create table authorities (
-  username citext not null,
-  authority citext not null,
-  constraint fk_authorities_users foreign key(username) references users(username)
+CREATE TABLE authorities (
+  username  CITEXT NOT NULL,
+  authority CITEXT NOT NULL,
+  CONSTRAINT fk_authorities_users FOREIGN KEY (username) REFERENCES users (username)
 );
 
-create unique index ix_auth_username on authorities (username, authority);
+CREATE UNIQUE INDEX ix_auth_username
+  ON authorities (username, authority);

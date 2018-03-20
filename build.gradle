@@ -1,5 +1,5 @@
 group 'com.agonyengine'
-version '0.1.0-SNAPSHOT'
+version '0.2.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
@@ -63,8 +63,8 @@ dependencies {
 bootJar {
     manifest {
         attributes(
-                "Implementation-Title": rootProject.name,
-                "Implementation-Version": version)
+            "Implementation-Title": rootProject.name,
+            "Implementation-Version": version)
     }
 }
 
@@ -87,10 +87,10 @@ build.dependsOn project.tasks.buildDocker
 
 pitest {
     excludedClasses = [
-            'com.agonyengine.core.AgonyEngine',
-            'com.agonyengine.core.config.*',
-            'com.agonyengine.core.resource.model.*',
-            'com.agonyengine.core.resource.annotation.*'
+        'com.agonyengine.core.AgonyEngine',
+        'com.agonyengine.core.config.*',
+        'com.agonyengine.core.resource.model.*',
+        'com.agonyengine.core.resource.annotation.*'
     ]
     coverageThreshold = 70
     mutationThreshold = 70
