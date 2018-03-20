@@ -1,8 +1,8 @@
 <#import "/spring.ftl" as spring>
 <!DOCTYPE html>
 <html lang="en">
-<#assign title="Login">
-<#assign path="/login">
+<#assign title="Register">
+<#assign path="/login/new">
 <#assign styles = [ "/css/index.css" ]>
 <#include "header.inc.ftl">
 <body>
@@ -16,7 +16,7 @@
     <div class="row">
         <div class="col-md"></div>
         <div class="col">
-            <form id="new-player-form" class="form-horizontal" method="post" action="<@spring.url '/login'/>">
+            <form id="new-player-form" class="form-horizontal" method="post" action="<@spring.url '/login/new'/>">
                 <div class="form-group">
                     <div class="col">
                         <label for="username">Username</label>
@@ -28,6 +28,13 @@
                     <div class="col">
                         <label for="password">Password</label>
                         <input type="password" class="form-control" name="password" id="password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col">
+                        <label for="password-confirm">Confirm Password</label>
+                        <input type="password" class="form-control" name="passwordConfirm" id="password-confirm">
                     </div>
                 </div>
 
@@ -46,7 +53,7 @@
                             <i class="fa fa-times"></i> Cancel
                         </a>
                         <button role="button" class="btn btn-primary">
-                            <i class="fa fa-sign-in"></i> Login
+                            <i class="fa fa-plus"></i> Register
                         </button>
                     </div>
                 </div>

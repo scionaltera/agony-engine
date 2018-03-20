@@ -88,7 +88,9 @@ build.dependsOn project.tasks.buildDocker
 pitest {
     excludedClasses = [
             'com.agonyengine.core.AgonyEngine',
-            'com.agonyengine.core.config.*'
+            'com.agonyengine.core.config.*',
+            'com.agonyengine.core.resource.model.*',
+            'com.agonyengine.core.resource.annotation.*'
     ]
     coverageThreshold = 70
     mutationThreshold = 70

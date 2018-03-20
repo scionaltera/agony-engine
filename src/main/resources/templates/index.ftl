@@ -25,6 +25,9 @@
     <#else>
     <div class="row">
         <div class="col text-right">
+            <a role="button" class="btn btn-secondary" href="<@spring.url '/login/new'/>">
+                <i class="fa fa-plus"></i> Register
+            </a>
             <a role="button" class="btn btn-primary" href="<@spring.url '/login'/>">
                 <i class="fa fa-sign-in"></i> Login
             </a>

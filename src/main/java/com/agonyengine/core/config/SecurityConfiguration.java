@@ -6,10 +6,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import javax.inject.Inject;
@@ -18,18 +15,26 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    private DataSource dataSource;
+    private UserDetailsManager userDetailsManager;
 
     @Inject
-    public SecurityConfiguration(DataSource dataSource) {
+    public SecurityConfiguration(DataSource dataSource, AuthenticationManagerBuilder auth) throws Exception {
         super();
 
-        this.dataSource = dataSource;
+        this.userDetailsManager = auth
+                .jdbcAuthentication()
+                .dataSource(dataSource)
+                .getUserDetailsService();
     }
 
     @Bean
     public SecurityContextLogoutHandler getSecurityContextLogoutHandler() {
         return new SecurityContextLogoutHandler();
+    }
+
+    @Bean
+    public UserDetailsManager getUserDetailsManager() {
+        return userDetailsManager;
     }
 
     @Override
@@ -39,7 +44,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(
                         "/",
                         "/public/**",
-                        "/login**",
+                        "/login/**",
                         "/webjars/**",
                         "/img/**",
                         "/css/**",
@@ -48,23 +53,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .anyRequest().authenticated()
                 .and().logout().logoutSuccessUrl("/").permitAll()
-                .and().formLogin().loginPage("/login");
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
-        UserDetails scion = User.builder()
-                .username("Scion")
-                .password("password")
-                .passwordEncoder(encoder::encode)
-                .roles("USER", "ADMIN")
-                .build();
-
-        auth
-                .jdbcAuthentication()
-                .dataSource(dataSource)
-                .withUser(scion);
+                .and().formLogin().loginPage("/login").defaultSuccessUrl("/play", true);
     }
 }
