@@ -37,3 +37,6 @@ build/
 codeship.aes
 credentials.env
 dockercfg
+
+# OSX
+.DS_Store

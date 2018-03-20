@@ -47,6 +47,7 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-jetty'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
 
     compile group: 'org.springframework.session', name: 'spring-session-jdbc'
 
@@ -57,6 +58,14 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.16.0'
+}
+
+bootJar {
+    manifest {
+        attributes(
+                "Implementation-Title": rootProject.name,
+                "Implementation-Version": version)
+    }
 }
 
 task buildDocker(type: Docker) {
@@ -79,7 +88,9 @@ build.dependsOn project.tasks.buildDocker
 pitest {
     excludedClasses = [
             'com.agonyengine.core.AgonyEngine',
-            'com.agonyengine.core.config.*'
+            'com.agonyengine.core.config.*',
+            'com.agonyengine.core.resource.model.*',
+            'com.agonyengine.core.resource.annotation.*'
     ]
     coverageThreshold = 70
     mutationThreshold = 70
