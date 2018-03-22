@@ -3,6 +3,7 @@ version: "2"
 services:
   agony-engine:
     image: scionaltera/agony-engine:latest
+    tty: true
     ports:
      - "8080:8080"
      - "5005:5005"
