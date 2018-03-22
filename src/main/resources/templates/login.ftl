@@ -7,11 +7,7 @@
 <#include "header.inc.ftl">
 <body>
 <div class="container-fluid">
-    <div class="row buffer">
-        <div class="col text-center">
-            <span class="heading">The Agony Engine</span>
-        </div>
-    </div>
+    <#include "title.inc.ftl">
 
     <div class="row">
         <div class="col-md"></div>
