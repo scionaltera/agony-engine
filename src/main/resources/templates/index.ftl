@@ -56,6 +56,8 @@
             <p>The first MUDs gained popularity in the 80s and 90s when telnet was a popular protocol and text based games like <a href="https://en.wikipedia.org/wiki/Zork">Zork</a> were commonplace. Much time has passed but MUDs are still around. On many of them, the code remains very similar to what it looked like 20 years ago. The Agony Engine is an attempt to bring modern technology to this retro form of gaming, and to make it easy for people to start up their own MUDs.</p>
         </div>
     </div>
+
+    <#include "links.inc.ftl">
 </div>
 
 <#include "scripts.inc.ftl">

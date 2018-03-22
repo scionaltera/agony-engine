@@ -69,6 +69,11 @@ public class MainResourceTest {
     }
 
     @Test
+    public void testPrivacy() {
+        assertEquals("privacy", resource.privacy());
+    }
+
+    @Test
     public void testLogin() {
         String view = resource.login(null, model);
 

@@ -47,6 +47,11 @@ public class MainResource {
         return "index";
     }
 
+    @RequestMapping("/public/privacy")
+    public String privacy() {
+        return "privacy";
+    }
+
     @RequestMapping("/login")
     public String login(@RequestParam(required = false) String error,
                         Model model) {
