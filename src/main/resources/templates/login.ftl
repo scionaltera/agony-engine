@@ -55,6 +55,8 @@
         </div>
         <div class="col-md"></div>
     </div>
+
+    <#include "links.inc.ftl">
 </div>
 
 <#include "scripts.inc.ftl">
