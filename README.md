@@ -1,4 +1,4 @@
-# agony-engine ![Codeship](https://img.shields.io/codeship/3ec579e0-0a29-0136-0e62-26e427967e2e.svg)[![Website](https://img.shields.io/website-up-down-brightgreen-red/http/shields.io.svg?label=website)](https://agonyengine.com)
+# agony-engine ![AWS CodeBuild](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibHRwM2YxOVlSQmJWTzU4NE1BZC9UU1czK1hTaG5iTzRwUG1TS2QyT1RBTVNjTHhqUFNNenhwSkZHZFhraVJ4VkhkTWVhQVZHYWx6VEg1aXMzZEpUWkYwPSIsIml2UGFyYW1ldGVyU3BlYyI6Ii9RcC9Ob1ZMU0dvbi8yRnciLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)[![Website](https://img.shields.io/website-up-down-brightgreen-red/http/shields.io.svg?label=website)](https://agonyengine.com)
 
 **A modern, customizable engine for web based MUDs.**
 

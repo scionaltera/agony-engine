@@ -8,13 +8,17 @@ env:
 phases:
   pre_build:
     commands:
+      - echo Identifying project version...
+      - export PROJECT_VERSION=`egrep "^version" build.gradle | cut -f2 -d\'`
       - echo Logging into Docker Hub...
       - docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
   build:
     commands:
       - echo Building the Docker image...
       - docker build -t scionaltera/agony-engine:latest -f src/main/docker/codebuild/Dockerfile .
+      - docker tag scionaltera/agony-engine:latest scionaltera/agony-engine:${PROJECT_VERSION}
   post_build:
     commands:
       - echo Pushing the Docker image..
       - docker push scionaltera/agony-engine:latest
+      - docker push scionaltera/agony-engine:${PROJECT_VERSION}
