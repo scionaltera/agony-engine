@@ -13,9 +13,8 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t scionaltera:agony-engine -f src/main/docker/codebuild/Dockerfile .
-#      - docker tag scionaltera:agony-engine latest
+      - docker build -t scionaltera/agony-engine:latest -f src/main/docker/codebuild/Dockerfile .
   post_build:
     commands:
       - echo Pushing the Docker image..
-#      - docker push scionaltera:agony-engine:latest
+      - docker push scionaltera/agony-engine:latest
