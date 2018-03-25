@@ -1,5 +1,7 @@
-# agony-engine ![AWS CodeBuild](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibHRwM2YxOVlSQmJWTzU4NE1BZC9UU1czK1hTaG5iTzRwUG1TS2QyT1RBTVNjTHhqUFNNenhwSkZHZFhraVJ4VkhkTWVhQVZHYWx6VEg1aXMzZEpUWkYwPSIsIml2UGFyYW1ldGVyU3BlYyI6Ii9RcC9Ob1ZMU0dvbi8yRnciLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)[![Website](https://img.shields.io/website-up-down-brightgreen-red/http/shields.io.svg?label=website)](https://agonyengine.com)
+# agony-engine
+![AWS CodeBuild](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibHRwM2YxOVlSQmJWTzU4NE1BZC9UU1czK1hTaG5iTzRwUG1TS2QyT1RBTVNjTHhqUFNNenhwSkZHZFhraVJ4VkhkTWVhQVZHYWx6VEg1aXMzZEpUWkYwPSIsIml2UGFyYW1ldGVyU3BlYyI6Ii9RcC9Ob1ZMU0dvbi8yRnciLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscionaltera%2Fagony-engine.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscionaltera%2Fagony-engine?ref=badge_shield)
+[![Website](https://img.shields.io/website-up-down-brightgreen-red/http/shields.io.svg?label=website)](https://agonyengine.com)
 
 **A modern, customizable engine for web based MUDs.**
 
