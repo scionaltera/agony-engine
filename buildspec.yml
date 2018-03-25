@@ -9,7 +9,8 @@ phases:
   pre_build:
     commands:
       - echo Identifying project version...
-      - export PROJECT_VERSION=`egrep "^version" build.gradle | cut -f2 -d\'`
+      - export PROJECT_VERSION=v`egrep "^version" build.gradle | cut -f2 -d\'`
+      - echo Project version is ${PROJECT_VERSION}
       - echo Logging into Docker Hub...
       - docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
   build:
