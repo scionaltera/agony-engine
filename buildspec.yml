@@ -6,6 +6,9 @@ env:
     DOCKER_HUB_PASSWORD: "docker-hub-password"
 
 phases:
+  install:
+    commands:
+      - chmod +x ./gradlew
   pre_build:
     commands:
       - export PROJECT_VERSION=v`egrep "^version" build.gradle | cut -f2 -d\'`
