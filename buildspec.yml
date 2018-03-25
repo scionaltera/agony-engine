@@ -22,6 +22,6 @@ phases:
     commands:
       - docker push scionaltera/agony-engine:latest
       - docker push scionaltera/agony-engine:${PROJECT_VERSION}
-      - printf '[{"name":"agony-engine","imageUri":"%s"}]' scionaltera/agony-engine:${PROJECT_VERSION} > imagedefinitions.json
+      - printf '[{"name":"agonyengine","imageUri":"%s"}]' scionaltera/agony-engine:${PROJECT_VERSION} > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
