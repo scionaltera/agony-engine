@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging into Docker Hub...
+#      - echo Command to log into Docker Hub goes here...
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t scionaltera:agony-engine -f src/main/docker/codebuild/Dockerfile .
+#      - docker tag scionaltera:agony-engine latest
+  post_build:
+    commands:
+      - echo Pushing the Docker image..
+#      - docker push scionaltera:agony-engine:latest
