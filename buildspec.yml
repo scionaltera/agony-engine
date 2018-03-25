@@ -1,0 +1,21 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DOCKER_HUB_USERNAME: "docker-hub-username"
+    DOCKER_HUB_PASSWORD: "docker-hub-password"
+
+phases:
+  pre_build:
+    commands:
+      - export PROJECT_VERSION=v`egrep "^version" build.gradle | cut -f2 -d\'`
+      - echo Project version is ${PROJECT_VERSION}
+      - docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
+  build:
+    commands:
+      - docker build -t scionaltera/agony-engine:latest -f src/main/docker/codebuild/Dockerfile .
+      - docker tag scionaltera/agony-engine:latest scionaltera/agony-engine:${PROJECT_VERSION}
+  post_build:
+    commands:
+      - docker push scionaltera/agony-engine:latest
+      - docker push scionaltera/agony-engine:${PROJECT_VERSION}
