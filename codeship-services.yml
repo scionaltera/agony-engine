@@ -1,4 +1,0 @@
-agony-engine:
-  build:
-    image: scionaltera/agony-engine
-    dockerfile: src/main/docker/codeship/Dockerfile
