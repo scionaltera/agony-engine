@@ -1,10 +1,15 @@
 version: 0.2
 
+env:
+  parameter-store:
+    DOCKER_HUB_USERNAME: "docker-hub-username"
+    DOCKER_HUB_PASSWORD: "docker-hub-password"
+
 phases:
   pre_build:
     commands:
       - echo Logging into Docker Hub...
-#      - echo Command to log into Docker Hub goes here...
+      - docker login -u ${DOCKER_HUB_USERNAME} --password-stdin ${DOCKER_HUB_PASSWORD}
   build:
     commands:
       - echo Building the Docker image...
