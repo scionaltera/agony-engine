@@ -65,7 +65,7 @@ function connect() {
         function () {
             setConnected(false);
             console.log('Disconnected.');
-            showOutput(["[red]Disconnected from server."])
+            showOutput(["[red]Disconnected from server."]);
         });
 }
 
