@@ -25,6 +25,6 @@ public class WebSocketResource {
     public GameOutput onInput(UserInput input) {
         LOGGER.info("Input: " + input.getInput());
 
-        return new GameOutput("Echo: " + input.getInput());
+        return new GameOutput(": " + input.getInput());
     }
 }

@@ -36,6 +36,6 @@ public class WebSocketResourceTest {
     public void testOnInput() {
         GameOutput output = resource.onInput(input);
 
-        assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Echo: Alpha!")));
+        assertTrue(output.getOutput().stream().anyMatch(line -> line.equals(": Alpha!")));
     }
 }

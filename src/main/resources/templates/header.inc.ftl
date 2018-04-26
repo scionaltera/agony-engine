@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css"
           href="<@spring.url 'https://fonts.googleapis.com/css?family=Inconsolata|Rock+Salt'/>">
     <link rel="stylesheet" type="text/css" href="<@spring.url '/webjars/bootstrap/css/bootstrap.min.css'/>"/>
-    <link rel="stylesheet" type="text/css" href="<@spring.url '/webjars/font-awesome/css/font-awesome.min.css'/>"/>
+    <link rel="stylesheet" type="text/css" href="<@spring.url '/webjars/font-awesome/web-fonts-with-css/css/fontawesome-all.min-jsf.css'/>"/>
 <#if styles??>
     <#list styles as style>
     <link rel="stylesheet" type="text/css" href="<@spring.url '${style}'/>"/>
