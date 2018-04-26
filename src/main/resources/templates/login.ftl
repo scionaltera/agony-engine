@@ -16,15 +16,24 @@
                 <div class="form-group">
                     <div class="col">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" name="username" id="username" value="${username!""}"
-                               placeholder="Username" autofocus>
+                        <#if username??>
+                        <input type="text" class="form-control" name="username" id="username" value="${username!""}" placeholder="Username">
+                        <#else>
+                        <input type="text" class="form-control" name="username" id="username" value="${username!""}" placeholder="Username" autofocus>
+                        </#if>
+
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="col">
                         <label for="password">Password</label>
+                        <#if username??>
+                        <input type="password" class="form-control" name="password" id="password" autofocus>
+                        <#else>
                         <input type="password" class="form-control" name="password" id="password">
+                        </#if>
+
                     </div>
                 </div>
 
@@ -43,7 +52,7 @@
                             <i class="fa fa-times"></i> Cancel
                         </a>
                         <button role="button" class="btn btn-primary">
-                            <i class="fa fa-sign-in"></i> Login
+                            <i class="fa fa-sign-in-alt"></i> Login
                         </button>
                     </div>
                 </div>

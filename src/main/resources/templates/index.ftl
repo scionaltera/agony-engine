@@ -11,10 +11,13 @@
     <#if name??>
     <div class="row">
         <div class="col text-right">
-            <form id="new-player-form" class="form-horizontal" method="post" action="<@spring.url '/logout'/>">
+            <a role="button" class="btn btn-secondary" href="<@spring.url '/account'/>">
+                <i class="fa fa-address-book"></i> Account
+            </a>
+            <form id="new-player-form" class="form-horizontal" style="display: inline-block;" method="post" action="<@spring.url '/logout'/>">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <button role="button" class="btn btn-primary">
-                    <i class="fa fa-sign-out"></i> Logout
+                    <i class="fa fa-sign-out-alt"></i> Logout
                 </button>
             </form>
         </div>
@@ -26,7 +29,7 @@
                 <i class="fa fa-plus"></i> Register
             </a>
             <a role="button" class="btn btn-primary" href="<@spring.url '/login'/>">
-                <i class="fa fa-sign-in"></i> Login
+                <i class="fa fa-sign-in-alt"></i> Login
             </a>
         </div>
     </div>
