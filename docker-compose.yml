@@ -9,6 +9,7 @@ services:
      - "5005:5005"
     links:
      - postgres
+     - activemq
     env_file:
      - agonyengine.env
   postgres:
@@ -19,3 +20,20 @@ services:
       POSTGRES_USER: agonyengine
       POSTGRES_PASSWORD: agonyengine
       POSTGRES_DB: agonyengine
+  activemq:
+    image: webcenter/activemq:5.14.3
+    ports:
+     - "61613:61613"
+     - "8161:8161"
+    environment:
+      # remove default accounts and require authentication, so the local copy acts the same as a production deploy
+      ACTIVEMQ_ENABLED_AUTH: "true"
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+
+      # user with access to web UI
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: admin
+
+      # user with access to broker
+      ACTIVEMQ_OWNER_LOGIN: agonyengine
+      ACTIVEMQ_OWNER_PASSWORD: agonyengine
