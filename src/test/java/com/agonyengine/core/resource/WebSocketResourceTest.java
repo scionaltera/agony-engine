@@ -14,6 +14,8 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 
+import java.security.Principal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +44,9 @@ public class WebSocketResourceTest {
     @Mock
     private UserInput input;
 
+    @Mock
+    private Principal principal;
+
     private UUID sessionId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> sessionAttributes = new HashMap<>();
@@ -55,18 +60,27 @@ public class WebSocketResourceTest {
 
         message = buildMockMessage(sessionId.toString());
 
+        when(principal.getName()).thenReturn("Shepherd");
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
 
-        resource = new WebSocketResource(sessionRepository, playerActorTemplateRepository);
+        resource = new WebSocketResource(
+            "0.1.2-UNIT-TEST",
+            new Date(),
+            sessionRepository,
+            playerActorTemplateRepository);
     }
 
     @Test
     public void testOnSubscribe() {
         GameOutput output = resource.onSubscribe();
 
-        assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Subscribed!")));
+        assertTrue(output.getOutput().stream()
+            .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
+
+        assertTrue(output.getOutput().stream()
+            .anyMatch(line -> line.equals("Breaking Space Greeting.")));
     }
 
     @Test
@@ -77,7 +91,7 @@ public class WebSocketResourceTest {
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
 
-        GameOutput output = resource.onInput(input, message);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Frank: Alpha!")));
     }
@@ -88,7 +102,7 @@ public class WebSocketResourceTest {
 
         when(input.getInput()).thenReturn("Alpha!");
 
-        GameOutput output = resource.onInput(input, badMessage);
+        GameOutput output = resource.onInput(principal, input, badMessage);
 
         assertNotNull(output);
 
@@ -103,7 +117,7 @@ public class WebSocketResourceTest {
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
-        GameOutput output = resource.onInput(input, message);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Someone: Alpha!")));
     }
