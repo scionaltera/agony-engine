@@ -20,6 +20,8 @@ import java.util.UUID;
 
 @Controller
 public class WebSocketResource {
+    protected static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
 
     private SessionRepository sessionRepository;
@@ -45,6 +47,12 @@ public class WebSocketResource {
     @SendToUser(value = "/queue/output", broadcast = false)
     public GameOutput onInput(UserInput input, Message<byte[]> message) {
         Session session = getSession(message);
+
+        if (session == null) {
+            LOGGER.error("Unable to find session for message!");
+            return new GameOutput("[red]Could not find your session! Please try refreshing your browser.");
+        }
+
         PlayerActorTemplate pat = playerActorTemplateRepository
             .findById(UUID.fromString(session.getAttribute("actor")))
             .orElse(null);
@@ -56,7 +64,7 @@ public class WebSocketResource {
 
     private Session getSession(Message<byte[]> message) {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
-        String sessionId = (String)headerAccessor.getSessionAttributes().get("SPRING.SESSION.ID");
+        String sessionId = (String)headerAccessor.getSessionAttributes().get(SPRING_SESSION_ID_KEY);
 
         return sessionRepository.findById(sessionId);
     }
