@@ -1,0 +1,2 @@
+Non Breaking Space Greeting.
+*Breaking Space Greeting.

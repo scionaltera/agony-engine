@@ -16,41 +16,81 @@ import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Controller;
 
 import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.Principal;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class WebSocketResource {
-    protected static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
+    static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
 
+    private String applicationVersion;
+    private Date applicationBootDate;
     private SessionRepository sessionRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
+    private List<String> greeting;
 
     @Inject
     public WebSocketResource(
+        String applicationVersion,
+        Date applicationBootDate,
         SessionRepository sessionRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository) {
 
+        this.applicationVersion = applicationVersion;
+        this.applicationBootDate = applicationBootDate;
         this.sessionRepository = sessionRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
+
+        InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
+        BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
+
+        greeting = greetingReader.lines().collect(Collectors.toList());
     }
 
     @SubscribeMapping("/queue/output")
     public GameOutput onSubscribe() {
-        LOGGER.info("Subscribe");
+        GameOutput output = new GameOutput();
 
-        return new GameOutput("Subscribed!");
+        greeting.forEach(line -> {
+            if (line.startsWith("*")) {
+                output.append(line.substring(1));
+            } else {
+                output.append(line.replace(" ", "&nbsp;"));
+            }
+        });
+
+        output.append("[dwhite]Server status:");
+        output.append("[dwhite]&nbsp;&nbsp;Version: [white]v" + applicationVersion);
+        output.append("[dwhite]&nbsp;&nbsp;Last boot: [white]" + applicationBootDate);
+        output.append("[dyellow]A relentless grinding rattles your very soul as [red]The Agony Engine " +
+            "[dyellow]carries out its barbarous task...");
+        output.append("");
+        output.append("[dwhite]> ");
+
+        return output;
     }
 
     @MessageMapping("/input")
     @SendToUser(value = "/queue/output", broadcast = false)
-    public GameOutput onInput(UserInput input, Message<byte[]> message) {
+    public GameOutput onInput(Principal principal, UserInput input, Message<byte[]> message) {
         Session session = getSession(message);
 
         if (session == null) {
-            LOGGER.error("Unable to find session for message!");
-            return new GameOutput("[red]Could not find your session! Please try refreshing your browser.");
+            LOGGER.error("Unable to find session for authenticated user: {}", principal.getName());
+
+            // Without a session the user probably won't see this, but it's worth a try anyway...
+            return new GameOutput(
+                "[red]ERROR: Could not find your HTTP session!",
+                "[red]Please try logging out, clearing cookies, restarting your browser and logging back in.",
+                "[red]The administrators have been notified of the problem.");
         }
 
         PlayerActorTemplate pat = playerActorTemplateRepository

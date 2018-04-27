@@ -1,0 +1,18 @@
+[red]                                                                                                              %.
+[red]             .%%%%%                       %%                                                      %%(    %%%%%.*
+[red]      (%%%%%%%.(                          %%%                                                     %%%%%%%/
+[red]  %%%%(  .%%   .%.  (%                    %%%        %%(          .                    /%,      %%%%*                        %%%
+[red]         %%     %%  /%%  *%%%%%%%%       .%.%%    *%%/       %%%%%%%%/ %%     %%*%%   .%%         %/       *.  %%    /%%   %%%       %%%#(%%    %%% .%%%%%%%%.
+[red]         %%    #%%%%%%%%*%#              %% #%   %%,  %%%%%%*%%%   .%/ %%%    %%(%%  %%%         (%  %%%%%%(.  %%%    %. %%#  %%%%%%#%%  %%%    (%  %%
+[red]         %% .%%%%%   %% %%%%%%#          %%  %/ %%  %%/ %  ,%%     %%  %%%.   %% /%%%%%%        %%%%%%        %%%%    %%(%% %%( %#   %%  %%%%    %/(%%%%%%*
+[red]        (%/    %%    %% %%    %*        #%.  %% %%%     %% %%%   %%%  %% %%%  %%     %%          %,           %% %%.  %%.%%     %%   %% /%%%%%   %%(%(   ,%
+[red]        /%(    *%%   %%*%%. .%%         %%   %%.  #%%%%%%%% %%%%%     %%  %%%%%%     /%%        .%        %% %%/  %%%#%%  /%%%%%%%%     %%   %%%%%*#%%  %%.
+[red]         %%(             %%%%        %%%%%%%%%%%          /           %%#    %.                 %%     .%%%  #%%    .%            (     %%%    /%   (%%%#
+[red]                                      %%       #%%%                                             (%   %%%
+[red]                                     %%(                                                         %%%%%
+[red]  
+*[red]The Agony Engine [dwhite]Copyright &copy; 2018 [yellow]Peter Keeler[dwhite].
+*[red]The Agony Engine [dwhite]is licensed under the <a class="white" target="_blank" href="https://raw.githubusercontent.com/scionaltera/agony-engine/master/LICENSE">MIT License</a>.
+*[red]The Agony Engine [dwhite]is <a class="white" target="_blank" href="https://github.com/scionaltera/agony-engine">free, open source software</a> that you can contribute to, modify and distribute as you wish.
+*[red]The Agony Engine [dwhite]offers no warranties or guarantees. Play at your own risk.
+*[red]The Agony Engine [red]is in active development. Reboots, outages and database wipes may occur without warning!
