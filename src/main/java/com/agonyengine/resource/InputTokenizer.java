@@ -24,6 +24,13 @@ public class InputTokenizer {
             if (isQuoting || Character.isAlphabetic(codepoint) || Character.isDigit(codepoint)) {
                 if (curChar == '"') {
                     isQuoting = false;
+
+                    String token = buf.toString().trim();
+
+                    if (token.length() > 0) {
+                        tokens.add(token);
+                        buf.setLength(0);
+                    }
                 } else {
                     if (!isQuoting) {
                         buf.append(Character.toUpperCase(curChar));
@@ -50,6 +57,13 @@ public class InputTokenizer {
                 buf.setLength(0);
             } else if (curChar == '"') {
                 isQuoting = true;
+
+                String token = buf.toString().trim();
+
+                if (token.length() > 0) {
+                    tokens.add(token);
+                    buf.setLength(0);
+                }
             }
         }
 
@@ -57,6 +71,9 @@ public class InputTokenizer {
 
         if (token.length() > 0) {
             tokens.add(token);
+        }
+
+        if (tokens.size() > 0) {
             tokenList.add(tokens.toArray(new String[tokens.size()]));
         }
 
