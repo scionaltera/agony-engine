@@ -83,6 +83,16 @@ public class InputTokenizerTest {
     }
 
     @Test
+    public void testEmptyQuotedString() {
+        List<String[]> tokens = inputTokenizer.tokenize("empty \"\" quote");
+
+        assertEquals(1, tokens.size());
+        assertEquals(2, tokens.get(0).length);
+        assertEquals("EMPTY", tokens.get(0)[0]);
+        assertEquals("QUOTE", tokens.get(0)[1]);
+    }
+
+    @Test
     public void testPeriods() {
         List<String[]> tokens = inputTokenizer.tokenize("this is. two sentences");
 
@@ -138,5 +148,18 @@ public class InputTokenizerTest {
         assertEquals(1, tokens.size());
         assertEquals(1, tokens.get(0).length);
         assertEquals("TEST", tokens.get(0)[0]);
+    }
+
+    @Test
+    public void testEmbeddedQuotes() {
+        List<String[]> tokens = inputTokenizer.tokenize("code: \"System.out.println(\"Test\");\" code");
+
+        assertEquals(1, tokens.size());
+        assertEquals(5, tokens.get(0).length);
+        assertEquals("CODE", tokens.get(0)[0]);
+        assertEquals("System.out.println(", tokens.get(0)[1]);
+        assertEquals("TEST", tokens.get(0)[2]);
+        assertEquals(");", tokens.get(0)[3]);
+        assertEquals("CODE", tokens.get(0)[4]);
     }
 }
