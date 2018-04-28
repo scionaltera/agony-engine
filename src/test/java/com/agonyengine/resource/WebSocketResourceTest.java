@@ -15,8 +15,10 @@ import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +31,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class WebSocketResourceTest {
+    @Mock
+    private InputTokenizer inputTokenizer;
+
     @Mock
     private SessionRepository sessionRepository;
 
@@ -47,6 +52,7 @@ public class WebSocketResourceTest {
     @Mock
     private Principal principal;
 
+    private List<String[]> sentences = new ArrayList<>();
     private UUID sessionId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> sessionAttributes = new HashMap<>();
@@ -58,6 +64,7 @@ public class WebSocketResourceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        sentences.add(new String[] { "ALPHA" });
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
@@ -68,6 +75,7 @@ public class WebSocketResourceTest {
         resource = new WebSocketResource(
             "0.1.2-UNIT-TEST",
             new Date(),
+            inputTokenizer,
             sessionRepository,
             playerActorTemplateRepository);
     }
@@ -87,13 +95,14 @@ public class WebSocketResourceTest {
     public void testOnInput() {
         UUID actorId = UUID.randomUUID();
 
+        when(inputTokenizer.tokenize(eq("Alpha!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Alpha!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Frank: Alpha!")));
+        assertTrue(output.getOutput().size() >= 3);
     }
 
     @Test
@@ -113,13 +122,14 @@ public class WebSocketResourceTest {
     public void testOnInputNoPat() {
         UUID actorId = UUID.randomUUID();
 
+        when(inputTokenizer.tokenize(eq("Alpha!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Alpha!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch(line -> line.equals("Someone: Alpha!")));
+        assertTrue(output.getOutput().size() >= 3);
     }
 
     private Message<byte[]> buildMockMessage(String id) {
