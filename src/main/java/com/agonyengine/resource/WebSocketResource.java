@@ -30,9 +30,13 @@ public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
+    private static final String[] COLORS = new String[] {
+        "[red]", "[dyellow]", "[yellow]", "[green]", "[blue]", "[magenta]"
+    };
 
     private String applicationVersion;
     private Date applicationBootDate;
+    private InputTokenizer inputTokenizer;
     private SessionRepository sessionRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
     private List<String> greeting;
@@ -41,11 +45,13 @@ public class WebSocketResource {
     public WebSocketResource(
         String applicationVersion,
         Date applicationBootDate,
+        InputTokenizer inputTokenizer,
         SessionRepository sessionRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
+        this.inputTokenizer = inputTokenizer;
         this.sessionRepository = sessionRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
 
@@ -97,9 +103,28 @@ public class WebSocketResource {
             .findById(UUID.fromString(session.getAttribute("actor")))
             .orElse(null);
 
-        LOGGER.info("Input: " + input.getInput());
+        GameOutput output = new GameOutput();
+        List<String[]> sentences = inputTokenizer.tokenize(input.getInput());
+        StringBuilder buf = new StringBuilder();
 
-        return new GameOutput((pat != null ? pat.getGivenName() : "Someone") + ": " + input.getInput());
+        for (String[] tokens : sentences) {
+            buf.append("[dwhite]Tokenized input: [white]| ");
+
+            for (int i = 0; i < tokens.length; i++) {
+                buf.append(COLORS[i % COLORS.length]);
+                buf.append(tokens[i]);
+                buf.append(" [white]| ");
+            }
+
+            output.append(buf.toString().trim());
+            buf.setLength(0);
+        }
+
+        output
+            .append("")
+            .append("[dwhite]> ");
+
+        return output;
     }
 
     private Session getSession(Message<byte[]> message) {
