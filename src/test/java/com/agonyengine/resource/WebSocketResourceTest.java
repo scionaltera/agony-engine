@@ -16,6 +16,7 @@ import org.springframework.session.SessionRepository;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class WebSocketResourceTest {
     @Mock
     private Principal principal;
 
-    private List<String[]> sentences = new ArrayList<>();
+    private List<List<String>> sentences = new ArrayList<>();
     private UUID sessionId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> sessionAttributes = new HashMap<>();
@@ -64,7 +65,7 @@ public class WebSocketResourceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        sentences.add(new String[] { "ALPHA" });
+        sentences.add(Collections.singletonList("ALPHA"));
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
