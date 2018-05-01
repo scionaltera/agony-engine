@@ -104,15 +104,15 @@ public class WebSocketResource {
             .orElse(null);
 
         GameOutput output = new GameOutput();
-        List<String[]> sentences = inputTokenizer.tokenize(input.getInput());
+        List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
         StringBuilder buf = new StringBuilder();
 
-        for (String[] tokens : sentences) {
+        for (List<String> tokens : sentences) {
             buf.append("[dwhite]Tokenized input: [white]| ");
 
-            for (int i = 0; i < tokens.length; i++) {
+            for (int i = 0; i < tokens.size(); i++) {
                 buf.append(COLORS[i % COLORS.length]);
-                buf.append(tokens[i]);
+                buf.append(tokens.get(i));
                 buf.append(" [white]| ");
             }
 

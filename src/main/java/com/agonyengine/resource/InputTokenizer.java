@@ -4,17 +4,22 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class InputTokenizer {
-    public List<String[]> tokenize(String input) {
-        List<String[]> tokenList = new ArrayList<>();
+    public List<List<String>> tokenize(String input) {
+        return filterTokens(buildTokens(input));
+    }
+
+    private List<List<String>> buildTokens(String input) {
+        List<List<String>> sentences = new ArrayList<>();
         List<String> tokens = new ArrayList<>();
         StringBuilder buf = new StringBuilder();
         boolean isQuoting = false;
 
         if (input == null) {
-            return tokenList;
+            return sentences;
         }
 
         for (int i = 0; i < input.length(); i++) {
@@ -50,7 +55,7 @@ public class InputTokenizer {
 
                 if (token.length() > 0) {
                     tokens.add(token);
-                    tokenList.add(tokens.toArray(new String[tokens.size()]));
+                    sentences.add(new ArrayList<>(tokens));
                     tokens.clear();
                 }
 
@@ -74,9 +79,19 @@ public class InputTokenizer {
         }
 
         if (tokens.size() > 0) {
-            tokenList.add(tokens.toArray(new String[tokens.size()]));
+            sentences.add(new ArrayList<>(tokens));
         }
 
-        return tokenList;
+        return sentences;
+    }
+
+    private List<List<String>> filterTokens(List<List<String>> sentences) {
+        return sentences.stream()
+            .map(sentence -> sentence.stream()
+                .filter(token -> !"THE".equals(token))
+                .filter(token -> !"A".equals(token))
+                .filter(token -> !"AN".equals(token))
+                .collect(Collectors.toList()))
+            .collect(Collectors.toList());
     }
 }
