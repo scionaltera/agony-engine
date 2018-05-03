@@ -92,6 +92,39 @@ public class InputTokenizerTest {
     }
 
     @Test
+    public void testThen() {
+        List<List<String>> tokens = inputTokenizer.tokenize("do this then do that");
+
+        assertEquals(2, tokens.size());
+        assertEquals(2, tokens.get(0).size());
+        assertEquals(2, tokens.get(1).size());
+        assertEquals("DO", tokens.get(0).get(0));
+        assertEquals("THIS", tokens.get(0).get(1));
+        assertEquals("DO", tokens.get(1).get(0));
+        assertEquals("THAT", tokens.get(1).get(1));
+    }
+
+    @Test
+    public void testThenAtEnd() {
+        List<List<String>> tokens = inputTokenizer.tokenize("do this then");
+
+        assertEquals(1, tokens.size());
+        assertEquals(2, tokens.get(0).size());
+        assertEquals("DO", tokens.get(0).get(0));
+        assertEquals("THIS", tokens.get(0).get(1));
+    }
+
+    @Test
+    public void testThenAtStart() {
+        List<List<String>> tokens = inputTokenizer.tokenize("then do that");
+
+        assertEquals(1, tokens.size());
+        assertEquals(2, tokens.get(0).size());
+        assertEquals("DO", tokens.get(0).get(0));
+        assertEquals("THAT", tokens.get(0).get(1));
+    }
+
+    @Test
     public void testPeriods() {
         List<List<String>> tokens = inputTokenizer.tokenize("this is. two sentences");
 
@@ -143,6 +176,15 @@ public class InputTokenizerTest {
     @Test
     public void testMultiplePunctuations() {
         List<List<String>> tokens = inputTokenizer.tokenize("test...");
+
+        assertEquals(1, tokens.size());
+        assertEquals(1, tokens.get(0).size());
+        assertEquals("TEST", tokens.get(0).get(0));
+    }
+
+    @Test
+    public void testPeriodsAtStart() {
+        List<List<String>> tokens = inputTokenizer.tokenize("...test");
 
         assertEquals(1, tokens.size());
         assertEquals(1, tokens.get(0).size());

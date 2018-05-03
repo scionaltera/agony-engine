@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 @Component
 public class InputTokenizer {
     public List<List<String>> tokenize(String input) {
-        return filterTokens(buildTokens(input));
+        return splitSentences(filterTokens(buildTokens(input)));
     }
 
     private List<List<String>> buildTokens(String input) {
@@ -78,11 +78,34 @@ public class InputTokenizer {
             tokens.add(token);
         }
 
-        if (tokens.size() > 0) {
-            sentences.add(new ArrayList<>(tokens));
-        }
+        sentences.add(new ArrayList<>(tokens));
 
         return sentences;
+    }
+
+    private List<List<String>> splitSentences(List<List<String>> sentences) {
+        List<List<String>> output = new ArrayList<>();
+
+        for (List<String> sentence : sentences) {
+            List<String> outputSentence = new ArrayList<>();
+
+            for (String token : sentence) {
+                if ("THEN".equals(token)) {
+                    if (outputSentence.size() > 0) {
+                        output.add(outputSentence);
+                        outputSentence = new ArrayList<>();
+                    }
+                } else {
+                    outputSentence.add(token);
+                }
+            }
+
+            if (outputSentence.size() > 0) {
+                output.add(outputSentence);
+            }
+        }
+
+        return output;
     }
 
     private List<List<String>> filterTokens(List<List<String>> sentences) {
