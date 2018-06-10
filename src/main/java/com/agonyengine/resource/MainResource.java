@@ -94,12 +94,6 @@ public class MainResource {
             return "register";
         }
 
-        if (userDetailsManager.userExists(registration.getUsername())) {
-            model.addAttribute("errorText", "That username is not available. Please try another one.");
-
-            return "register";
-        }
-
         UserDetails user = new User(
             registration.getUsername(),
             passwordEncoder.encode(registration.getPassword()),

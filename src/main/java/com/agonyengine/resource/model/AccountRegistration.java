@@ -1,12 +1,14 @@
 package com.agonyengine.resource.model;
 
 import com.agonyengine.resource.annotation.PasswordsMatch;
+import com.agonyengine.resource.annotation.UniqueUsername;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @PasswordsMatch(message = "Password and confirmation must match.")
+@UniqueUsername(message = "That username is not available. Please try another one.")
 public class AccountRegistration {
     @NotNull(message = "Username must not be empty.")
     @Size(min = 3, message = "Username must be at least 3 letters long.")
