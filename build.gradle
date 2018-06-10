@@ -92,8 +92,7 @@ pitest {
     excludedClasses = [
         'com.agonyengine.AgonyEngine',
         'com.agonyengine.config.*',
-        'com.agonyengine.resource.model.*',
-        'com.agonyengine.resource.annotation.*'
+        'com.agonyengine.resource.model.*'
     ]
     coverageThreshold = 70
     mutationThreshold = 70

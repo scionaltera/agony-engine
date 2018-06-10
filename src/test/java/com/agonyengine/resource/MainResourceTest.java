@@ -137,7 +137,6 @@ public class MainResourceTest {
 
         assertEquals("login", view);
 
-        verify(userDetailsManager).userExists(eq("Frank"));
         verify(model).addAttribute(eq("username"), eq("Frank"));
         verify(userDetailsManager).createUser(userDetailsCaptor.capture());
 
@@ -150,19 +149,22 @@ public class MainResourceTest {
 
     @Test
     public void testRegisterDuplicateUser() {
+        ObjectError objectError = new ObjectError("username", "That username is not available.");
+
         when(accountRegistration.getUsername()).thenReturn("Frank");
         when(accountRegistration.getPassword()).thenReturn("Underwood");
         when(accountRegistration.getPasswordConfirm()).thenReturn("Underwood");
         when(userDetailsManager.userExists(eq("Frank"))).thenReturn(true);
-        when(errors.hasErrors()).thenReturn(false);
+        when(errors.hasErrors()).thenReturn(true);
+        when(errors.getAllErrors()).thenReturn(Collections.singletonList(objectError));
 
         String view = resource.register(accountRegistration, errors, model);
 
         assertEquals("register", view);
 
-        verify(userDetailsManager).userExists(eq("Frank"));
         verify(model).addAttribute(eq("errorText"), anyString());
-        verifyNoMoreInteractions(userDetailsManager);
+        verify(model).addAttribute(eq("username"), eq("Frank"));
+        verifyZeroInteractions(userDetailsManager);
     }
 
     @Test
