@@ -1,0 +1,6 @@
+CREATE TABLE verb (
+  name VARCHAR(255) NOT NULL,
+  priority INT NOT NULL,
+  bean VARCHAR(255) NOT NULL,
+  PRIMARY KEY (name)
+);
