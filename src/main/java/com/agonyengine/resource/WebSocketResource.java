@@ -1,11 +1,16 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.PlayerActorTemplate;
+import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.repository.VerbRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -14,11 +19,13 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
@@ -30,30 +37,33 @@ public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
-    private static final String[] COLORS = new String[] {
-        "[red]", "[dyellow]", "[yellow]", "[green]", "[blue]", "[magenta]"
-    };
 
     private String applicationVersion;
     private Date applicationBootDate;
+    private ApplicationContext applicationContext;
     private InputTokenizer inputTokenizer;
     private SessionRepository sessionRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
+    private VerbRepository verbRepository;
     private List<String> greeting;
 
     @Inject
     public WebSocketResource(
         String applicationVersion,
         Date applicationBootDate,
+        ApplicationContext applicationContext,
         InputTokenizer inputTokenizer,
         SessionRepository sessionRepository,
-        PlayerActorTemplateRepository playerActorTemplateRepository) {
+        PlayerActorTemplateRepository playerActorTemplateRepository,
+        VerbRepository verbRepository) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
+        this.applicationContext = applicationContext;
         this.inputTokenizer = inputTokenizer;
         this.sessionRepository = sessionRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
+        this.verbRepository = verbRepository;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -105,19 +115,25 @@ public class WebSocketResource {
 
         GameOutput output = new GameOutput();
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
-        StringBuilder buf = new StringBuilder();
 
         for (List<String> tokens : sentences) {
-            buf.append("[dwhite]Tokenized input: [white]| ");
+            try {
+                String verbToken = tokens.get(0);
+                Verb verb = verbRepository
+                    .findAll(Sort.by(Sort.Direction.ASC, "priority", "name"))
+                    .stream()
+                    .filter(v -> v.getName().toUpperCase().startsWith(verbToken))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown verb: " + verbToken));
 
-            for (int i = 0; i < tokens.size(); i++) {
-                buf.append(COLORS[i % COLORS.length]);
-                buf.append(tokens.get(i));
-                buf.append(" [white]| ");
+                Object verbBean = applicationContext.getBean(verb.getBean());
+                Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class);
+                ReflectionUtils.invokeMethod(verbMethod, verbBean, output);
+            } catch (IllegalArgumentException | BeansException e) {
+                LOGGER.error(e.getMessage());
+
+                output.append("[dwhite]" + e.getMessage());
             }
-
-            output.append(buf.toString().trim());
-            buf.setLength(0);
         }
 
         output
