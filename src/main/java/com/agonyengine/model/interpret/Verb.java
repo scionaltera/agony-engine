@@ -8,6 +8,7 @@ public class Verb {
     @Id
     private String name;
     private int priority;
+    private boolean quoting = false;
     private String bean;
 
     public String getName() {
@@ -24,6 +25,14 @@ public class Verb {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public boolean isQuoting() {
+        return quoting;
+    }
+
+    public void setQuoting(boolean quoting) {
+        this.quoting = quoting;
     }
 
     public String getBean() {
