@@ -1,6 +1,7 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.PlayerActorTemplate;
+import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
@@ -126,9 +127,18 @@ public class WebSocketResource {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unknown verb: " + verbToken));
 
-                Object verbBean = applicationContext.getBean(verb.getBean());
-                Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class);
-                ReflectionUtils.invokeMethod(verbMethod, verbBean, output);
+                if (verb.isQuoting()) {
+                    QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
+                    Object verbBean = applicationContext.getBean(verb.getBean());
+                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class, QuotedString.class);
+                    ReflectionUtils.invokeMethod(verbMethod, verbBean, output, quoted);
+
+                    break;
+                } else {
+                    Object verbBean = applicationContext.getBean(verb.getBean());
+                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class);
+                    ReflectionUtils.invokeMethod(verbMethod, verbBean, output);
+                }
             } catch (IllegalArgumentException | BeansException e) {
                 LOGGER.error(e.getMessage());
 
@@ -148,5 +158,19 @@ public class WebSocketResource {
         String sessionId = (String)headerAccessor.getSessionAttributes().get(SPRING_SESSION_ID_KEY);
 
         return sessionRepository.findById(sessionId);
+    }
+
+    private String removeFirstWord(String in) {
+        if (in.indexOf(' ') != -1) {
+            int i = in.indexOf(' ');
+
+            while (i < in.length() &&  in.charAt(i) == ' ') {
+                i++;
+            }
+
+            return in.substring(i);
+        }
+
+        return "";
     }
 }

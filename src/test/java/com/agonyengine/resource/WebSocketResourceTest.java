@@ -2,6 +2,8 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.command.HelpCommand;
+import com.agonyengine.model.command.SayCommand;
+import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
@@ -11,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ import org.springframework.session.SessionRepository;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -138,6 +140,113 @@ public class WebSocketResourceTest {
     }
 
     @Test
+    public void testOnInputQuotingVerb() {
+        UUID actorId = UUID.randomUUID();
+        SayCommand alphaBean = mock(SayCommand.class);
+
+        fakeCommandOutput(alphaBean);
+
+        List<List<String>> sentences = new ArrayList<>();
+
+        sentences.add(Arrays.asList("ALPHA", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
+
+        when(inputTokenizer.tokenize(eq("Able baker charlie dog easy fox."))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able baker charlie dog easy fox.");
+        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbs.get(0).isQuoting()).thenReturn(true);
+        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
+
+        verify(applicationContext).getBean(eq("alphaCommand"));
+        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+    }
+
+    @Test
+    public void testOnInputQuotingVerbEmpty() {
+        UUID actorId = UUID.randomUUID();
+        SayCommand alphaBean = mock(SayCommand.class);
+        List<List<String>> sentences = new ArrayList<>();
+
+        sentences.add(Collections.singletonList("ALPHA"));
+
+        when(inputTokenizer.tokenize(eq("Able"))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able");
+        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbs.get(0).isQuoting()).thenReturn(true);
+        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        assertTrue(output.getOutput().stream().anyMatch(line -> line.contains("cannot be empty")));
+
+        verify(applicationContext, never()).getBean(eq("alphaCommand"));
+        verify(alphaBean, never()).invoke(any(GameOutput.class), any(QuotedString.class));
+    }
+
+    @Test
+    public void testOnInputQuotingVerbSeveralSpaces() {
+        UUID actorId = UUID.randomUUID();
+        SayCommand alphaBean = mock(SayCommand.class);
+
+        fakeCommandOutput(alphaBean);
+
+        List<List<String>> sentences = new ArrayList<>();
+
+        sentences.add(Arrays.asList("ALPHA", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
+
+        when(inputTokenizer.tokenize(eq("Able      baker charlie dog easy fox."))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able      baker charlie dog easy fox.");
+        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbs.get(0).isQuoting()).thenReturn(true);
+        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
+
+        verify(applicationContext).getBean(eq("alphaCommand"));
+        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+    }
+
+    @Test
+    public void testOnInputQuotingVerbMultipleSentences() {
+        UUID actorId = UUID.randomUUID();
+        SayCommand alphaBean = mock(SayCommand.class);
+
+        fakeCommandOutput(alphaBean);
+
+        List<List<String>> sentences = new ArrayList<>();
+
+        sentences.add(Arrays.asList("ALPHA", "BAKER"));
+        sentences.add(Arrays.asList("CHARLIE", "DOG"));
+        sentences.add(Arrays.asList("EASY", "FOX"));
+
+        when(inputTokenizer.tokenize(eq("Able baker. Charlie dog. Easy fox."))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able baker. Charlie dog. Easy fox.");
+        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbs.get(0).isQuoting()).thenReturn(true);
+        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker. Charlie dog. Easy fox."::equals));
+
+        verify(applicationContext).getBean(eq("alphaCommand"));
+        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+    }
+
+    @Test
     public void testOnInputNoCommand() {
         UUID actorId = UUID.randomUUID();
 
@@ -206,5 +315,16 @@ public class WebSocketResourceTest {
         }
 
         return verbs;
+    }
+
+    private void fakeCommandOutput(SayCommand alphaBean) {
+        doAnswer(i -> {
+            GameOutput output = i.getArgument(0);
+            QuotedString message = i.getArgument(1);
+
+            output.append("Test Passed: " + message.getText());
+
+            return null;
+        }).when(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
     }
 }
