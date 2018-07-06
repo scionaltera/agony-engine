@@ -1,3 +1,7 @@
+agonyengine:
+  maps:
+    default: "5231e20f-0658-4685-9396-6e69ebfb2c3b"
+
 spring:
   jpa:
     properties:
