@@ -246,7 +246,7 @@ public class MainResourceTest {
 
     @Test
     public void testPlay() {
-        when(httpSession.getAttribute(eq("actor"))).thenReturn("actor_id");
+        when(httpSession.getAttribute(eq("actor_template"))).thenReturn("actor_id");
 
         assertEquals("play", resource.play(httpSession));
     }
@@ -263,7 +263,7 @@ public class MainResourceTest {
 
         assertEquals("redirect:/play", view);
 
-        verify(httpSession).setAttribute(eq("actor"), eq(actorId.toString()));
+        verify(httpSession).setAttribute(eq("actor_template"), eq(actorId.toString()));
     }
 
     @Test
@@ -278,7 +278,7 @@ public class MainResourceTest {
 
         assertEquals("redirect:/account", view);
 
-        verify(httpSession, never()).setAttribute(eq("actor"), anyString());
+        verify(httpSession, never()).setAttribute(eq("actor_template"), anyString());
     }
 
     @Test
@@ -293,7 +293,7 @@ public class MainResourceTest {
 
         assertEquals("redirect:/account", view);
 
-        verify(httpSession, never()).setAttribute(eq("actor"), anyString());
+        verify(httpSession, never()).setAttribute(eq("actor_template"), anyString());
     }
 
     @Test

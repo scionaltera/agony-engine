@@ -1,5 +1,6 @@
 package com.agonyengine.resource;
 
+import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.command.HelpCommand;
 import com.agonyengine.model.command.SayCommand;
@@ -7,6 +8,8 @@ import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
+import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
 import org.junit.Before;
@@ -34,7 +37,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -47,16 +49,25 @@ public class WebSocketResourceTest {
     private InputTokenizer inputTokenizer;
 
     @Mock
+    private GameMapRepository gameMapRepository;
+
+    @Mock
     private SessionRepository sessionRepository;
 
     @Mock
     private PlayerActorTemplateRepository playerActorTemplateRepository;
 
     @Mock
+    private ActorRepository actorRepository;
+
+    @Mock
     private VerbRepository verbRepository;
 
     @Mock
     private PlayerActorTemplate pat;
+
+    @Mock
+    private Actor actor;
 
     @Mock
     private Session session;
@@ -67,6 +78,7 @@ public class WebSocketResourceTest {
     @Mock
     private Principal principal;
 
+    private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
     private UUID sessionId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
@@ -86,6 +98,8 @@ public class WebSocketResourceTest {
         when(principal.getName()).thenReturn("Shepherd");
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
+        when(actor.getName()).thenReturn("Frank");
+        when(actorRepository.findBySessionUsername(eq("Shepherd"))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
 
         verbs = buildMockVerbs();
@@ -93,16 +107,19 @@ public class WebSocketResourceTest {
         resource = new WebSocketResource(
             "0.1.2-UNIT-TEST",
             new Date(),
+            defaultMapId,
             applicationContext,
             inputTokenizer,
+            gameMapRepository,
             sessionRepository,
+            actorRepository,
             playerActorTemplateRepository,
             verbRepository);
     }
 
     @Test
     public void testOnSubscribe() {
-        GameOutput output = resource.onSubscribe();
+        GameOutput output = resource.onSubscribe(principal, message);
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -117,12 +134,12 @@ public class WebSocketResourceTest {
         HelpCommand alphaBean = mock(HelpCommand.class);
 
         doAnswer(i -> {
-            GameOutput output = i.getArgument(0);
+            GameOutput output = i.getArgument(1);
 
             output.append("Test Passed");
 
             return null;
-        }).when(alphaBean).invoke(any(GameOutput.class));
+        }).when(alphaBean).invoke(any(Actor.class), any(GameOutput.class));
 
         when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able!");
@@ -131,12 +148,12 @@ public class WebSocketResourceTest {
         when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed"::equals));
 
         verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(GameOutput.class));
+        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class));
     }
 
     @Test
@@ -158,12 +175,12 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
 
         verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
     }
 
     @Test
@@ -182,12 +199,12 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch(line -> line.contains("cannot be empty")));
 
         verify(applicationContext, never()).getBean(eq("alphaCommand"));
-        verify(alphaBean, never()).invoke(any(GameOutput.class), any(QuotedString.class));
+        verify(alphaBean, never()).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
     }
 
     @Test
@@ -209,12 +226,12 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
 
         verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
     }
 
     @Test
@@ -238,12 +255,12 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker. Charlie dog. Easy fox."::equals));
 
         verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
     }
 
     @Test
@@ -258,24 +275,11 @@ public class WebSocketResourceTest {
         when(applicationContext.getBean(eq("alphaCommand")))
             .thenThrow(new NoSuchBeanDefinitionException("alphaCommand"));
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().stream().anyMatch("[dwhite]No bean named 'alphaCommand' available"::equals));
 
         verify(applicationContext).getBean(eq("alphaCommand"));
-    }
-
-    @Test
-    public void testOnInputNoSession() {
-        Message<byte[]> badMessage = buildMockMessage("fakeId");
-
-        when(input.getInput()).thenReturn("Alpha!");
-
-        GameOutput output = resource.onInput(principal, input, badMessage);
-
-        assertNotNull(output);
-
-        verifyZeroInteractions(playerActorTemplateRepository);
     }
 
     @Test
@@ -287,7 +291,7 @@ public class WebSocketResourceTest {
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
-        GameOutput output = resource.onInput(principal, input, message);
+        GameOutput output = resource.onInput(principal, input);
 
         assertTrue(output.getOutput().size() >= 3);
     }
@@ -319,12 +323,12 @@ public class WebSocketResourceTest {
 
     private void fakeCommandOutput(SayCommand alphaBean) {
         doAnswer(i -> {
-            GameOutput output = i.getArgument(0);
-            QuotedString message = i.getArgument(1);
+            GameOutput output = i.getArgument(1);
+            QuotedString message = i.getArgument(2);
 
             output.append("Test Passed: " + message.getText());
 
             return null;
-        }).when(alphaBean).invoke(any(GameOutput.class), any(QuotedString.class));
+        }).when(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
     }
 }
