@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActorRepository extends JpaRepository<Actor, UUID> {
-    Actor findBySessionUsername(String sessionUsername);
+    Actor findBySessionUsernameAndSessionId(String sessionUsername, String sessionId);
     List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
 }

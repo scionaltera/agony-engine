@@ -49,8 +49,9 @@ public class StompDisconnectListenerTest {
     @Test
     public void testApplicationEvent() {
         when(disconnectEvent.getMessage()).thenReturn(message);
+        when(disconnectEvent.getSessionId()).thenReturn("SessionId");
         when(principal.getName()).thenReturn("SessionUser");
-        when(actorRepository.findBySessionUsername(eq("SessionUser"))).thenReturn(actor);
+        when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(actor);
         when(actor.getName()).thenReturn("Stan");
 
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
@@ -61,8 +62,9 @@ public class StompDisconnectListenerTest {
     @Test
     public void testActorNotFound() {
         when(disconnectEvent.getMessage()).thenReturn(message);
+        when(disconnectEvent.getSessionId()).thenReturn("SessionId");
         when(principal.getName()).thenReturn("SessionUser");
-        when(actorRepository.findBySessionUsername(eq("SessionUser"))).thenReturn(null);
+        when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(null);
 
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
 
