@@ -1,6 +1,7 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.command.HelpCommand;
 import com.agonyengine.model.command.SayCommand;
@@ -14,6 +15,8 @@ import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -37,7 +40,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -70,6 +76,9 @@ public class WebSocketResourceTest {
     private Actor actor;
 
     @Mock
+    private GameMap gameMap;
+
+    @Mock
     private Session session;
 
     @Mock
@@ -77,6 +86,9 @@ public class WebSocketResourceTest {
 
     @Mock
     private Principal principal;
+
+    @Captor
+    private ArgumentCaptor<Actor> actorCaptor;
 
     private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
@@ -102,6 +114,14 @@ public class WebSocketResourceTest {
         when(actorRepository.findBySessionUsername(eq("Shepherd"))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
 
+        when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
+            Actor a = i.getArgument(0);
+
+            a.setId(UUID.randomUUID());
+
+            return a;
+        });
+
         verbs = buildMockVerbs();
 
         resource = new WebSocketResource(
@@ -120,6 +140,34 @@ public class WebSocketResourceTest {
     @Test
     public void testOnSubscribe() {
         GameOutput output = resource.onSubscribe(principal, message);
+
+        assertTrue(output.getOutput().stream()
+            .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
+
+        assertTrue(output.getOutput().stream()
+            .anyMatch(line -> line.equals("Breaking Space Greeting.")));
+    }
+
+    @Test
+    public void testOnSubscribeNullActor() {
+        when(actorRepository.findBySessionUsername(eq("Shepherd"))).thenReturn(null);
+        when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.of(pat));
+        when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
+        when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
+
+        GameOutput output = resource.onSubscribe(principal, message);
+
+        verify(actorRepository).save(actorCaptor.capture());
+
+        Actor savedActor = actorCaptor.getValue();
+
+        assertNotNull(savedActor.getId());
+        assertEquals("Frank", savedActor.getName());
+        assertEquals("Shepherd", savedActor.getSessionUsername());
+        assertEquals(sessionId.toString(), savedActor.getSessionId());
+        assertEquals(gameMap, savedActor.getGameMap());
+        assertEquals((Integer)0, savedActor.getX());
+        assertEquals((Integer)0, savedActor.getY());
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -299,6 +347,7 @@ public class WebSocketResourceTest {
     private Message<byte[]> buildMockMessage(String id) {
         sessionAttributes.put(SPRING_SESSION_ID_KEY, id);
 
+        headers.put(SimpMessageHeaderAccessor.SESSION_ID_HEADER, sessionId.toString());
         headers.put(SimpMessageHeaderAccessor.SESSION_ATTRIBUTES, sessionAttributes);
 
         return new GenericMessage<>(new byte[0], headers);
