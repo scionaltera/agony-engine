@@ -106,7 +106,7 @@ public class WebSocketResource {
         output.append("");
         output.append("[dwhite]> ");
 
-        Actor actor = actorRepository.findBySessionUsername(principal.getName());
+        Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
 
         if (actor == null) {
             PlayerActorTemplate pat = playerActorTemplateRepository
@@ -136,8 +136,8 @@ public class WebSocketResource {
 
     @MessageMapping("/input")
     @SendToUser(value = "/queue/output", broadcast = false)
-    public GameOutput onInput(Principal principal, UserInput input) {
-        Actor actor = actorRepository.findBySessionUsername(principal.getName());
+    public GameOutput onInput(Principal principal, UserInput input, Message<byte[]> message) {
+        Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
         GameOutput output = new GameOutput();
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
 

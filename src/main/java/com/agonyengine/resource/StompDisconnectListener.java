@@ -25,7 +25,9 @@ public class StompDisconnectListener implements ApplicationListener<SessionDisco
     @Override
     public void onApplicationEvent(SessionDisconnectEvent event) {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
-        Actor actor = actorRepository.findBySessionUsername(headerAccessor.getUser().getName());
+        Actor actor = actorRepository.findBySessionUsernameAndSessionId(
+            headerAccessor.getUser().getName(),
+            event.getSessionId());
 
         if (actor == null) {
             return;

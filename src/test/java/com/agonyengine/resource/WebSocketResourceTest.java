@@ -111,7 +111,7 @@ public class WebSocketResourceTest {
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
         when(actor.getName()).thenReturn("Frank");
-        when(actorRepository.findBySessionUsername(eq("Shepherd"))).thenReturn(actor);
+        when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
@@ -150,7 +150,7 @@ public class WebSocketResourceTest {
 
     @Test
     public void testOnSubscribeNullActor() {
-        when(actorRepository.findBySessionUsername(eq("Shepherd"))).thenReturn(null);
+        when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(null);
         when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.of(pat));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
@@ -196,7 +196,7 @@ public class WebSocketResourceTest {
         when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed"::equals));
 
@@ -223,7 +223,7 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
 
@@ -247,7 +247,7 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch(line -> line.contains("cannot be empty")));
 
@@ -274,7 +274,7 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
 
@@ -303,7 +303,7 @@ public class WebSocketResourceTest {
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker. Charlie dog. Easy fox."::equals));
 
@@ -323,7 +323,7 @@ public class WebSocketResourceTest {
         when(applicationContext.getBean(eq("alphaCommand")))
             .thenThrow(new NoSuchBeanDefinitionException("alphaCommand"));
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().stream().anyMatch("[dwhite]No bean named 'alphaCommand' available"::equals));
 
@@ -339,7 +339,7 @@ public class WebSocketResourceTest {
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
-        GameOutput output = resource.onInput(principal, input);
+        GameOutput output = resource.onInput(principal, input, message);
 
         assertTrue(output.getOutput().size() >= 3);
     }
