@@ -151,7 +151,7 @@ public class MainResource {
 
     @RequestMapping("/play")
     public String play(HttpSession httpSession) {
-        if (httpSession.getAttribute("actor") == null) {
+        if (httpSession.getAttribute("actor_template") == null) {
             return "redirect:/account";
         }
 
@@ -169,7 +169,7 @@ public class MainResource {
                 throw new NoSuchActorException("PAT belongs to a different user");
             }
 
-            httpSession.setAttribute("actor", id);
+            httpSession.setAttribute("actor_template", id);
 
             return "redirect:/play";
         } catch (NoSuchActorException e) {

@@ -1,10 +1,14 @@
 package com.agonyengine.resource;
 
+import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
+import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
 import org.slf4j.Logger;
@@ -41,9 +45,12 @@ public class WebSocketResource {
 
     private String applicationVersion;
     private Date applicationBootDate;
+    private UUID defaultMapId;
     private ApplicationContext applicationContext;
     private InputTokenizer inputTokenizer;
+    private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
+    private ActorRepository actorRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
     private VerbRepository verbRepository;
     private List<String> greeting;
@@ -52,17 +59,23 @@ public class WebSocketResource {
     public WebSocketResource(
         String applicationVersion,
         Date applicationBootDate,
+        UUID defaultMapId,
         ApplicationContext applicationContext,
         InputTokenizer inputTokenizer,
+        GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
+        ActorRepository actorRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository,
         VerbRepository verbRepository) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
+        this.defaultMapId = defaultMapId;
         this.applicationContext = applicationContext;
         this.inputTokenizer = inputTokenizer;
+        this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
+        this.actorRepository = actorRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.verbRepository = verbRepository;
 
@@ -73,7 +86,8 @@ public class WebSocketResource {
     }
 
     @SubscribeMapping("/queue/output")
-    public GameOutput onSubscribe() {
+    public GameOutput onSubscribe(Principal principal, Message<byte[]> message) {
+        Session session = getSpringSession(message);
         GameOutput output = new GameOutput();
 
         greeting.forEach(line -> {
@@ -92,28 +106,38 @@ public class WebSocketResource {
         output.append("");
         output.append("[dwhite]> ");
 
+        Actor actor = actorRepository.findBySessionUsername(principal.getName());
+
+        if (actor == null) {
+            PlayerActorTemplate pat = playerActorTemplateRepository
+                .findById(UUID.fromString(session.getAttribute("actor_template")))
+                .orElse(null);
+
+            GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+
+            actor = new Actor();
+
+            actor.setName(pat.getGivenName());
+            actor.setSessionUsername(principal.getName());
+            actor.setSessionId(getStompSessionId(message));
+            actor.setGameMap(defaultMap);
+            actor.setX(0);
+            actor.setY(0);
+
+            actor = actorRepository.save(actor);
+
+            LOGGER.info("{} has connected to the game", actor.getName());
+        } else {
+            LOGGER.info("{} has reconnected", actor.getName());
+        }
+
         return output;
     }
 
     @MessageMapping("/input")
     @SendToUser(value = "/queue/output", broadcast = false)
-    public GameOutput onInput(Principal principal, UserInput input, Message<byte[]> message) {
-        Session session = getSession(message);
-
-        if (session == null) {
-            LOGGER.error("Unable to find session for authenticated user: {}", principal.getName());
-
-            // Without a session the user probably won't see this, but it's worth a try anyway...
-            return new GameOutput(
-                "[red]ERROR: Could not find your HTTP session!",
-                "[red]Please try logging out, clearing cookies, restarting your browser and logging back in.",
-                "[red]The administrators have been notified of the problem.");
-        }
-
-        PlayerActorTemplate pat = playerActorTemplateRepository
-            .findById(UUID.fromString(session.getAttribute("actor")))
-            .orElse(null);
-
+    public GameOutput onInput(Principal principal, UserInput input) {
+        Actor actor = actorRepository.findBySessionUsername(principal.getName());
         GameOutput output = new GameOutput();
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
 
@@ -130,14 +154,14 @@ public class WebSocketResource {
                 if (verb.isQuoting()) {
                     QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
                     Object verbBean = applicationContext.getBean(verb.getBean());
-                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class, QuotedString.class);
-                    ReflectionUtils.invokeMethod(verbMethod, verbBean, output, quoted);
+                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", Actor.class, GameOutput.class, QuotedString.class);
+                    ReflectionUtils.invokeMethod(verbMethod, verbBean, actor, output, quoted);
 
                     break;
                 } else {
                     Object verbBean = applicationContext.getBean(verb.getBean());
-                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", GameOutput.class);
-                    ReflectionUtils.invokeMethod(verbMethod, verbBean, output);
+                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", Actor.class, GameOutput.class);
+                    ReflectionUtils.invokeMethod(verbMethod, verbBean, actor, output);
                 }
             } catch (IllegalArgumentException | BeansException e) {
                 LOGGER.error(e.getMessage());
@@ -153,11 +177,17 @@ public class WebSocketResource {
         return output;
     }
 
-    private Session getSession(Message<byte[]> message) {
+    private Session getSpringSession(Message<byte[]> message) {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
         String sessionId = (String)headerAccessor.getSessionAttributes().get(SPRING_SESSION_ID_KEY);
 
         return sessionRepository.findById(sessionId);
+    }
+
+    private String getStompSessionId(Message<byte[]> message) {
+        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
+
+        return headerAccessor.getSessionId();
     }
 
     private String removeFirstWord(String in) {
