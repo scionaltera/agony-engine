@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.command.HelpCommand;
+import com.agonyengine.model.command.LookCommand;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
@@ -87,6 +88,9 @@ public class WebSocketResourceTest {
     @Mock
     private Principal principal;
 
+    @Mock
+    private LookCommand lookCommand;
+
     @Captor
     private ArgumentCaptor<Actor> actorCaptor;
 
@@ -107,6 +111,7 @@ public class WebSocketResourceTest {
         sentences.add(Collections.singletonList("ALPHA"));
         message = buildMockMessage(sessionId.toString());
 
+        when(applicationContext.getBean(eq("lookCommand"))).thenReturn(lookCommand);
         when(principal.getName()).thenReturn("Shepherd");
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
