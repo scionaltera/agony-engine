@@ -104,7 +104,6 @@ public class WebSocketResource {
         output.append("[dyellow]A relentless grinding rattles your very soul as [red]The Agony Engine " +
             "[dyellow]carries out its barbarous task...");
         output.append("");
-        output.append("[dwhite]> ");
 
         Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
 
@@ -130,6 +129,13 @@ public class WebSocketResource {
         } else {
             LOGGER.info("{} has reconnected", actor.getName());
         }
+
+        Object lookBean = applicationContext.getBean("lookCommand");
+        Method lookMethod = ReflectionUtils.findMethod(lookBean.getClass(), "invoke", Actor.class, GameOutput.class);
+        ReflectionUtils.invokeMethod(lookMethod, lookBean, actor, output);
+
+        output.append("");
+        output.append("[dwhite]> ");
 
         return output;
     }
