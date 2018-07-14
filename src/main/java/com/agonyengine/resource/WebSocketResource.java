@@ -11,10 +11,10 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
+import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,13 +24,11 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
@@ -46,13 +44,13 @@ public class WebSocketResource {
     private String applicationVersion;
     private Date applicationBootDate;
     private UUID defaultMapId;
-    private ApplicationContext applicationContext;
     private InputTokenizer inputTokenizer;
     private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
     private VerbRepository verbRepository;
+    private InvokerService invokerService;
     private List<String> greeting;
 
     @Inject
@@ -60,24 +58,24 @@ public class WebSocketResource {
         String applicationVersion,
         Date applicationBootDate,
         UUID defaultMapId,
-        ApplicationContext applicationContext,
         InputTokenizer inputTokenizer,
         GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository,
-        VerbRepository verbRepository) {
+        VerbRepository verbRepository,
+        InvokerService invokerService) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
         this.defaultMapId = defaultMapId;
-        this.applicationContext = applicationContext;
         this.inputTokenizer = inputTokenizer;
         this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.verbRepository = verbRepository;
+        this.invokerService = invokerService;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -130,9 +128,7 @@ public class WebSocketResource {
             LOGGER.info("{} has reconnected", actor.getName());
         }
 
-        Object lookBean = applicationContext.getBean("lookCommand");
-        Method lookMethod = ReflectionUtils.findMethod(lookBean.getClass(), "invoke", Actor.class, GameOutput.class);
-        ReflectionUtils.invokeMethod(lookMethod, lookBean, actor, output);
+        invokerService.invoke("lookCommand", actor, output);
 
         output.append("");
         output.append("[dwhite]> ");
@@ -159,15 +155,11 @@ public class WebSocketResource {
 
                 if (verb.isQuoting()) {
                     QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
-                    Object verbBean = applicationContext.getBean(verb.getBean());
-                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", Actor.class, GameOutput.class, QuotedString.class);
-                    ReflectionUtils.invokeMethod(verbMethod, verbBean, actor, output, quoted);
 
+                    invokerService.invoke(verb.getBean(), actor, output, quoted);
                     break;
                 } else {
-                    Object verbBean = applicationContext.getBean(verb.getBean());
-                    Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke", Actor.class, GameOutput.class);
-                    ReflectionUtils.invokeMethod(verbMethod, verbBean, actor, output);
+                    invokerService.invoke(verb.getBean(), actor, output);
                 }
             } catch (IllegalArgumentException | BeansException e) {
                 LOGGER.error(e.getMessage());

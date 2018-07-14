@@ -3,8 +3,6 @@ package com.agonyengine.resource;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
-import com.agonyengine.model.command.HelpCommand;
-import com.agonyengine.model.command.LookCommand;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
@@ -14,13 +12,13 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
+import com.agonyengine.service.InvokerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
@@ -89,7 +87,7 @@ public class WebSocketResourceTest {
     private Principal principal;
 
     @Mock
-    private LookCommand lookCommand;
+    private InvokerService invokerService;
 
     @Captor
     private ArgumentCaptor<Actor> actorCaptor;
@@ -111,7 +109,6 @@ public class WebSocketResourceTest {
         sentences.add(Collections.singletonList("ALPHA"));
         message = buildMockMessage(sessionId.toString());
 
-        when(applicationContext.getBean(eq("lookCommand"))).thenReturn(lookCommand);
         when(principal.getName()).thenReturn("Shepherd");
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
@@ -133,18 +130,20 @@ public class WebSocketResourceTest {
             "0.1.2-UNIT-TEST",
             new Date(),
             defaultMapId,
-            applicationContext,
             inputTokenizer,
             gameMapRepository,
             sessionRepository,
             actorRepository,
             playerActorTemplateRepository,
-            verbRepository);
+            verbRepository,
+            invokerService);
     }
 
     @Test
     public void testOnSubscribe() {
         GameOutput output = resource.onSubscribe(principal, message);
+
+        verify(invokerService).invoke(eq("lookCommand"), eq(actor), any(GameOutput.class));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -162,6 +161,7 @@ public class WebSocketResourceTest {
 
         GameOutput output = resource.onSubscribe(principal, message);
 
+        verify(invokerService).invoke(eq("lookCommand"), any(Actor.class), any(GameOutput.class));
         verify(actorRepository).save(actorCaptor.capture());
 
         Actor savedActor = actorCaptor.getValue();
@@ -184,29 +184,16 @@ public class WebSocketResourceTest {
     @Test
     public void testOnInput() {
         UUID actorId = UUID.randomUUID();
-        HelpCommand alphaBean = mock(HelpCommand.class);
-
-        doAnswer(i -> {
-            GameOutput output = i.getArgument(1);
-
-            output.append("Test Passed");
-
-            return null;
-        }).when(alphaBean).invoke(any(Actor.class), any(GameOutput.class));
 
         when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
         when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
-        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch("Test Passed"::equals));
-
-        verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class));
+        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output));
     }
 
     @Test
@@ -230,10 +217,7 @@ public class WebSocketResourceTest {
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
-
-        verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
+        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -254,10 +238,7 @@ public class WebSocketResourceTest {
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch(line -> line.contains("cannot be empty")));
-
-        verify(applicationContext, never()).getBean(eq("alphaCommand"));
-        verify(alphaBean, never()).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
+        verify(invokerService, never()).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -281,10 +262,7 @@ public class WebSocketResourceTest {
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker charlie dog easy fox."::equals));
-
-        verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
+        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -310,29 +288,7 @@ public class WebSocketResourceTest {
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        assertTrue(output.getOutput().stream().anyMatch("Test Passed: baker. Charlie dog. Easy fox."::equals));
-
-        verify(applicationContext).getBean(eq("alphaCommand"));
-        verify(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
-    }
-
-    @Test
-    public void testOnInputNoCommand() {
-        UUID actorId = UUID.randomUUID();
-
-        when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
-        when(input.getInput()).thenReturn("Able!");
-        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
-        when(applicationContext.getBean(eq("alphaCommand")))
-            .thenThrow(new NoSuchBeanDefinitionException("alphaCommand"));
-
-        GameOutput output = resource.onInput(principal, input, message);
-
-        assertTrue(output.getOutput().stream().anyMatch("[dwhite]No bean named 'alphaCommand' available"::equals));
-
-        verify(applicationContext).getBean(eq("alphaCommand"));
+        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
