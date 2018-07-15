@@ -145,30 +145,30 @@ public class WebSocketResource {
         Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
         GameOutput output = new GameOutput();
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
+        List<String> tokens = sentences.get(0);
 
-        for (List<String> tokens : sentences) {
-            try {
-                String verbToken = tokens.get(0);
-                Verb verb = verbRepository
-                    .findAll(Sort.by(Sort.Direction.ASC, "priority", "name"))
-                    .stream()
-                    .filter(v -> v.getName().toUpperCase().startsWith(verbToken))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Unknown verb: " + verbToken));
+        try {
+            String verbToken = tokens.get(0);
+            Verb verb = verbRepository.findFirstByNameIgnoreCaseStartingWith(
+                Sort.by(Sort.Direction.ASC, "priority", "name"),
+                verbToken
+            );
 
-                if (verb.isQuoting()) {
-                    QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
-
-                    invokerService.invoke(verb.getBean(), actor, output, quoted);
-                    break;
-                } else {
-                    invokerService.invoke(verb.getBean(), actor, output);
-                }
-            } catch (IllegalArgumentException | BeansException e) {
-                LOGGER.error(e.getMessage());
-
-                output.append("[dwhite]" + e.getMessage());
+            if (verb == null) {
+                throw new IllegalArgumentException("Unknown verb: " + verbToken);
             }
+
+            if (verb.isQuoting()) {
+                QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
+
+                invokerService.invoke(verb.getBean(), actor, output, quoted);
+            } else {
+                invokerService.invoke(verb.getBean(), actor, output);
+            }
+        } catch (IllegalArgumentException | BeansException e) {
+            LOGGER.error(e.getMessage());
+
+            output.append("[dwhite]" + e.getMessage());
         }
 
         output

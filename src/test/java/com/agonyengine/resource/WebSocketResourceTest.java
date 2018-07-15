@@ -106,7 +106,7 @@ public class WebSocketResourceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        sentences.add(Collections.singletonList("ALPHA"));
+        sentences.add(Collections.singletonList("ABLE"));
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
@@ -189,11 +189,26 @@ public class WebSocketResourceTest {
         when(input.getInput()).thenReturn("Able!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output));
+        verify(invokerService).invoke(eq("ableCommand"), eq(actor), eq(output));
+    }
+
+    @Test
+    public void testOnInputMultipleSentences() {
+        UUID actorId = UUID.randomUUID();
+
+        when(inputTokenizer.tokenize(eq("Able. Baker. Charlie."))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able. Baker. Charlie.");
+        when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        verify(invokerService).invoke(eq("ableCommand"), eq(actor), eq(output));
     }
 
     @Test
@@ -205,19 +220,19 @@ public class WebSocketResourceTest {
 
         List<List<String>> sentences = new ArrayList<>();
 
-        sentences.add(Arrays.asList("ALPHA", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
+        sentences.add(Arrays.asList("ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
 
         when(inputTokenizer.tokenize(eq("Able baker charlie dog easy fox."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able baker charlie dog easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
         when(verbs.get(0).isQuoting()).thenReturn(true);
-        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+        when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
+        verify(invokerService).invoke(eq("ableCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -226,19 +241,19 @@ public class WebSocketResourceTest {
         SayCommand alphaBean = mock(SayCommand.class);
         List<List<String>> sentences = new ArrayList<>();
 
-        sentences.add(Collections.singletonList("ALPHA"));
+        sentences.add(Collections.singletonList("ABLE"));
 
         when(inputTokenizer.tokenize(eq("Able"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
         when(verbs.get(0).isQuoting()).thenReturn(true);
-        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+        when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        verify(invokerService, never()).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
+        verify(invokerService, never()).invoke(eq("ableCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -250,19 +265,19 @@ public class WebSocketResourceTest {
 
         List<List<String>> sentences = new ArrayList<>();
 
-        sentences.add(Arrays.asList("ALPHA", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
+        sentences.add(Arrays.asList("ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX"));
 
         when(inputTokenizer.tokenize(eq("Able      baker charlie dog easy fox."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able      baker charlie dog easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
         when(verbs.get(0).isQuoting()).thenReturn(true);
-        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+        when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
+        verify(invokerService).invoke(eq("ableCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
@@ -274,7 +289,7 @@ public class WebSocketResourceTest {
 
         List<List<String>> sentences = new ArrayList<>();
 
-        sentences.add(Arrays.asList("ALPHA", "BAKER"));
+        sentences.add(Arrays.asList("ABLE", "BAKER"));
         sentences.add(Arrays.asList("CHARLIE", "DOG"));
         sentences.add(Arrays.asList("EASY", "FOX"));
 
@@ -282,21 +297,21 @@ public class WebSocketResourceTest {
         when(input.getInput()).thenReturn("Able baker. Charlie dog. Easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-        when(verbRepository.findAll(any(Sort.class))).thenReturn(verbs);
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(verbs.get(0));
         when(verbs.get(0).isQuoting()).thenReturn(true);
-        when(applicationContext.getBean(eq("alphaCommand"))).thenReturn(alphaBean);
+        when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
 
         GameOutput output = resource.onInput(principal, input, message);
 
-        verify(invokerService).invoke(eq("alphaCommand"), eq(actor), eq(output), any(QuotedString.class));
+        verify(invokerService).invoke(eq("ableCommand"), eq(actor), eq(output), any(QuotedString.class));
     }
 
     @Test
     public void testOnInputNoPat() {
         UUID actorId = UUID.randomUUID();
 
-        when(inputTokenizer.tokenize(eq("Alpha!"))).thenReturn(sentences);
-        when(input.getInput()).thenReturn("Alpha!");
+        when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
+        when(input.getInput()).thenReturn("Able!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
@@ -315,7 +330,7 @@ public class WebSocketResourceTest {
     }
 
     private List<Verb> buildMockVerbs() {
-        String[] names = new String[] {"alpha", "bravo", "charlie"};
+        String[] names = new String[] {"able", "baker", "charlie"};
         List<Verb> verbs = new ArrayList<>();
 
         for (String name : names) {
