@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ public class InvokerService {
         this.applicationContext = applicationContext;
     }
 
+    @Transactional
     public void invoke(String verbBeanName, Actor actor, GameOutput output, Object ... arguments) {
         Object verbBean = applicationContext.getBean(verbBeanName);
         Method verbMethod = ReflectionUtils.findMethod(verbBean.getClass(), "invoke",
