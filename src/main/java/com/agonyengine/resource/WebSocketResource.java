@@ -26,6 +26,7 @@ import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Controller;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -83,6 +84,7 @@ public class WebSocketResource {
         greeting = greetingReader.lines().collect(Collectors.toList());
     }
 
+    @Transactional
     @SubscribeMapping("/queue/output")
     public GameOutput onSubscribe(Principal principal, Message<byte[]> message) {
         Session session = getSpringSession(message);
@@ -136,6 +138,7 @@ public class WebSocketResource {
         return output;
     }
 
+    @Transactional
     @MessageMapping("/input")
     @SendToUser(value = "/queue/output", broadcast = false)
     public GameOutput onInput(Principal principal, UserInput input, Message<byte[]> message) {

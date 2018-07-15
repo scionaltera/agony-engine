@@ -72,11 +72,21 @@ public class GameMap {
         return tiles[computeIndex(x, y)];
     }
 
+    public boolean hasTile(int x, int y) {
+        int index = computeIndex(x, y);
+
+        return index >= 0 && index < tiles.length;
+    }
+
     public void setTile(int x, int y, byte value) {
         tiles[computeIndex(x, y)] = value;
     }
 
     private int computeIndex(int x, int y) {
+        if (x < 0 || x >= width) {
+            return -1;
+        }
+
         return y * width + x;
     }
 }

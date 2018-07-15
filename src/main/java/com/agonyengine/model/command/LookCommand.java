@@ -6,21 +6,39 @@ import com.agonyengine.repository.ActorRepository;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.List;
+
+import static java.util.stream.Collectors.joining;
 
 @Component
 public class LookCommand {
     private ActorRepository actorRepository;
+    private List<Direction> directions;
 
     @Inject
-    public LookCommand(ActorRepository actorRepository) {
+    public LookCommand(ActorRepository actorRepository, List<Direction> directions) {
         this.actorRepository = actorRepository;
+        this.directions = directions;
     }
 
+    @Transactional
     public void invoke(Actor actor, GameOutput output) {
         List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
 
-        output.append("[black]You see nothing but the inky void swirling around you.");
+        // TODO game maps will need names
+        output.append(String.format("[yellow](%d, %d) %s",
+            actor.getX(),
+            actor.getY(),
+            actor.getGameMap().getId()));
+
+        output.append(String.format("[black](tile=0x%s) You see nothing but the inky void swirling around you.",
+            Integer.toHexString(Byte.toUnsignedInt(actor.getGameMap().getTile(actor.getX(), actor.getY())))));
+
+        output.append(directions.stream()
+            .filter(direction -> actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()))
+            .map(Direction::getName)
+            .collect(joining(" ", "[cyan]Exits: ", "")));
 
         actors.stream()
             .filter(target -> !actor.equals(target))
