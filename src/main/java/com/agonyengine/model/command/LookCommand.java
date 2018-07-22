@@ -50,4 +50,11 @@ public class LookCommand {
     public void invoke(Actor actor, GameOutput output, ActorSameRoom target) {
         output.append(String.format("You look at %s.", target.getTarget().getName()));
     }
+
+    @Transactional
+    public void invoke(Actor actor, GameOutput output, ActorSameRoom target, ActorSameRoom target2) {
+        output.append(String.format("You look at %s, then %s.",
+            target.getTarget().getName(),
+            target2.getTarget().getName()));
+    }
 }

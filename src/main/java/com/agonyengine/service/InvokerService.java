@@ -55,6 +55,10 @@ public class InvokerService {
             .filter(m -> (verb.isQuoting() && tokens.size() > 1) || STANDARD_CMD_ARG_COUNT + (tokens.size() - 1) == m.getParameterCount())
             .collect(Collectors.toList());
 
+        if (methods.isEmpty()) {
+            output.append("No matching method signatures found.");
+        }
+
         for (Method method : methods) {
             List<ArgumentBinding> arguments = new ArrayList<>();
 
@@ -62,8 +66,12 @@ public class InvokerService {
                 ReflectionUtils.invokeMethod(method, verbBean, actor, output);
                 return;
             } else if (verb.isQuoting()) { // verb automatically quotes the rest of the input (e.g. SAY)
-                ReflectionUtils.invokeMethod(method, verbBean, actor, output, new QuotedString(UserInput.removeFirstWord(rawInput.getInput())));
-                return;
+                QuotedString quoted = applicationContext.getBean(QuotedString.class);
+
+                if (quoted.bind(actor, UserInput.removeFirstWord(rawInput.getInput()))) {
+                    ReflectionUtils.invokeMethod(method, verbBean, actor, output, quoted);
+                    return;
+                }
             } else { // verb has arguments after it that we need to bind objects to
                 boolean isBindingSuccessful = true;
 
@@ -74,6 +82,7 @@ public class InvokerService {
                         arguments.add(binding);
                     } else {
                         isBindingSuccessful = false;
+                        output.append(String.format("Binding failed for arg: %s", binding));
                     }
                 }
 
@@ -87,10 +96,10 @@ public class InvokerService {
                             .toArray());
 
                     return;
+                } else {
+                    output.append(String.format("Failed to bind args for method: %s", Arrays.toString(method.getParameterTypes())));
                 }
             }
         }
-
-        output.append("Unable to bind arguments.");
     }
 }
