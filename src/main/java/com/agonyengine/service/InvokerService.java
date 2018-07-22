@@ -17,6 +17,7 @@ import org.springframework.util.ReflectionUtils;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +57,24 @@ public class InvokerService {
             .collect(Collectors.toList());
 
         if (methods.isEmpty()) {
-            output.append("No matching method signatures found.");
+            output.append("Valid grammars for this command are:");
+
+            Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(verbBean.getClass()))
+                .filter(m -> "invoke".equals(m.getName()))
+                .forEach(m -> {
+                    StringBuilder buf = new StringBuilder();
+
+                    buf.append(verb.getName());
+                    buf.append(" ");
+
+                    for (int i = STANDARD_CMD_ARG_COUNT; i < m.getParameterCount(); i++) {
+                        buf.append("&lt;");
+                        buf.append(getSyntaxDescription(m.getParameters()[i]));
+                        buf.append("&gt; ");
+                    }
+
+                    output.append(buf.toString());
+                });
         }
 
         for (Method method : methods) {
@@ -82,7 +100,9 @@ public class InvokerService {
                         arguments.add(binding);
                     } else {
                         isBindingSuccessful = false;
-                        output.append(String.format("Binding failed for arg: %s", binding));
+                        output.append(String.format("No \"%s\" found for word: %s",
+                            getSyntaxDescription(method.getParameters()[i]),
+                            binding.getToken()));
                     }
                 }
 
@@ -97,9 +117,34 @@ public class InvokerService {
 
                     return;
                 } else {
-                    output.append(String.format("Failed to bind args for method: %s", Arrays.toString(method.getParameterTypes())));
+                    StringBuilder buf = new StringBuilder();
+
+                    buf.append(verb.getName());
+                    buf.append(" ");
+
+                    for (int i = STANDARD_CMD_ARG_COUNT; i < method.getParameterCount(); i++) {
+                        buf.append("&lt;");
+                        buf.append(getSyntaxDescription(method.getParameters()[i]));
+                        buf.append("&gt; ");
+                    }
+
+                    output.append("Could not resolve all arguments for grammar:");
+                    output.append(buf.toString());
                 }
             }
         }
+    }
+
+    private String getSyntaxDescription(Parameter parameter) {
+        String description;
+
+        try {
+            Method descMethod = parameter.getType().getMethod("getSyntaxDescription");
+            description = (String) ReflectionUtils.invokeMethod(descMethod, null);
+        } catch (NoSuchMethodException e) {
+            description = parameter.getType().getSimpleName();
+        }
+
+        return description;
     }
 }

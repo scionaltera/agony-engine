@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 @Scope(scopeName = "prototype")
 public class ActorSameRoom implements ArgumentBinding {
     private ActorRepository actorRepository;
+    private String token;
     private Actor target;
 
     @Inject
@@ -22,6 +23,7 @@ public class ActorSameRoom implements ArgumentBinding {
     @Transactional
     @Override
     public boolean bind(Actor actor, String token) {
+        this.token = token;
         target = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY())
             .stream()
             .filter(t -> !t.equals(actor) && t.getName().toUpperCase().startsWith(token.toUpperCase()))
@@ -31,7 +33,16 @@ public class ActorSameRoom implements ArgumentBinding {
         return target != null;
     }
 
+    @Override
+    public String getToken() {
+        return token;
+    }
+
     public Actor getTarget() {
         return target;
+    }
+
+    public static String getSyntaxDescription() {
+        return "person in same room";
     }
 }

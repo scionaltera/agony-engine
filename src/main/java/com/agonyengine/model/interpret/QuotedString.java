@@ -25,7 +25,16 @@ public class QuotedString implements ArgumentBinding {
         return true;
     }
 
+    @Override
+    public String getToken() {
+        return text;
+    }
+
     public String getText() {
         return text;
+    }
+
+    public static String getSyntaxDescription() {
+        return "quoted text";
     }
 }
