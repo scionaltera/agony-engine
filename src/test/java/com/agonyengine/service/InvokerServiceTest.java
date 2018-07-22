@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
 
 public class InvokerServiceTest {
     @Mock
@@ -32,6 +32,18 @@ public class InvokerServiceTest {
 
     @Mock
     private VerbRepository verbRepository;
+
+    @Mock
+    private Actor invoker;
+
+    @Mock
+    private Actor target;
+
+    @Mock
+    private GameOutput output;
+
+    @Mock
+    private UserInput input;
 
     @Mock
     private Verb lookVerb;
@@ -46,19 +58,10 @@ public class InvokerServiceTest {
     private SayCommand sayCommand;
 
     @Mock
-    private ActorSameRoom actorSameRoom;
-
-    @Mock
     private QuotedString quotedString;
 
     @Mock
-    private Actor actor;
-
-    @Mock
-    private Actor target;
-
-    @Mock
-    private GameOutput output;
+    private ActorSameRoom actorSameRoom;
 
     private InvokerService invokerService;
 
@@ -68,39 +71,70 @@ public class InvokerServiceTest {
 
         when(lookVerb.getBean()).thenReturn("lookCommand");
         when(sayVerb.getBean()).thenReturn("sayCommand");
-        when(applicationContext.getBean(eq("lookCommand"))).thenReturn(lookCommand);
-        when(applicationContext.getBean(eq("sayCommand"))).thenReturn(sayCommand);
+
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(
+            any(Sort.class),
+            eq("LOOK")
+        )).thenReturn(Optional.of(lookVerb));
+        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(
+            any(Sort.class),
+            eq("SAY")
+        )).thenReturn(Optional.of(sayVerb));
+
         when(applicationContext.getBean(eq(QuotedString.class))).thenReturn(quotedString);
         when(applicationContext.getBean(eq(ActorSameRoom.class))).thenReturn(actorSameRoom);
-        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("LOOK")))
-            .thenReturn(Optional.of(lookVerb));
-        when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("SAY")))
-            .thenReturn(Optional.of(sayVerb));
-        when(quotedString.bind(eq(actor), anyString())).thenReturn(true);
-        when(quotedString.getText()).thenReturn("foo");
-        when(actorSameRoom.bind(eq(actor), anyString())).thenReturn(true);
-        when(actorSameRoom.getTarget()).thenReturn(target);
+        when(applicationContext.getBean(eq("lookCommand"))).thenReturn(lookCommand);
+        when(applicationContext.getBean(eq("sayCommand"))).thenReturn(sayCommand);
 
         invokerService = new InvokerService(applicationContext, verbRepository);
     }
 
     @Test
-    public void testInvokeNoArgs() {
-        invokerService.invoke(actor, output, null, Collections.singletonList("LOOK"));
+    public void testInvokeInvalidGrammar() {
+        invokerService.invoke(invoker, output, input, Arrays.asList("LOOK", "FOO", "BAR", "BAZ"));
 
-        verify(lookCommand).invoke(eq(actor), eq(output));
+        verify(lookCommand, never()).invoke(any(Actor.class), any(GameOutput.class));
     }
 
     @Test
-    public void testInvokeQuotedString() {
-        UserInput input = new UserInput();
-        QuotedString quoted = new QuotedString();
+    public void testInvokeNoArgs() {
+        invokerService.invoke(invoker, output, input, Collections.singletonList("LOOK"));
 
-        input.setInput("say foo");
-        quoted.bind(actor, input.getInput());
+        verify(lookCommand).invoke(eq(invoker), eq(output));
+    }
 
-        invokerService.invoke(actor, output, input, Arrays.asList("SAY", "FOO"));
+    @Test
+    public void testInvokeOneTarget() {
+        when(actorSameRoom.bind(eq(invoker), eq("MORGAN"))).thenReturn(true);
+        when(actorSameRoom.getTarget()).thenReturn(target);
+        when(actorSameRoom.getToken()).thenReturn("MORGAN");
 
-        verify(sayCommand).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));
+        invokerService.invoke(invoker, output, input, Arrays.asList("LOOK", "MORGAN"));
+
+        verify(lookCommand).invoke(eq(invoker), eq(output), eq(actorSameRoom));
+    }
+
+    @Test
+    public void testInvokeOneTargetQuoting() {
+        when(sayVerb.isQuoting()).thenReturn(true);
+        when(input.getInput()).thenReturn("say This is a string.");
+        when(quotedString.bind(eq(invoker), eq("This is a string."))).thenReturn(true);
+        when(quotedString.getText()).thenReturn("This is a string.");
+        when(quotedString.getToken()).thenReturn("This is a string.");
+
+        invokerService.invoke(invoker, output, input, Arrays.asList("SAY", "This is a string."));
+
+        verify(sayCommand).invoke(eq(invoker), eq(output), eq(quotedString));
+    }
+
+    @Test
+    public void testInvokeOneTargetNotFound() {
+        when(actorSameRoom.bind(eq(invoker), eq("MORGAN"))).thenReturn(false);
+        when(actorSameRoom.getTarget()).thenReturn(null);
+        when(actorSameRoom.getToken()).thenReturn("MORGAN");
+
+        invokerService.invoke(invoker, output, input, Arrays.asList("LOOK", "MORGAN"));
+
+        verify(lookCommand, never()).invoke(eq(invoker), eq(output), eq(actorSameRoom));
     }
 }
