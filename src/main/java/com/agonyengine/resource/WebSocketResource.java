@@ -3,19 +3,14 @@ package com.agonyengine.resource;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
-import com.agonyengine.model.interpret.QuotedString;
-import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
-import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -31,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +46,6 @@ public class WebSocketResource {
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
-    private VerbRepository verbRepository;
     private InvokerService invokerService;
     private List<String> greeting;
 
@@ -64,7 +59,6 @@ public class WebSocketResource {
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository,
-        VerbRepository verbRepository,
         InvokerService invokerService) {
 
         this.applicationVersion = applicationVersion;
@@ -75,7 +69,6 @@ public class WebSocketResource {
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
-        this.verbRepository = verbRepository;
         this.invokerService = invokerService;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
@@ -130,7 +123,7 @@ public class WebSocketResource {
             LOGGER.info("{} has reconnected", actor.getName());
         }
 
-        invokerService.invoke("lookCommand", actor, output);
+        invokerService.invoke(actor, output, null, Collections.singletonList("look"));
 
         output.append("");
         output.append("[dwhite]> ");
@@ -148,27 +141,10 @@ public class WebSocketResource {
         List<String> tokens = sentences.get(0);
 
         try {
-            String verbToken = tokens.get(0);
-            Verb verb = verbRepository.findFirstByNameIgnoreCaseStartingWith(
-                Sort.by(Sort.Direction.ASC, "priority", "name"),
-                verbToken
-            );
-
-            if (verb == null) {
-                throw new IllegalArgumentException("Unknown verb: " + verbToken);
-            }
-
-            if (verb.isQuoting()) {
-                QuotedString quoted = new QuotedString(removeFirstWord(input.getInput()));
-
-                invokerService.invoke(verb.getBean(), actor, output, quoted);
-            } else {
-                invokerService.invoke(verb.getBean(), actor, output);
-            }
-        } catch (IllegalArgumentException | BeansException e) {
-            LOGGER.error(e.getMessage());
-
-            output.append("[dwhite]" + e.getMessage());
+            invokerService.invoke(actor, output, input, tokens);
+        } catch (Exception e) {
+            output.append("[red]" + e.getMessage());
+            LOGGER.error(e.getMessage(), e);
         }
 
         output
@@ -189,19 +165,5 @@ public class WebSocketResource {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 
         return headerAccessor.getSessionId();
-    }
-
-    private String removeFirstWord(String in) {
-        if (in.indexOf(' ') != -1) {
-            int i = in.indexOf(' ');
-
-            while (i < in.length() &&  in.charAt(i) == ' ') {
-                i++;
-            }
-
-            return in.substring(i);
-        }
-
-        return "";
     }
 }

@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.springframework.stereotype.Component;
@@ -43,5 +44,17 @@ public class LookCommand {
         actors.stream()
             .filter(target -> !actor.equals(target))
             .forEach(target -> output.append(String.format("[green]%s is here.", target.getName())));
+    }
+
+    @Transactional
+    public void invoke(Actor actor, GameOutput output, ActorSameRoom target) {
+        output.append(String.format("You look at %s.", target.getTarget().getName()));
+    }
+
+    @Transactional
+    public void invoke(Actor actor, GameOutput output, ActorSameRoom target, ActorSameRoom target2) {
+        output.append(String.format("You look at %s, then %s.",
+            target.getTarget().getName(),
+            target2.getTarget().getName()));
     }
 }

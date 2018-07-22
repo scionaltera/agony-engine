@@ -10,4 +10,18 @@ public class UserInput {
     public String getInput() {
         return input;
     }
+
+    public static String removeFirstWord(String in) {
+        if (in.indexOf(' ') != -1) {
+            int i = in.indexOf(' ');
+
+            while (i < in.length() &&  in.charAt(i) == ' ') {
+                i++;
+            }
+
+            return in.substring(i);
+        }
+
+        return "";
+    }
 }
