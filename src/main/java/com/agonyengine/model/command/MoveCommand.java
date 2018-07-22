@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.Collections;
 
 public class MoveCommand {
     private Direction direction;
@@ -41,6 +42,6 @@ public class MoveCommand {
 
         actorRepository.save(actor);
 
-        invokerService.invoke("lookCommand", actor, output);
+        invokerService.invoke(actor, output, null, Collections.singletonList("look"));
     }
 }
