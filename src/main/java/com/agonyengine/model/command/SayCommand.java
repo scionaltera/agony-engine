@@ -26,10 +26,10 @@ public class SayCommand {
 
         actors.forEach(target -> {
            if (target.equals(actor)) {
-               output.append("[cyan]You say '" + message.getText() + "[cyan]'");
+               output.append("[cyan]You say '" + message.getToken() + "[cyan]'");
            } else {
                // TODO need a database model for dynamically defined channels, for now assume everything is a say
-               GameOutput formatted = target.onChannel(actor, message.getText());
+               GameOutput formatted = target.onChannel(actor, message.getToken());
 
                commService.echo(target, formatted);
            }

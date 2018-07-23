@@ -47,7 +47,12 @@ public class InvokerService {
         Verb verb = verbRepository.findFirstByNameIgnoreCaseStartingWith(
             Sort.by(Sort.Direction.ASC, "priority", "name"),
             verbToken)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown verb: " + verbToken));
+            .orElse(null);
+
+        if (verb == null) {
+            output.append(String.format("Unrecognized verb: %s", verbToken));
+            return;
+        }
 
         Object verbBean = applicationContext.getBean(verb.getBean());
 

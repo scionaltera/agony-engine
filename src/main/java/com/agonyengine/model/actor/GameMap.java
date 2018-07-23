@@ -16,8 +16,6 @@ public class GameMap {
     private int width;
     private byte[] tiles;
 
-    public GameMap() {}
-
     public GameMap(int width, byte[] tiles) {
         this.width = width;
         this.tiles = tiles;

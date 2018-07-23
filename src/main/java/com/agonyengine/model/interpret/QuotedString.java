@@ -30,10 +30,6 @@ public class QuotedString implements ArgumentBinding {
         return text;
     }
 
-    public String getText() {
-        return text;
-    }
-
     public static String getSyntaxDescription() {
         return "quoted text";
     }
