@@ -356,7 +356,7 @@ public class WebSocketResourceTest {
             GameOutput output = i.getArgument(1);
             QuotedString message = i.getArgument(2);
 
-            output.append("Test Passed: " + message.getText());
+            output.append("Test Passed: " + message.getToken());
 
             return null;
         }).when(alphaBean).invoke(any(Actor.class), any(GameOutput.class), any(QuotedString.class));

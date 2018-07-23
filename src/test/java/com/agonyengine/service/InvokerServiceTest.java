@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,6 +91,13 @@ public class InvokerServiceTest {
     }
 
     @Test
+    public void testUnknownVerb() {
+        invokerService.invoke(invoker, output, input, Collections.singletonList("TEST"));
+
+        verify(applicationContext, never()).getBean(anyString());
+    }
+
+    @Test
     public void testInvokeInvalidGrammar() {
         invokerService.invoke(invoker, output, input, Arrays.asList("LOOK", "FOO", "BAR", "BAZ"));
 
@@ -119,7 +127,6 @@ public class InvokerServiceTest {
         when(sayVerb.isQuoting()).thenReturn(true);
         when(input.getInput()).thenReturn("say This is a string.");
         when(quotedString.bind(eq(invoker), eq("This is a string."))).thenReturn(true);
-        when(quotedString.getText()).thenReturn("This is a string.");
         when(quotedString.getToken()).thenReturn("This is a string.");
 
         invokerService.invoke(invoker, output, input, Arrays.asList("SAY", "This is a string."));
