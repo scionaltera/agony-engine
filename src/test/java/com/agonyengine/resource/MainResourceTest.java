@@ -247,8 +247,11 @@ public class MainResourceTest {
     @Test
     public void testPlay() {
         when(httpSession.getAttribute(eq("actor_template"))).thenReturn("actor_id");
+        when(httpServletRequest.getRemoteAddr()).thenReturn("10.11.12.13");
 
-        assertEquals("play", resource.play(httpSession));
+        assertEquals("play", resource.play(httpSession, httpServletRequest));
+
+        verify(httpSession).setAttribute(eq("remoteIpAddress"), eq("10.11.12.13"));
     }
 
     @Test
@@ -298,7 +301,7 @@ public class MainResourceTest {
 
     @Test
     public void testPlayNoActor() {
-        assertEquals("redirect:/account", resource.play(httpSession));
+        assertEquals("redirect:/account", resource.play(httpSession, httpServletRequest));
     }
 
     @Test

@@ -26,6 +26,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,10 +152,12 @@ public class MainResource {
     }
 
     @RequestMapping("/play")
-    public String play(HttpSession httpSession) {
+    public String play(HttpSession httpSession, HttpServletRequest request) {
         if (httpSession.getAttribute("actor_template") == null) {
             return "redirect:/account";
         }
+
+        httpSession.setAttribute("remoteIpAddress", extractRemoteIp(request));
 
         return "play";
     }
@@ -186,5 +190,27 @@ public class MainResource {
         LOGGER.info("Logged out.");
 
         return "redirect:/";
+    }
+
+    private String extractRemoteIp(HttpServletRequest request) {
+        String forwardedHeader = request.getHeader("x-forwarded-for");
+
+        if (forwardedHeader != null) {
+            String[] addresses = forwardedHeader.split("[,]");
+
+            for (String address : addresses) {
+                try {
+                    InetAddress inetAddress = InetAddress.getByName(address);
+
+                    if (!inetAddress.isSiteLocalAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                } catch (UnknownHostException e) {
+                    LOGGER.debug("Failed to resolve IP for address: {}", address);
+                }
+            }
+        }
+
+        return request.getRemoteAddr();
     }
 }

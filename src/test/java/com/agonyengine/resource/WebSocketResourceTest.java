@@ -12,6 +12,7 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
+import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +90,9 @@ public class WebSocketResourceTest {
     @Mock
     private InvokerService invokerService;
 
+    @Mock
+    private CommService commService;
+
     @Captor
     private ArgumentCaptor<Actor> actorCaptor;
 
@@ -135,13 +139,15 @@ public class WebSocketResourceTest {
             sessionRepository,
             actorRepository,
             playerActorTemplateRepository,
-            invokerService);
+            invokerService,
+            commService);
     }
 
     @Test
     public void testOnSubscribe() {
         GameOutput output = resource.onSubscribe(principal, message);
 
+        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
 
         assertTrue(output.getOutput().stream()

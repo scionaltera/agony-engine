@@ -1,6 +1,5 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.stomp.GameOutput;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Entity;
@@ -26,16 +25,6 @@ public class Actor {
     private GameMap gameMap;
     private Integer x;
     private Integer y;
-
-    public GameOutput onChannel(Actor origin, String message) {
-        GameOutput output = new GameOutput();
-
-        output.append(String.format("[cyan]%s says '%s[cyan]'", origin.getName(), message));
-        output.append("");
-        output.append("> ");
-
-        return output;
-    }
 
     public UUID getId() {
         return id;
