@@ -1,7 +1,9 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.service.CommService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -9,12 +11,15 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.session.Session;
+import org.springframework.session.SessionRepository;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +30,12 @@ public class StompDisconnectListenerTest {
     private ActorRepository actorRepository;
 
     @Mock
+    private SessionRepository sessionRepository;
+
+    @Mock
+    private CommService commService;
+
+    @Mock
     private SessionDisconnectEvent disconnectEvent;
 
     @Mock
@@ -32,6 +43,9 @@ public class StompDisconnectListenerTest {
 
     @Mock
     private Actor actor;
+
+    @Mock
+    private Session springSession;
 
     private Message<byte[]> message;
 
@@ -43,7 +57,10 @@ public class StompDisconnectListenerTest {
 
         message = buildMockMessage();
 
-        stompDisconnectListener = new StompDisconnectListener(actorRepository);
+        stompDisconnectListener = new StompDisconnectListener(
+            actorRepository,
+            sessionRepository,
+            commService);
     }
 
     @Test
@@ -53,9 +70,12 @@ public class StompDisconnectListenerTest {
         when(principal.getName()).thenReturn("SessionUser");
         when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(actor);
         when(actor.getName()).thenReturn("Stan");
+        when(sessionRepository.findById(eq("springSessionId"))).thenReturn(springSession);
+        when(springSession.getAttribute(eq("remoteIpAddress"))).thenReturn("10.11.12.13");
 
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
 
+        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(actorRepository).delete(eq(actor));
     }
 
@@ -73,8 +93,12 @@ public class StompDisconnectListenerTest {
 
     private Message<byte[]> buildMockMessage() {
         Map<String, Object> headers = new HashMap<>();
+        Map<String, Object> sessionAttributes = new HashMap<>();
+
+        sessionAttributes.put("SPRING.SESSION.ID", "springSessionId");
 
         headers.put(SimpMessageHeaderAccessor.USER_HEADER, principal);
+        headers.put(SimpMessageHeaderAccessor.SESSION_ATTRIBUTES, sessionAttributes);
 
         return new GenericMessage<>(new byte[0], headers);
     }

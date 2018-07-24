@@ -8,6 +8,7 @@ import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class WebSocketResource {
     private ActorRepository actorRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
     private InvokerService invokerService;
+    private CommService commService;
     private List<String> greeting;
 
     @Inject
@@ -59,7 +61,8 @@ public class WebSocketResource {
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         PlayerActorTemplateRepository playerActorTemplateRepository,
-        InvokerService invokerService) {
+        InvokerService invokerService,
+        CommService commService) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
@@ -70,6 +73,7 @@ public class WebSocketResource {
         this.actorRepository = actorRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.invokerService = invokerService;
+        this.commService = commService;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -118,10 +122,12 @@ public class WebSocketResource {
 
             actor = actorRepository.save(actor);
 
-            LOGGER.info("{} has connected to the game", actor.getName());
+            LOGGER.info("{} has connected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
         } else {
-            LOGGER.info("{} has reconnected", actor.getName());
+            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
         }
+
+        commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
 
         invokerService.invoke(actor, output, null, Collections.singletonList("look"));
 
