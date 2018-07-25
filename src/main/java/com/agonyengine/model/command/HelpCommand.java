@@ -18,8 +18,9 @@ public class HelpCommand {
     }
 
     public void invoke(Actor actor, GameOutput output) {
+        output.append("[dwhite][ [white]Command List [dwhite]]");
         verbRepository
             .findAll(Sort.by(Sort.Direction.ASC,"priority", "name"))
-            .forEach(v -> output.append(v.getName().toUpperCase()));
+            .forEach(v -> output.append("[dwhite]" + v.getName().toUpperCase()));
     }
 }
