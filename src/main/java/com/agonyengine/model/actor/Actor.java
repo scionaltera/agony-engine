@@ -17,6 +17,10 @@ public class Actor {
     @Type(type = "pg-uuid")
     private UUID id;
 
+    @ManyToOne
+    @Type(type = "pg-uuid")
+    private PlayerActorTemplate actorTemplate;
+
     private String name;
 
     private String sessionUsername;
@@ -34,6 +38,14 @@ public class Actor {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public PlayerActorTemplate getActorTemplate() {
+        return actorTemplate;
+    }
+
+    public void setActorTemplate(PlayerActorTemplate actorTemplate) {
+        this.actorTemplate = actorTemplate;
     }
 
     public String getName() {
