@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScoreCommand {
     public void invoke(Actor actor, GameOutput output) {
-        output.append("[dwhite]Not implemented yet.");
+        output.append("[dcyan][ [cyan]Your Score [dcyan]]");
+        output.append(String.format("[cyan]Name: [dcyan]%s", actor.getName()));
     }
 }

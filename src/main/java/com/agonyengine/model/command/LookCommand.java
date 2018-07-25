@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.service.CommService;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -15,11 +16,13 @@ import static java.util.stream.Collectors.joining;
 @Component
 public class LookCommand {
     private ActorRepository actorRepository;
+    private CommService commService;
     private List<Direction> directions;
 
     @Inject
-    public LookCommand(ActorRepository actorRepository, List<Direction> directions) {
+    public LookCommand(ActorRepository actorRepository, CommService commservice, List<Direction> directions) {
         this.actorRepository = actorRepository;
+        this.commService = commservice;
         this.directions = directions;
     }
 
@@ -49,12 +52,10 @@ public class LookCommand {
     @Transactional
     public void invoke(Actor actor, GameOutput output, ActorSameRoom target) {
         output.append(String.format("You look at %s.", target.getTarget().getName()));
-    }
-
-    @Transactional
-    public void invoke(Actor actor, GameOutput output, ActorSameRoom target, ActorSameRoom target2) {
-        output.append(String.format("You look at %s, then %s.",
-            target.getTarget().getName(),
-            target2.getTarget().getName()));
+        commService.echo(target.getTarget(), new GameOutput(String.format("%s looks at you.", actor.getName())));
+        commService.echoToRoom(
+            actor,
+            new GameOutput(String.format("%s looks at %s.", actor.getName(), target.getTarget().getName())),
+            actor, target.getTarget());
     }
 }
