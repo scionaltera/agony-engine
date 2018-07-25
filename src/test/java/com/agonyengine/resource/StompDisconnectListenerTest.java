@@ -16,6 +16,7 @@ import org.springframework.session.SessionRepository;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +77,8 @@ public class StompDisconnectListenerTest {
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-        verify(actorRepository).delete(eq(actor));
+        verify(actor).setDisconnectedDate(any(Date.class));
+        verify(actorRepository).save(eq(actor));
     }
 
     @Test

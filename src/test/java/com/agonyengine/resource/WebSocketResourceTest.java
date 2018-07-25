@@ -149,6 +149,8 @@ public class WebSocketResourceTest {
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
+        verify(actor).setDisconnectedDate(isNull());
+        verify(actorRepository).save(eq(actor));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));

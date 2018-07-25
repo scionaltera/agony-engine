@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class Actor {
 
     private String sessionUsername;
     private String sessionId;
+    private Date disconnectedDate = null;
 
     @ManyToOne
     private GameMap gameMap;
@@ -56,6 +58,14 @@ public class Actor {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public Date getDisconnectedDate() {
+        return disconnectedDate;
+    }
+
+    public void setDisconnectedDate(Date disconnectedDate) {
+        this.disconnectedDate = disconnectedDate;
     }
 
     public GameMap getGameMap() {

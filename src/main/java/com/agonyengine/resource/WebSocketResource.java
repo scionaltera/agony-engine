@@ -123,11 +123,16 @@ public class WebSocketResource {
             actor = actorRepository.save(actor);
 
             LOGGER.info("{} has connected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
-        } else {
-            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
-        }
 
-        commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+            commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+        } else {
+            actor.setDisconnectedDate(null);
+            actor = actorRepository.save(actor);
+
+            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
+
+            commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
+        }
 
         invokerService.invoke(actor, output, null, Collections.singletonList("look"));
 

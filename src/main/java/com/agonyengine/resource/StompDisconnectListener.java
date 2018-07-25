@@ -15,6 +15,8 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import javax.inject.Inject;
 
+import java.util.Date;
+
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
 
 @Component
@@ -52,8 +54,9 @@ public class StompDisconnectListener implements ApplicationListener<SessionDisco
 
         LOGGER.info("{} has disconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
 
-        commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s disappears in a puff of smoke!", actor.getName())), actor);
+        commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has disconnected.", actor.getName())), actor);
 
-        actorRepository.delete(actor);
+        actor.setDisconnectedDate(new Date());
+        actorRepository.save(actor);
     }
 }
