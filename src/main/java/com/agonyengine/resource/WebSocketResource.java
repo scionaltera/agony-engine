@@ -120,23 +120,25 @@ public class WebSocketResource {
             actor.setName(pat.getGivenName());
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
+            actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
             actor.setGameMap(defaultMap);
             actor.setX(0);
             actor.setY(0);
 
             actor = actorRepository.save(actor);
 
-            LOGGER.info("{} has connected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
+            LOGGER.info("{} has connected ({})", actor.getName(), actor.getRemoteIpAddress());
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
         } else {
             actor.setDisconnectedDate(null);
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
+            actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
             actor = actorRepository.save(actor);
 
-            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
+            LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getRemoteIpAddress());
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
         }

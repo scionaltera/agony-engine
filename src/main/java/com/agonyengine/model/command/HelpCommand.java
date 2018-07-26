@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 @Component
 public class HelpCommand {
@@ -17,6 +18,7 @@ public class HelpCommand {
         this.verbRepository = verbRepository;
     }
 
+    @Transactional
     public void invoke(Actor actor, GameOutput output) {
         output.append("[dwhite][ [white]Command List [dwhite]]");
         verbRepository

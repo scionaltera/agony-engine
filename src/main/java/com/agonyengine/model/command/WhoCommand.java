@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -18,6 +19,7 @@ public class WhoCommand {
         this.actorRepository = actorRepository;
     }
 
+    @Transactional
     public void invoke(Actor actor, GameOutput output) {
         List<Actor> actors = actorRepository.findBySessionUsernameIsNotNullAndSessionIdIsNotNull(Sort.by(Sort.Direction.ASC, "name"));
 
