@@ -12,6 +12,7 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
+import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
@@ -99,6 +100,7 @@ public class WebSocketResourceTest {
     private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
     private UUID sessionId = UUID.randomUUID();
+    private UUID actorTemplateId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> sessionAttributes = new HashMap<>();
     private Message<byte[]> message;
@@ -119,6 +121,9 @@ public class WebSocketResourceTest {
         when(actor.getName()).thenReturn("Frank");
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
+        when(session.getAttribute(eq("actor_template"))).thenReturn(actorTemplateId.toString());
+        when(playerActorTemplateRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.of(actor));
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);
@@ -149,6 +154,10 @@ public class WebSocketResourceTest {
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
+        verify(actor).setDisconnectedDate(isNull());
+        verify(actor).setSessionUsername(eq("Shepherd"));
+        verify(actor).setSessionId(eq(sessionId.toString()));
+        verify(actorRepository).save(eq(actor));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -159,19 +168,21 @@ public class WebSocketResourceTest {
 
     @Test
     public void testOnSubscribeNullActor() {
-        when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(null);
+        when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.empty());
         when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.of(pat));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
 
         GameOutput output = resource.onSubscribe(principal, message);
 
+        verify(commService).echoToRoom(any(Actor.class), any(GameOutput.class), any(Actor.class));
         verify(invokerService).invoke(any(Actor.class), any(GameOutput.class), isNull(), anyList());
         verify(actorRepository).save(actorCaptor.capture());
 
         Actor savedActor = actorCaptor.getValue();
 
         assertNotNull(savedActor.getId());
+        assertNotNull(savedActor.getActorTemplate());
         assertEquals("Frank", savedActor.getName());
         assertEquals("Shepherd", savedActor.getSessionUsername());
         assertEquals(sessionId.toString(), savedActor.getSessionId());
@@ -184,6 +195,13 @@ public class WebSocketResourceTest {
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Breaking Space Greeting.")));
+    }
+
+    @Test(expected = NoSuchActorException.class)
+    public void testOnSubscribeNoTemplate() {
+        when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        resource.onSubscribe(principal, message);
     }
 
     @Test

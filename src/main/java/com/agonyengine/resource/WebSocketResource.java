@@ -8,6 +8,7 @@ import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -102,17 +104,19 @@ public class WebSocketResource {
             "[dyellow]carries out its barbarous task...");
         output.append("");
 
-        Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
+        UUID actorTemplateId = UUID.fromString(session.getAttribute("actor_template"));
+        PlayerActorTemplate pat = playerActorTemplateRepository
+            .findById(actorTemplateId)
+            .orElseThrow(() -> new NoSuchActorException("Player Actor Template not found: " + actorTemplateId.toString()));
+        Actor actor = actorRepository.findByActorTemplate(pat)
+            .orElse(null);
 
         if (actor == null) {
-            PlayerActorTemplate pat = playerActorTemplateRepository
-                .findById(UUID.fromString(session.getAttribute("actor_template")))
-                .orElse(null);
-
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
 
             actor = new Actor();
 
+            actor.setActorTemplate(pat);
             actor.setName(pat.getGivenName());
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
@@ -123,11 +127,19 @@ public class WebSocketResource {
             actor = actorRepository.save(actor);
 
             LOGGER.info("{} has connected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
-        } else {
-            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
-        }
 
-        commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+            commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+        } else {
+            actor.setDisconnectedDate(null);
+            actor.setSessionUsername(principal.getName());
+            actor.setSessionId(getStompSessionId(message));
+
+            actor = actorRepository.save(actor);
+
+            LOGGER.info("{} has reconnected ({})", actor.getName(), session.getAttribute("remoteIpAddress"));
+
+            commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
+        }
 
         invokerService.invoke(actor, output, null, Collections.singletonList("look"));
 

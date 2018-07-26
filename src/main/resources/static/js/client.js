@@ -63,9 +63,15 @@ function connect() {
             setConnected(true);
         },
         function () {
-            setConnected(false);
-            console.log('Disconnected.');
             showOutput(["[red]Disconnected from server."]);
+
+            setTimeout(function() {
+                setConnected(false);
+                console.log('Disconnected.');
+                showOutput(["[dyellow]Reconnecting to server..."]);
+
+                this.connect();
+            }, 5000);
         });
 }
 
