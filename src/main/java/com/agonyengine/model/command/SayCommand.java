@@ -8,6 +8,7 @@ import com.agonyengine.service.CommService;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -21,6 +22,7 @@ public class SayCommand {
         this.actorRepository = actorRepository;
     }
 
+    @Transactional
     public void invoke(Actor actor, GameOutput output, QuotedString message) {
         List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
 

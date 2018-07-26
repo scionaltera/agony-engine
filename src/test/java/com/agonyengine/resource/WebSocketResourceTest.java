@@ -99,6 +99,7 @@ public class WebSocketResourceTest {
 
     private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
+    private String remoteIpAddress = "10.11.12.13";
     private UUID sessionId = UUID.randomUUID();
     private UUID actorTemplateId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
@@ -122,6 +123,7 @@ public class WebSocketResourceTest {
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("actor_template"))).thenReturn(actorTemplateId.toString());
+        when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
         when(playerActorTemplateRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(pat));
         when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.of(actor));
 
@@ -157,6 +159,7 @@ public class WebSocketResourceTest {
         verify(actor).setDisconnectedDate(isNull());
         verify(actor).setSessionUsername(eq("Shepherd"));
         verify(actor).setSessionId(eq(sessionId.toString()));
+        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
         verify(actorRepository).save(eq(actor));
 
         assertTrue(output.getOutput().stream()
@@ -186,6 +189,7 @@ public class WebSocketResourceTest {
         assertEquals("Frank", savedActor.getName());
         assertEquals("Shepherd", savedActor.getSessionUsername());
         assertEquals(sessionId.toString(), savedActor.getSessionId());
+        assertEquals(remoteIpAddress, savedActor.getRemoteIpAddress());
         assertEquals(gameMap, savedActor.getGameMap());
         assertEquals((Integer)0, savedActor.getX());
         assertEquals((Integer)0, savedActor.getY());

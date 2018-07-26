@@ -25,6 +25,7 @@ public class Actor {
 
     private String sessionUsername;
     private String sessionId;
+    private String remoteIpAddress;
     private Date disconnectedDate = null;
 
     @ManyToOne
@@ -70,6 +71,14 @@ public class Actor {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getRemoteIpAddress() {
+        return remoteIpAddress;
+    }
+
+    public void setRemoteIpAddress(String remoteIpAddress) {
+        this.remoteIpAddress = remoteIpAddress;
     }
 
     public Date getDisconnectedDate() {

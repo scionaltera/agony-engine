@@ -31,9 +31,6 @@ public class StompDisconnectListenerTest {
     private ActorRepository actorRepository;
 
     @Mock
-    private SessionRepository sessionRepository;
-
-    @Mock
     private CommService commService;
 
     @Mock
@@ -44,9 +41,6 @@ public class StompDisconnectListenerTest {
 
     @Mock
     private Actor actor;
-
-    @Mock
-    private Session springSession;
 
     private Message<byte[]> message;
 
@@ -60,7 +54,6 @@ public class StompDisconnectListenerTest {
 
         stompDisconnectListener = new StompDisconnectListener(
             actorRepository,
-            sessionRepository,
             commService);
     }
 
@@ -71,9 +64,7 @@ public class StompDisconnectListenerTest {
         when(principal.getName()).thenReturn("SessionUser");
         when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(actor);
         when(actor.getName()).thenReturn("Stan");
-        when(sessionRepository.findById(eq("springSessionId"))).thenReturn(springSession);
-        when(springSession.getAttribute(eq("remoteIpAddress"))).thenReturn("10.11.12.13");
-
+        when(actor.getRemoteIpAddress()).thenReturn("10.11.12.13");
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
