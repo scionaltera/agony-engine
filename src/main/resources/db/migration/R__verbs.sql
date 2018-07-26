@@ -29,3 +29,7 @@ UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
 INSERT INTO verb (name, priority, bean)
 VALUES ('score', 500, 'scoreCommand') ON CONFLICT (name) DO
 UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
+
+INSERT INTO verb (name, priority, bean)
+VALUES ('who', 500, 'whoCommand') ON CONFLICT (name) DO
+UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
