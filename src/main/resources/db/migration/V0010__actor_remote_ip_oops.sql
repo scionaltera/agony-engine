@@ -1,0 +1,2 @@
+ALTER TABLE actor ALTER COLUMN remote_ip_address TYPE VARCHAR(16);
+ALTER TABLE actor ALTER COLUMN disconnected_date TYPE TIMESTAMP;
