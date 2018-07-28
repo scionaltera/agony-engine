@@ -88,22 +88,6 @@ public class WebSocketResource {
     public GameOutput onSubscribe(Principal principal, Message<byte[]> message) {
         Session session = getSpringSession(message);
         GameOutput output = new GameOutput();
-
-        greeting.forEach(line -> {
-            if (line.startsWith("*")) {
-                output.append(line.substring(1));
-            } else {
-                output.append(line.replace(" ", "&nbsp;"));
-            }
-        });
-
-        output.append("[dwhite]Server status:");
-        output.append("[dwhite]&nbsp;&nbsp;Version: [white]v" + applicationVersion);
-        output.append("[dwhite]&nbsp;&nbsp;Last boot: [white]" + applicationBootDate);
-        output.append("[dyellow]A relentless grinding rattles your very soul as [red]The Agony Engine " +
-            "[dyellow]carries out its barbarous task...");
-        output.append("");
-
         UUID actorTemplateId = UUID.fromString(session.getAttribute("actor_template"));
         PlayerActorTemplate pat = playerActorTemplateRepository
             .findById(actorTemplateId)
@@ -126,6 +110,21 @@ public class WebSocketResource {
             actor.setY(0);
 
             actor = actorRepository.save(actor);
+
+            greeting.forEach(line -> {
+                if (line.startsWith("*")) {
+                    output.append(line.substring(1));
+                } else {
+                    output.append(line.replace(" ", "&nbsp;"));
+                }
+            });
+
+            output.append("[dwhite]Server status:");
+            output.append("[dwhite]&nbsp;&nbsp;Version: [white]v" + applicationVersion);
+            output.append("[dwhite]&nbsp;&nbsp;Last boot: [white]" + applicationBootDate);
+            output.append("[dyellow]A relentless grinding rattles your very soul as [red]The Agony Engine " +
+                "[dyellow]carries out its barbarous task...");
+            output.append("");
 
             LOGGER.info("{} has connected ({})", actor.getName(), actor.getRemoteIpAddress());
 
