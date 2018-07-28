@@ -1,6 +1,7 @@
-var connected = false;
 var socket = null;
 var stompClient = null;
+var isReconnecting = false;
+var reconnectDelay = 2;
 var commandHistory = [];
 var commandHistoryIndex = -1;
 var commandHistoryLength = 50;
@@ -42,10 +43,6 @@ $(document).keyup(function (event) {
     }
 });
 
-function setConnected(newConnected) {
-    connected = newConnected;
-}
-
 function connect() {
     socket = new SockJS('/mud');
     stompClient = webstomp.over(socket);
@@ -55,6 +52,8 @@ function connect() {
             console.log('Connected: ' + frame);
             showOutput(["[green]Connected to server."]);
 
+            reconnectDelay = 2;
+
             stompClient.subscribe('/user/queue/output', function (message) {
                 var msg = JSON.parse(message.body);
                 showOutput(msg.output);
@@ -63,15 +62,22 @@ function connect() {
             setConnected(true);
         },
         function () {
-            showOutput(["[red]Disconnected from server."]);
+            if (isReconnecting === false) {
+                showOutput(["[red]Disconnected from server. Attempting to reconnect in " + reconnectDelay + " seconds..."]);
 
-            setTimeout(function() {
-                setConnected(false);
-                console.log('Disconnected.');
-                showOutput(["[dyellow]Reconnecting to server..."]);
+                isReconnecting = true;
 
-                this.connect();
-            }, 5000);
+                setTimeout(function () {
+                    console.log('Disconnected.');
+                    showOutput(["[dyellow]Reconnecting to server."]);
+
+                    isReconnecting = false;
+
+                    this.connect();
+                }, reconnectDelay * 1000);
+
+                reconnectDelay = Math.min(reconnectDelay * 2, 60);
+            }
         });
 }
 
