@@ -151,7 +151,7 @@ public class WebSocketResourceTest {
     }
 
     @Test
-    public void testOnSubscribe() {
+    public void testOnSubscribeReconnect() {
         GameOutput output = resource.onSubscribe(principal, message);
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
@@ -163,14 +163,14 @@ public class WebSocketResourceTest {
         verify(actorRepository).save(eq(actor));
 
         assertTrue(output.getOutput().stream()
-            .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
+            .noneMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
 
         assertTrue(output.getOutput().stream()
-            .anyMatch(line -> line.equals("Breaking Space Greeting.")));
+            .noneMatch(line -> line.equals("Breaking Space Greeting.")));
     }
 
     @Test
-    public void testOnSubscribeNullActor() {
+    public void testOnSubscribeConnect() {
         when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.empty());
         when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.of(pat));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
