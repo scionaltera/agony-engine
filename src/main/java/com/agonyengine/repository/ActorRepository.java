@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public interface ActorRepository extends JpaRepository<Actor, UUID> {
     Actor findBySessionUsernameAndSessionId(String sessionUsername, String sessionId);
+    List<Actor> findByGameMap(GameMap gameMap);
     List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
     Optional<Actor> findByActorTemplate(PlayerActorTemplate playerActorTemplate);
     List<Actor> findBySessionUsernameIsNotNullAndSessionIdIsNotNull(Sort sort);

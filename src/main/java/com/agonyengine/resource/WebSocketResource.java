@@ -31,7 +31,6 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -97,6 +96,13 @@ public class WebSocketResource {
 
         if (actor == null) {
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+            GameMap inventoryMap = new GameMap();
+
+            inventoryMap.setWidth(1);
+            inventoryMap.setTiles(new byte[1]);
+            inventoryMap.setTile(0, 0, (byte)0xFF);
+
+            inventoryMap = gameMapRepository.save(inventoryMap);
 
             actor = new Actor();
 
@@ -106,6 +112,7 @@ public class WebSocketResource {
             actor.setSessionId(getStompSessionId(message));
             actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
             actor.setGameMap(defaultMap);
+            actor.setInventory(inventoryMap);
             actor.setX(0);
             actor.setY(0);
 
@@ -157,13 +164,16 @@ public class WebSocketResource {
         Actor actor = actorRepository.findBySessionUsernameAndSessionId(principal.getName(), getStompSessionId(message));
         GameOutput output = new GameOutput();
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
-        List<String> tokens = sentences.get(0);
 
-        try {
-            invokerService.invoke(actor, output, input, tokens);
-        } catch (Exception e) {
-            output.append("[red]" + e.getMessage());
-            LOGGER.error(e.getMessage(), e);
+        if (sentences.size() > 0) {
+            List<String> tokens = sentences.get(0);
+
+            try {
+                invokerService.invoke(actor, output, input, tokens);
+            } catch (Exception e) {
+                output.append("[red]" + e.getMessage());
+                LOGGER.error(e.getMessage(), e);
+            }
         }
 
         output
@@ -175,9 +185,15 @@ public class WebSocketResource {
 
     private Session getSpringSession(Message<byte[]> message) {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
-        String sessionId = (String)headerAccessor.getSessionAttributes().get(SPRING_SESSION_ID_KEY);
+        String sessionId;
 
-        return sessionRepository.findById(sessionId);
+        if (headerAccessor.getSessionAttributes() != null) {
+            sessionId = (String) headerAccessor.getSessionAttributes().get(SPRING_SESSION_ID_KEY);
+
+            return sessionRepository.findById(sessionId);
+        }
+
+        return null;
     }
 
     private String getStompSessionId(Message<byte[]> message) {

@@ -35,19 +35,19 @@ public class ActorSameRoomTest {
         MockitoAnnotations.initMocks(this);
 
         when(actor.getGameMap()).thenReturn(gameMap);
-        when(actor.getName()).thenReturn("Stu");
-        when(target.getName()).thenReturn("Dave");
+        when(actor.getNameTokens()).thenReturn(new String[] {"Stu"});
+        when(target.getNameTokens()).thenReturn(new String[] {"Dave"});
+
+        when(
+            actorRepository.findByGameMapAndXAndY(
+                eq(gameMap), anyInt(), anyInt()
+            )).thenReturn(Arrays.asList(actor, target));
 
         actorSameRoom = new ActorSameRoom(actorRepository);
     }
 
     @Test
     public void testBindTargetFound() {
-        when(
-            actorRepository.findByGameMapAndXAndY(
-                eq(gameMap), anyInt(), anyInt()
-            )).thenReturn(Arrays.asList(actor, target));
-
         boolean result = actorSameRoom.bind(actor, "DAVE");
 
         assertEquals("DAVE", actorSameRoom.getToken());
@@ -56,12 +56,18 @@ public class ActorSameRoomTest {
     }
 
     @Test
-    public void testBindTargetNotFound() {
-        when(
-            actorRepository.findByGameMapAndXAndY(
-                eq(gameMap), anyInt(), anyInt()
-            )).thenReturn(Arrays.asList(actor, target));
+    public void testBindTargetFoundMultiWord() {
+        when(target.getNameTokens()).thenReturn(new String[] {"rubber", "ball"});
 
+        boolean result = actorSameRoom.bind(actor, "BALL");
+
+        assertEquals("BALL", actorSameRoom.getToken());
+        assertEquals(target, actorSameRoom.getTarget());
+        assertTrue(result);
+    }
+
+    @Test
+    public void testBindTargetNotFound() {
         boolean result = actorSameRoom.bind(actor, "JOHN");
 
         assertEquals("JOHN", actorSameRoom.getToken());
@@ -71,6 +77,6 @@ public class ActorSameRoomTest {
 
     @Test
     public void testGetSyntaxDescription() {
-        assertEquals("person in same room", ActorSameRoom.getSyntaxDescription());
+        assertEquals("target in same room", ActorSameRoom.getSyntaxDescription());
     }
 }

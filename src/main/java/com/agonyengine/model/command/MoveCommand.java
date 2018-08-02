@@ -6,6 +6,7 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -42,7 +43,7 @@ public class MoveCommand {
 
         commService.echoToRoom(
             actor,
-            new GameOutput(String.format("[default]%s leaves to the %s.", actor.getName(), direction.getName())),
+            new GameOutput(String.format("[default]%s leaves to the %s.", StringUtils.capitalize(actor.getName()), direction.getName())),
             actor);
 
         actor.setX(newX);
@@ -52,7 +53,7 @@ public class MoveCommand {
 
         commService.echoToRoom(
             actor,
-            new GameOutput(String.format("[default]%s arrives from the %s.", actor.getName(), direction.getOpposite())),
+            new GameOutput(String.format("[default]%s arrives from the %s.", StringUtils.capitalize(actor.getName()), direction.getOpposite())),
             actor);
 
         invokerService.invoke(actor, output, null, Collections.singletonList("look"));

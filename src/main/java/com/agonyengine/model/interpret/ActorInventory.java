@@ -11,13 +11,13 @@ import java.util.Arrays;
 
 @Component
 @Scope(scopeName = "prototype")
-public class ActorSameRoom implements ArgumentBinding {
+public class ActorInventory implements ArgumentBinding {
     private ActorRepository actorRepository;
     private String token;
     private Actor target;
 
     @Inject
-    public ActorSameRoom(ActorRepository actorRepository) {
+    public ActorInventory(ActorRepository actorRepository) {
         this.actorRepository = actorRepository;
     }
 
@@ -26,7 +26,7 @@ public class ActorSameRoom implements ArgumentBinding {
     public boolean bind(Actor actor, String token) {
         this.token = token;
 
-        target = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY())
+        target = actorRepository.findByGameMap(actor.getInventory())
             .stream()
             .filter(t -> !t.equals(actor) && Arrays.stream(t.getNameTokens()).anyMatch(word -> word.toUpperCase().startsWith(token.toUpperCase())))
             .findFirst()
@@ -45,6 +45,6 @@ public class ActorSameRoom implements ArgumentBinding {
     }
 
     public static String getSyntaxDescription() {
-        return "target in same room";
+        return "target in inventory";
     }
 }

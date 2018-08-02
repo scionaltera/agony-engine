@@ -58,8 +58,6 @@ function connect() {
                 var msg = JSON.parse(message.body);
                 showOutput(msg.output);
             });
-
-            setConnected(true);
         },
         function () {
             if (isReconnecting === false) {

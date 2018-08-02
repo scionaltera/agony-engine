@@ -6,6 +6,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -47,17 +48,17 @@ public class LookCommand {
         actors.stream()
             .filter(target -> !actor.equals(target))
             .forEach(target -> output.append(String.format("[green]%s is here. %s",
-                target.getName(),
-                target.getDisconnectedDate() == null ? "" : "[green][[dgreen]LINK DEAD[green]]")));
+                StringUtils.capitalize(target.getName()),
+                target.getDisconnectedDate() == null ? "" : "[yellow][[dred]LINK DEAD[yellow]]")));
     }
 
     @Transactional
     public void invoke(Actor actor, GameOutput output, ActorSameRoom target) {
         output.append(String.format("You look at %s.", target.getTarget().getName()));
-        commService.echo(target.getTarget(), new GameOutput(String.format("%s looks at you.", actor.getName())));
+        commService.echo(target.getTarget(), new GameOutput(String.format("%s looks at you.", StringUtils.capitalize(actor.getName()))));
         commService.echoToRoom(
             actor,
-            new GameOutput(String.format("%s looks at %s.", actor.getName(), target.getTarget().getName())),
+            new GameOutput(String.format("%s looks at %s.", StringUtils.capitalize(actor.getName()), target.getTarget().getName())),
             actor, target.getTarget());
     }
 }

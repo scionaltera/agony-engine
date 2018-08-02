@@ -7,8 +7,6 @@ import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.VerbRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 
 @Component
 public class InvokerService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InvokerService.class);
     private static final int STANDARD_CMD_ARG_COUNT = 2;
 
     private ApplicationContext applicationContext;
@@ -138,6 +135,8 @@ public class InvokerService {
                 }
             }
         }
+
+        output.append("[default]Could not bind arguments for any of the available methods.");
     }
 
     private String getSyntaxDescription(Parameter parameter) {
