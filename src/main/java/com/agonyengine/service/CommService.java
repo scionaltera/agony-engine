@@ -23,6 +23,10 @@ public class CommService {
     }
 
     public void echo(Actor target, GameOutput message) {
+        if (target.getSessionId() == null) {
+            return;
+        }
+
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
 
         headerAccessor.setSessionId(target.getSessionId());
@@ -39,7 +43,7 @@ public class CommService {
 
         actorRepository.findByGameMapAndXAndY(source.getGameMap(), source.getX(), source.getY())
             .stream()
-            .filter(t -> t.getSessionId() != null && t.getSessionUsername() != null)
+            .filter(t -> t.getSessionId() != null || t.getSessionUsername() != null)
             .filter(t -> !excludeList.contains(t))
             .forEach(t -> {
                 SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();

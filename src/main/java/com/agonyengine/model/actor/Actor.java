@@ -1,7 +1,9 @@
 package com.agonyengine.model.actor;
 
+import com.agonyengine.util.NameUtils;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -33,6 +35,9 @@ public class Actor {
     private Integer x;
     private Integer y;
 
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private GameMap inventory;
+
     public UUID getId() {
         return id;
     }
@@ -49,8 +54,16 @@ public class Actor {
         this.actorTemplate = actorTemplate;
     }
 
+    public String[] getNameTokens() {
+        return name.split(" ");
+    }
+
     public String getName() {
-        return name;
+        if (sessionId != null) { // TODO this won't work for NPCs
+            return name;
+        }
+
+        return NameUtils.aoran(name);
     }
 
     public void setName(String name) {
@@ -113,6 +126,14 @@ public class Actor {
         this.y = y;
     }
 
+    public GameMap getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(GameMap inventory) {
+        this.inventory = inventory;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -123,7 +144,6 @@ public class Actor {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(getId());
     }
 }

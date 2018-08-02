@@ -1,18 +1,20 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
+import com.agonyengine.service.InvokerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,10 +24,19 @@ public class QuitCommandTest {
     private ActorRepository actorRepository;
 
     @Mock
+    private InvokerService invokerService;
+
+    @Mock
     private CommService commService;
 
     @Mock
     private Actor actor;
+
+    @Mock
+    private Actor item;
+
+    @Mock
+    private GameMap inventory;
 
     @Mock
     private GameOutput output;
@@ -41,8 +52,11 @@ public class QuitCommandTest {
 
         when(quotedString.getToken()).thenReturn("NOW");
         when(actor.getName()).thenReturn("Scion");
+        when(actor.getInventory()).thenReturn(inventory);
+        when(item.getName()).thenReturn("a flux capacitor");
+        when(actorRepository.findByGameMap(inventory)).thenReturn(Collections.singletonList(item));
 
-        quitCommand = new QuitCommand(actorRepository, commService);
+        quitCommand = new QuitCommand(actorRepository, invokerService, commService);
     }
 
     @Test
@@ -62,6 +76,7 @@ public class QuitCommandTest {
 
         verify(output).append(contains("Goodbye, Scion!"));
         verify(output).append(contains("window.location"));
+        verify(invokerService).invoke(eq(actor), eq(output), isNull(), anyList());
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(actorRepository).delete(eq(actor));
     }
