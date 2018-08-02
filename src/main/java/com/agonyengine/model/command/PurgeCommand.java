@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.interpret.ActorInventory;
 import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -40,6 +41,22 @@ public class PurgeCommand {
             actor,
             new GameOutput(String.format("[yellow]%s has purged %s[yellow]!", StringUtils.capitalize(actor.getName()), item.getName())),
             actor, item);
+
+        LOGGER.info("{} has purged an item: {} ({})", actor.getName(), item.getName(), item.getId());
+
+        actorRepository.delete(item);
+    }
+
+    @Transactional
+    public void invoke(Actor actor, GameOutput output, ActorInventory itemBinding) {
+        Actor item = itemBinding.getTarget();
+
+        if (item.getSessionId() != null) {
+            output.append("Sorry, you cannot purge other players.");
+            return;
+        }
+
+        output.append(String.format("[yellow]You purge %s[yellow].", item.getName()));
 
         LOGGER.info("{} has purged an item: {} ({})", actor.getName(), item.getName(), item.getId());
 
