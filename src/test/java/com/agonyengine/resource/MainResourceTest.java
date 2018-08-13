@@ -259,62 +259,71 @@ public class MainResourceTest {
 
     @Test
     public void testPlay() {
-        when(httpSession.getAttribute(eq("actor_template"))).thenReturn("actor_id");
-        when(httpServletRequest.getRemoteAddr()).thenReturn("10.11.12.13");
+        UUID actorId = UUID.randomUUID();
 
-        assertEquals("play", resource.play(httpSession, httpServletRequest));
+        when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.of(pat));
+        when(pat.getId()).thenReturn(actorId);
+        when(pat.getAccount()).thenReturn("Shepherd");
+        when(principal.getName()).thenReturn("Shepherd");
 
-        verify(httpSession).setAttribute(eq("remoteIpAddress"), eq("10.11.12.13"));
+        String view = resource.play(principal, httpServletRequest, model, httpSession);
+
+        assertEquals("play", view);
+
+        verify(httpSession).setAttribute(eq("remoteIpAddress"), any());
+        verify(httpSession).removeAttribute(eq("actor"));
+
+        verify(model).addAttribute(eq("actor"), eq(actorId.toString()));
     }
 
     @Test
-    public void testPlayIdRedirectValid() {
+    public void testPlayActorNotFound() {
         UUID actorId = UUID.randomUUID();
 
-        when(principal.getName()).thenReturn("Shepherd");
+        when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.empty());
+        when(pat.getId()).thenReturn(actorId);
         when(pat.getAccount()).thenReturn("Shepherd");
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(principal.getName()).thenReturn("Shepherd");
 
-        String view = resource.play(actorId.toString(), principal, httpSession);
+        String view = resource.play(principal, httpServletRequest, model, httpSession);
+
+        assertEquals("redirect:/account", view);
+
+        verify(httpSession, never()).setAttribute(eq("remoteIpAddress"), any());
+        verify(httpSession, never()).removeAttribute(eq("actor"));
+
+        verify(model, never()).addAttribute(eq("actor"), eq(actorId.toString()));
+    }
+
+    @Test
+    public void testPlayActorWrongUser() {
+        UUID actorId = UUID.randomUUID();
+
+        when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
+        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.of(pat));
+        when(pat.getId()).thenReturn(actorId);
+        when(pat.getAccount()).thenReturn("Scion");
+        when(principal.getName()).thenReturn("Shepherd");
+
+        String view = resource.play(principal, httpServletRequest, model, httpSession);
+
+        assertEquals("redirect:/account", view);
+
+        verify(httpSession, never()).setAttribute(eq("remoteIpAddress"), any());
+        verify(httpSession, never()).removeAttribute(eq("actor"));
+
+        verify(model, never()).addAttribute(eq("actor"), eq(actorId.toString()));
+    }
+
+    @Test
+    public void testPlayId() {
+        String view = resource.play("actor-id", httpSession);
+
+        verify(httpSession).setAttribute(eq("actor"), eq("actor-id"));
 
         assertEquals("redirect:/play", view);
-
-        verify(httpSession).setAttribute(eq("actor_template"), eq(actorId.toString()));
-    }
-
-    @Test
-    public void testPlayIdRedirectNotFound() {
-        UUID actorId = UUID.randomUUID();
-
-        when(principal.getName()).thenReturn("Shepherd");
-        when(pat.getAccount()).thenReturn("Shepherd");
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
-
-        String view = resource.play(actorId.toString(), principal, httpSession);
-
-        assertEquals("redirect:/account", view);
-
-        verify(httpSession, never()).setAttribute(eq("actor_template"), anyString());
-    }
-
-    @Test
-    public void testPlayIdRedirectWrongUser() {
-        UUID actorId = UUID.randomUUID();
-
-        when(principal.getName()).thenReturn("Shepherd");
-        when(pat.getAccount()).thenReturn("Frank");
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
-
-        String view = resource.play(actorId.toString(), principal, httpSession);
-
-        assertEquals("redirect:/account", view);
-
-        verify(httpSession, never()).setAttribute(eq("actor_template"), anyString());
-    }
-
-    @Test
-    public void testPlayNoActor() {
-        assertEquals("redirect:/account", resource.play(httpSession, httpServletRequest));
     }
 
     @Test

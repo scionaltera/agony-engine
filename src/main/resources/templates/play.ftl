@@ -26,6 +26,9 @@
 <#include "scripts.inc.ftl">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sockjs-client@1.1.5/dist/sockjs.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/webstomp-client@1.2.3/dist/webstomp.min.js"></script>
+<script type="text/javascript">
+    var actor = "${actor}";
+</script>
 <script type="text/javascript" src="<@spring.url '/js/client.js'/>"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@ import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -84,10 +85,10 @@ public class WebSocketResource {
 
     @Transactional
     @SubscribeMapping("/queue/output")
-    public GameOutput onSubscribe(Principal principal, Message<byte[]> message) {
+    public GameOutput onSubscribe(Principal principal, Message<byte[]> message, @Header("actor") String actorId) {
         Session session = getSpringSession(message);
         GameOutput output = new GameOutput();
-        UUID actorTemplateId = UUID.fromString(session.getAttribute("actor_template"));
+        UUID actorTemplateId = UUID.fromString(actorId);
         PlayerActorTemplate pat = playerActorTemplateRepository
             .findById(actorTemplateId)
             .orElseThrow(() -> new NoSuchActorException("Player Actor Template not found: " + actorTemplateId.toString()));

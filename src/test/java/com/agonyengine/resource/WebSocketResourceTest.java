@@ -128,7 +128,6 @@ public class WebSocketResourceTest {
         when(actor.getGameMap()).thenReturn(gameMap);
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
-        when(session.getAttribute(eq("actor_template"))).thenReturn(actorTemplateId.toString());
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
         when(playerActorTemplateRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(pat));
         when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.of(actor));
@@ -167,7 +166,7 @@ public class WebSocketResourceTest {
 
     @Test
     public void testOnSubscribeReconnectInWorld() {
-        GameOutput output = resource.onSubscribe(principal, message);
+        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(commService).echo(eq(actor), any(GameOutput.class));
@@ -192,7 +191,7 @@ public class WebSocketResourceTest {
     public void testOnSubscribeReconnectInVoid() {
         when(actor.getGameMap()).thenReturn(null);
 
-        GameOutput output = resource.onSubscribe(principal, message);
+        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(commService).echo(eq(actor), any(GameOutput.class));
@@ -220,7 +219,7 @@ public class WebSocketResourceTest {
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
 
-        GameOutput output = resource.onSubscribe(principal, message);
+        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
 
         verify(commService).echoToRoom(any(Actor.class), any(GameOutput.class), any(Actor.class));
         verify(invokerService).invoke(any(Actor.class), any(GameOutput.class), isNull(), anyList());
@@ -252,7 +251,7 @@ public class WebSocketResourceTest {
     public void testOnSubscribeNoTemplate() {
         when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        resource.onSubscribe(principal, message);
+        resource.onSubscribe(principal, message, actorTemplateId.toString());
     }
 
     @Test
