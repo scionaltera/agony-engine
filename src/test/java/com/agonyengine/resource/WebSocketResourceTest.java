@@ -125,12 +125,14 @@ public class WebSocketResourceTest {
         when(pat.getGivenName()).thenReturn("Frank");
         when(pat.getPronoun()).thenReturn(pronoun);
         when(actor.getName()).thenReturn("Frank");
+        when(actor.getGameMap()).thenReturn(gameMap);
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("actor_template"))).thenReturn(actorTemplateId.toString());
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
         when(playerActorTemplateRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(pat));
         when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.of(actor));
+        when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);
@@ -164,7 +166,7 @@ public class WebSocketResourceTest {
     }
 
     @Test
-    public void testOnSubscribeReconnect() {
+    public void testOnSubscribeReconnectInWorld() {
         GameOutput output = resource.onSubscribe(principal, message);
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
@@ -174,6 +176,34 @@ public class WebSocketResourceTest {
         verify(actor).setSessionUsername(eq("Shepherd"));
         verify(actor).setSessionId(eq(sessionId.toString()));
         verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
+        verify(actor, never()).setGameMap(any(GameMap.class));
+        verify(actor, never()).setX(anyInt());
+        verify(actor, never()).setY(anyInt());
+        verify(actorRepository).save(eq(actor));
+
+        assertTrue(output.getOutput().stream()
+            .noneMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
+
+        assertTrue(output.getOutput().stream()
+            .noneMatch(line -> line.equals("Breaking Space Greeting.")));
+    }
+
+    @Test
+    public void testOnSubscribeReconnectInVoid() {
+        when(actor.getGameMap()).thenReturn(null);
+
+        GameOutput output = resource.onSubscribe(principal, message);
+
+        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+        verify(commService).echo(eq(actor), any(GameOutput.class));
+        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
+        verify(actor).setDisconnectedDate(isNull());
+        verify(actor).setSessionUsername(eq("Shepherd"));
+        verify(actor).setSessionId(eq(sessionId.toString()));
+        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
+        verify(actor).setGameMap(eq(gameMap));
+        verify(actor).setX(eq(0));
+        verify(actor).setY(eq(0));
         verify(actorRepository).save(eq(actor));
 
         assertTrue(output.getOutput().stream()

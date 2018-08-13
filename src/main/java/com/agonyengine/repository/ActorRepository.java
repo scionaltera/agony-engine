@@ -16,6 +16,6 @@ public interface ActorRepository extends JpaRepository<Actor, UUID> {
     List<Actor> findByGameMap(GameMap gameMap);
     List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
     Optional<Actor> findByActorTemplate(PlayerActorTemplate playerActorTemplate);
-    List<Actor> findBySessionUsernameIsNotNullAndSessionIdIsNotNull(Sort sort);
-    List<Actor> findByDisconnectedDateIsBefore(Date cutoff);
+    List<Actor> findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(Sort sort);
+    List<Actor> findByDisconnectedDateIsBeforeAndGameMapIsNotNull(Date cutoff);
 }
