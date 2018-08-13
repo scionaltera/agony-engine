@@ -45,7 +45,7 @@ $(document).keyup(function (event) {
 
 function connect() {
     socket = new SockJS('/mud');
-    stompClient = webstomp.over(socket);
+    stompClient = webstomp.over(socket, { "heartbeat" : false });
     stompClient.connect(
         {},
         function (frame) {
