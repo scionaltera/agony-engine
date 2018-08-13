@@ -112,8 +112,8 @@ public class WebSocketResource {
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
             actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
-            actor.setGameMap(defaultMap);
             actor.setInventory(inventoryMap);
+            actor.setGameMap(defaultMap);
             actor.setX(0);
             actor.setY(0);
 
@@ -134,7 +134,7 @@ public class WebSocketResource {
                 "[dyellow]carries out its barbarous task...");
             output.append("");
 
-            LOGGER.info("{} has connected ({})", actor.getName(), actor.getRemoteIpAddress());
+            LOGGER.info("{} has connected for the first time ({})", actor.getName(), actor.getRemoteIpAddress());
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
         } else {
@@ -150,11 +150,24 @@ public class WebSocketResource {
             actor.setSessionId(getStompSessionId(message));
             actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
+            // if they were in the void, move them back into the world
+            if (null == actor.getGameMap()) {
+                GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+
+                actor.setGameMap(defaultMap);
+                actor.setX(0);
+                actor.setY(0);
+
+                LOGGER.info("{} has connected ({})", actor.getName(), actor.getRemoteIpAddress());
+
+                commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+            } else {
+                LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getRemoteIpAddress());
+
+                commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
+            }
+
             actor = actorRepository.save(actor);
-
-            LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getRemoteIpAddress());
-
-            commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
         }
 
         invokerService.invoke(actor, output, null, Collections.singletonList("look"));

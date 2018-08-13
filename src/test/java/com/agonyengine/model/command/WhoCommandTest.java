@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +48,7 @@ public class WhoCommandTest {
 
         onlineActors.add(actor);
 
-        when(actorRepository.findBySessionUsernameIsNotNullAndSessionIdIsNotNull(any(Sort.class))).thenReturn(onlineActors);
+        when(actorRepository.findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(any(Sort.class))).thenReturn(onlineActors);
 
         whoCommand = new WhoCommand(actorRepository);
     }
@@ -56,7 +57,7 @@ public class WhoCommandTest {
     public void testInvoke() {
         whoCommand.invoke(actor, output);
 
-        verify(actorRepository).findBySessionUsernameIsNotNullAndSessionIdIsNotNull(any(Sort.class));
+        verify(actorRepository).findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(any(Sort.class));
 
         verify(output).append(contains("Who is Online"));
 
@@ -74,10 +75,28 @@ public class WhoCommandTest {
 
         whoCommand.invoke(actor, output);
 
-        verify(actorRepository).findBySessionUsernameIsNotNullAndSessionIdIsNotNull(any(Sort.class));
+        verify(actorRepository).findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(any(Sort.class));
 
         verify(output).append(contains("Who is Online"));
         verify(output).append(contains("Kadne"));
         verify(output).append(contains("1 player online."));
+    }
+
+    @Test
+    public void testInvokeLinkDead() {
+        when(onlineActors.get(0).getDisconnectedDate()).thenReturn(new Date());
+
+        whoCommand.invoke(actor, output);
+
+        verify(actorRepository).findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(any(Sort.class));
+
+        verify(output).append(contains("Who is Online"));
+
+        for (int i = 0; i < MOCK_ACTORS; i++) {
+            verify(output).append(contains("Actor-" + i));
+        }
+
+        verify(output, times(1)).append(contains("LINK DEAD"));
+        verify(output).append(contains("6 players online."));
     }
 }

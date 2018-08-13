@@ -5,6 +5,8 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class ReaperServiceTest {
@@ -20,6 +23,9 @@ public class ReaperServiceTest {
 
     @Mock
     private CommService commService;
+
+    @Captor
+    private ArgumentCaptor<Date> dateArgumentCaptor;
 
     private List<Actor> actors = new ArrayList<>();
 
@@ -38,7 +44,7 @@ public class ReaperServiceTest {
             actors.add(actor);
         }
 
-        when(actorRepository.findByDisconnectedDateIsBefore(any(Date.class))).thenReturn(actors);
+        when(actorRepository.findByDisconnectedDateIsBeforeAndGameMapIsNotNull(any(Date.class))).thenReturn(actors);
 
         reaperService = new ReaperService(actorRepository, commService);
     }
@@ -47,8 +53,16 @@ public class ReaperServiceTest {
     public void testReap() {
         reaperService.reapLinkDeadActors();
 
-        verify(actorRepository).findByDisconnectedDateIsBefore(any(Date.class));
-        actors.forEach(actor -> verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor)));
-        verify(actorRepository).deleteAll(actors);
+        verify(actorRepository).findByDisconnectedDateIsBeforeAndGameMapIsNotNull(dateArgumentCaptor.capture());
+        verify(actorRepository).saveAll(actors);
+
+        actors.forEach(actor -> {
+            verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+            verify(actor).setGameMap(isNull());
+        });
+
+        Date cutoff = dateArgumentCaptor.getValue();
+
+        assertTrue(cutoff.before(new Date()));
     }
 }

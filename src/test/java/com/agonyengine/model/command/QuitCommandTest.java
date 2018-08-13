@@ -6,7 +6,6 @@ import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
-import com.agonyengine.service.InvokerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -22,9 +21,6 @@ import static org.mockito.Mockito.when;
 public class QuitCommandTest {
     @Mock
     private ActorRepository actorRepository;
-
-    @Mock
-    private InvokerService invokerService;
 
     @Mock
     private CommService commService;
@@ -56,7 +52,7 @@ public class QuitCommandTest {
         when(item.getName()).thenReturn("a flux capacitor");
         when(actorRepository.findByGameMap(inventory)).thenReturn(Collections.singletonList(item));
 
-        quitCommand = new QuitCommand(actorRepository, invokerService, commService);
+        quitCommand = new QuitCommand(actorRepository, commService);
     }
 
     @Test
@@ -65,8 +61,9 @@ public class QuitCommandTest {
 
         quitCommand.invoke(actor, output, quotedString);
 
+        verify(actor, never()).setGameMap(isNull());
         verify(commService, never()).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-        verify(actorRepository, never()).delete(eq(actor));
+        verify(actorRepository, never()).save(eq(actor));
         verify(output, never()).append(contains("window.location"));
     }
 
@@ -76,8 +73,8 @@ public class QuitCommandTest {
 
         verify(output).append(contains("Goodbye, Scion!"));
         verify(output).append(contains("window.location"));
-        verify(invokerService).invoke(eq(actor), eq(output), isNull(), anyList());
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-        verify(actorRepository).delete(eq(actor));
+        verify(actor).setGameMap(isNull());
+        verify(actorRepository).save(eq(actor));
     }
 }

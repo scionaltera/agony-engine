@@ -20,7 +20,10 @@ public class ReaperService {
     private CommService commService;
 
     @Inject
-    public ReaperService(ActorRepository actorRepository, CommService commService) {
+    public ReaperService(
+        ActorRepository actorRepository,
+        CommService commService) {
+
         this.actorRepository = actorRepository;
         this.commService = commService;
     }
@@ -29,16 +32,15 @@ public class ReaperService {
     public void reapLinkDeadActors() {
         LOGGER.debug("Querying for link-dead players to reap...");
 
-        List<Actor> actors = actorRepository.findByDisconnectedDateIsBefore(new Date(System.currentTimeMillis() - (1000 * 60 * 30)));
+        List<Actor> actors = actorRepository.findByDisconnectedDateIsBeforeAndGameMapIsNotNull(new Date(System.currentTimeMillis() - (1000 * 60 * 30)));
 
         actors.forEach(actor -> {
             LOGGER.info("Reaping link-dead player: {}", actor.getName());
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s disappears in a puff of smoke!", actor.getName())), actor);
-
-            // TODO need to copy state from the actor to the template before deleting
+            actor.setGameMap(null);
         });
 
-        actorRepository.deleteAll(actors);
+        actorRepository.saveAll(actors);
     }
 }
