@@ -57,7 +57,8 @@ function connect() {
             stompClient.subscribe('/user/queue/output', function (message) {
                 var msg = JSON.parse(message.body);
                 showOutput(msg.output);
-            });
+            },
+            { "actor" : actor });
         },
         function () {
             if (isReconnecting === false) {

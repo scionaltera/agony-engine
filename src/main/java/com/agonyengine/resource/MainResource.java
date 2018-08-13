@@ -161,35 +161,34 @@ public class MainResource {
     }
 
     @RequestMapping("/play")
-    public String play(HttpSession httpSession, HttpServletRequest request) {
-        if (httpSession.getAttribute("actor_template") == null) {
-            return "redirect:/account";
-        }
-
-        httpSession.setAttribute("remoteIpAddress", extractRemoteIp(request));
-
-        return "play";
-    }
-
-    @RequestMapping("/play/{id}")
-    public String play(@PathVariable("id") String id, Principal principal, HttpSession httpSession) {
+    public String play(Principal principal, HttpServletRequest request, Model model, HttpSession httpSession) {
         try {
             PlayerActorTemplate actor = playerActorTemplateRepository
-                .findById(UUID.fromString(id))
+                .findById(UUID.fromString((String) httpSession.getAttribute("actor")))
                 .orElseThrow(() -> new NoSuchActorException("No PAT exists with specified ID"));
 
             if (!actor.getAccount().equals(principal.getName())) {
                 throw new NoSuchActorException("PAT belongs to a different user");
             }
 
-            httpSession.setAttribute("actor_template", id);
+            httpSession.setAttribute("remoteIpAddress", extractRemoteIp(request));
+            httpSession.removeAttribute("actor");
 
-            return "redirect:/play";
+            model.addAttribute("actor", actor.getId().toString());
+
+            return "play";
         } catch (NoSuchActorException e) {
-            LOGGER.warn("Attempt to load PAT by ID failed: {}", e.getMessage());
+            LOGGER.error("Invalid actor ID: {}", e.getMessage());
         }
 
         return "redirect:/account";
+    }
+
+    @RequestMapping("/play/{id}")
+    public String play(@PathVariable("id") String id, HttpSession httpSession) {
+        httpSession.setAttribute("actor", id);
+
+        return "redirect:/play";
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/logout")
