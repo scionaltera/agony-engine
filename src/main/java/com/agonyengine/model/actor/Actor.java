@@ -25,6 +25,9 @@ public class Actor {
 
     private String name;
 
+    @ManyToOne
+    private Pronoun pronoun;
+
     private String sessionUsername;
     private String sessionId;
     private String remoteIpAddress;
@@ -68,6 +71,14 @@ public class Actor {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Pronoun getPronoun() {
+        return pronoun;
+    }
+
+    public void setPronoun(Pronoun pronoun) {
+        this.pronoun = pronoun;
     }
 
     public String getSessionUsername() {

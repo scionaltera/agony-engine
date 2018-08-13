@@ -3,6 +3,7 @@ package com.agonyengine.resource;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.PlayerActorTemplate;
+import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
@@ -77,6 +78,9 @@ public class WebSocketResourceTest {
     private Actor actor;
 
     @Mock
+    private Pronoun pronoun;
+
+    @Mock
     private GameMap gameMap;
 
     @Mock
@@ -119,6 +123,7 @@ public class WebSocketResourceTest {
         when(principal.getName()).thenReturn("Shepherd");
         when(pat.getAccount()).thenReturn("Dude007");
         when(pat.getGivenName()).thenReturn("Frank");
+        when(pat.getPronoun()).thenReturn(pronoun);
         when(actor.getName()).thenReturn("Frank");
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
@@ -133,6 +138,14 @@ public class WebSocketResourceTest {
             a.setId(UUID.randomUUID());
 
             return a;
+        });
+
+        when(gameMapRepository.save(any(GameMap.class))).thenAnswer(i -> {
+            GameMap m = i.getArgument(0);
+
+            m.setId(UUID.randomUUID());
+
+            return m;
         });
 
         verbs = buildMockVerbs();
@@ -190,7 +203,10 @@ public class WebSocketResourceTest {
         assertEquals("Shepherd", savedActor.getSessionUsername());
         assertEquals(sessionId.toString(), savedActor.getSessionId());
         assertEquals(remoteIpAddress, savedActor.getRemoteIpAddress());
+        assertEquals(pronoun, savedActor.getPronoun());
         assertEquals(gameMap, savedActor.getGameMap());
+        assertEquals(1, savedActor.getInventory().getWidth());
+        assertEquals((byte)0xFF, savedActor.getInventory().getTile(0, 0));
         assertEquals((Integer)0, savedActor.getX());
         assertEquals((Integer)0, savedActor.getY());
 

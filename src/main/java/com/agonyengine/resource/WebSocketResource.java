@@ -108,6 +108,7 @@ public class WebSocketResource {
 
             actor.setActorTemplate(pat);
             actor.setName(pat.getGivenName());
+            actor.setPronoun(pat.getPronoun());
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
             actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));

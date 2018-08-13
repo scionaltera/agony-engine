@@ -22,6 +22,21 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <div class="col">
+                        <label for="pronoun">Pronouns</label>
+                        <select class="form-control" id="pronoun" name="pronoun">
+                            <#list pronouns as pronoun>
+                                <#if selectedPronoun?? && selectedPronoun == pronoun.subject>
+                                    <option value="${pronoun.subject}" selected>${pronoun.subject}/${pronoun.object}</option>
+                                <#else>
+                                    <option value="${pronoun.subject}">${pronoun.subject}/${pronoun.object}</option>
+                                </#if>
+                            </#list>
+                        </select>
+                    </div>
+                </div>
+
                 <#if errorText??>
                 <div class="form-group">
                     <div class="col">

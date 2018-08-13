@@ -1,7 +1,9 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.PlayerActorTemplate;
+import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.model.AccountRegistration;
 import com.agonyengine.resource.model.PlayerActorRegistration;
 import org.junit.Before;
@@ -35,6 +37,9 @@ import static org.mockito.Mockito.*;
 
 public class MainResourceTest {
     @Mock
+    private PronounRepository pronounRepository;
+
+    @Mock
     private PlayerActorTemplateRepository playerActorTemplateRepository;
 
     @Mock
@@ -64,6 +69,9 @@ public class MainResourceTest {
     @Mock
     private PlayerActorTemplate pat;
 
+    @Mock
+    private Pronoun pronoun;
+
     @Captor
     private ArgumentCaptor<UserDetails> userDetailsCaptor;
 
@@ -84,7 +92,9 @@ public class MainResourceTest {
            return pat;
         });
 
-        resource = new MainResource(playerActorTemplateRepository, userDetailsManager);
+        when(pronounRepository.getOne(eq("he"))).thenReturn(pronoun);
+
+        resource = new MainResource(pronounRepository, playerActorTemplateRepository, userDetailsManager);
     }
 
     @Test
@@ -204,13 +214,14 @@ public class MainResourceTest {
 
     @Test
     public void testActorNew() {
-        assertEquals("actor", resource.actor());
+        assertEquals("actor", resource.actor(model));
     }
 
     @Test
     public void testActorValid() {
         when(principal.getName()).thenReturn("Shepherd");
         when(actorRegistration.getGivenName()).thenReturn("Frank");
+        when(actorRegistration.getPronoun()).thenReturn("he");
         when(errors.hasErrors()).thenReturn(false);
 
         String view = resource.actor(actorRegistration, errors, principal, model);
@@ -224,6 +235,7 @@ public class MainResourceTest {
 
         assertNotNull(pat.getId());
         assertEquals("Frank", pat.getGivenName());
+        assertEquals(pronoun, pat.getPronoun());
         assertEquals("Shepherd", pat.getAccount());
     }
 
@@ -232,6 +244,7 @@ public class MainResourceTest {
         ObjectError objectError = new ObjectError("givenName", "Given name is too short.");
 
         when(actorRegistration.getGivenName()).thenReturn("");
+        when(actorRegistration.getPronoun()).thenReturn("he");
         when(errors.hasErrors()).thenReturn(true);
         when(errors.getAllErrors()).thenReturn(Collections.singletonList(objectError));
 

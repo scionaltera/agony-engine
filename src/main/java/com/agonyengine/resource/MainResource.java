@@ -2,6 +2,7 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.resource.model.AccountRegistration;
 import com.agonyengine.resource.model.PlayerActorRegistration;
@@ -38,14 +39,17 @@ import java.util.UUID;
 public class MainResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainResource.class);
 
+    private PronounRepository pronounRepository;
     private PlayerActorTemplateRepository playerActorTemplateRepository;
     private UserDetailsManager userDetailsManager;
     private PasswordEncoder passwordEncoder;
 
     @Inject
-    public MainResource(PlayerActorTemplateRepository playerActorTemplateRepository,
+    public MainResource(PronounRepository pronounRepository,
+                        PlayerActorTemplateRepository playerActorTemplateRepository,
                         UserDetailsManager userDetailsManager) {
 
+        this.pronounRepository = pronounRepository;
         this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.userDetailsManager = userDetailsManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -120,7 +124,9 @@ public class MainResource {
     }
 
     @RequestMapping("/actor/new")
-    public String actor() {
+    public String actor(Model model) {
+        model.addAttribute("pronouns", pronounRepository.findAll());
+
         return "actor";
     }
 
@@ -133,8 +139,10 @@ public class MainResource {
         }
 
         if (!errorText.isEmpty()) {
+            model.addAttribute("pronouns", pronounRepository.findAll());
             model.addAttribute("errorText", String.join("<br />", errorText));
             model.addAttribute("givenName", registration.getGivenName());
+            model.addAttribute("selectedPronoun", registration.getPronoun());
 
             return "actor";
         }
@@ -143,6 +151,7 @@ public class MainResource {
 
         actor.setAccount(principal.getName());
         actor.setGivenName(registration.getGivenName());
+        actor.setPronoun(pronounRepository.getOne(registration.getPronoun()));
 
         actor = playerActorTemplateRepository.save(actor);
 
