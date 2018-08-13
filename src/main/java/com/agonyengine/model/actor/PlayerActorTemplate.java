@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
@@ -15,6 +16,9 @@ public class PlayerActorTemplate {
     private UUID id;
     private String account;
     private String givenName;
+
+    @ManyToOne
+    private Pronoun pronoun;
 
     public UUID getId() {
         return id;
@@ -38,5 +42,13 @@ public class PlayerActorTemplate {
 
     public void setGivenName(String givenName) {
         this.givenName = givenName;
+    }
+
+    public Pronoun getPronoun() {
+        return pronoun;
+    }
+
+    public void setPronoun(Pronoun pronoun) {
+        this.pronoun = pronoun;
     }
 }
