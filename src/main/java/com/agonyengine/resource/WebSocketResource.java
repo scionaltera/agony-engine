@@ -138,6 +138,13 @@ public class WebSocketResource {
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
         } else {
+            GameOutput reconnect = new GameOutput();
+
+            reconnect.append("[yellow]Your connection has been reconnected in another browser!");
+            reconnect.append("<script type=\"text/javascript\">setTimeout(function() { window.location=\"/account\"; }, 1000);</script>");
+
+            commService.echo(actor, reconnect);
+
             actor.setDisconnectedDate(null);
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));

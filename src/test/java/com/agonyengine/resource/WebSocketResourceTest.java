@@ -168,6 +168,7 @@ public class WebSocketResourceTest {
         GameOutput output = resource.onSubscribe(principal, message);
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+        verify(commService).echo(eq(actor), any(GameOutput.class));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
         verify(actor).setDisconnectedDate(isNull());
         verify(actor).setSessionUsername(eq("Shepherd"));
