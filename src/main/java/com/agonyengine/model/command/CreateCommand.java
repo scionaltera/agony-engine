@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.service.CommService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,13 @@ public class CreateCommand {
 
     private CommService commService;
     private ActorRepository actorRepository;
+    private PronounRepository pronounRepository;
 
     @Inject
-    public CreateCommand(CommService commService, ActorRepository actorRepository) {
+    public CreateCommand(CommService commService, ActorRepository actorRepository, PronounRepository pronounRepository) {
         this.commService = commService;
         this.actorRepository = actorRepository;
+        this.pronounRepository = pronounRepository;
     }
 
     @Transactional
@@ -31,6 +34,7 @@ public class CreateCommand {
         Actor item = new Actor();
 
         item.setName(itemName.getToken());
+        item.setPronoun(pronounRepository.getOne("it"));
         item.setGameMap(actor.getGameMap());
         item.setX(actor.getX());
         item.setY(actor.getY());
