@@ -2,12 +2,10 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
-import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
@@ -48,7 +46,6 @@ public class WebSocketResource {
     private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
-    private PlayerActorTemplateRepository playerActorTemplateRepository;
     private InvokerService invokerService;
     private CommService commService;
     private List<String> greeting;
@@ -62,7 +59,6 @@ public class WebSocketResource {
         GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
-        PlayerActorTemplateRepository playerActorTemplateRepository,
         InvokerService invokerService,
         CommService commService) {
 
@@ -73,7 +69,6 @@ public class WebSocketResource {
         this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
-        this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.invokerService = invokerService;
         this.commService = commService;
 
@@ -88,28 +83,19 @@ public class WebSocketResource {
     public GameOutput onSubscribe(Principal principal, Message<byte[]> message, @Header("actor") String actorId) {
         Session session = getSpringSession(message);
         GameOutput output = new GameOutput();
-        UUID actorTemplateId = UUID.fromString(actorId);
-        PlayerActorTemplate pat = playerActorTemplateRepository
-            .findById(actorTemplateId)
-            .orElseThrow(() -> new NoSuchActorException("Player Actor Template not found: " + actorTemplateId.toString()));
-        Actor actor = actorRepository.findByActorTemplate(pat)
-            .orElse(null);
+        UUID actorUuid = UUID.fromString(actorId);
+        Actor actor = actorRepository.findById(UUID.fromString(actorId))
+            .orElseThrow(() -> new NoSuchActorException("Player Actor Template not found: " + actorUuid.toString()));
 
-        if (actor == null) {
+        if (null == actor.getSessionUsername() && null == actor.getSessionId()) {
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
             GameMap inventoryMap = new GameMap();
 
             inventoryMap.setWidth(1);
-            inventoryMap.setTiles(new byte[1]);
-            inventoryMap.setTile(0, 0, (byte)0xFF);
+            inventoryMap.setTiles(new byte[] { (byte)0xFF });
 
             inventoryMap = gameMapRepository.save(inventoryMap);
 
-            actor = new Actor();
-
-            actor.setActorTemplate(pat);
-            actor.setName(pat.getGivenName());
-            actor.setPronoun(pat.getPronoun());
             actor.setSessionUsername(principal.getName());
             actor.setSessionId(getStompSessionId(message));
             actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));

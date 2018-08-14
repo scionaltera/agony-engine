@@ -1,8 +1,8 @@
 package com.agonyengine.resource;
 
-import com.agonyengine.model.actor.PlayerActorTemplate;
+import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Pronoun;
-import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.model.AccountRegistration;
 import com.agonyengine.resource.model.PlayerActorRegistration;
@@ -37,13 +37,16 @@ import static org.mockito.Mockito.*;
 
 public class MainResourceTest {
     @Mock
+    private ActorRepository actorRepository;
+
+    @Mock
     private PronounRepository pronounRepository;
 
     @Mock
-    private PlayerActorTemplateRepository playerActorTemplateRepository;
+    private UserDetailsManager userDetailsManager;
 
     @Mock
-    private UserDetailsManager userDetailsManager;
+    private Actor actor;
 
     @Mock
     private Principal principal;
@@ -67,16 +70,13 @@ public class MainResourceTest {
     private PlayerActorRegistration actorRegistration;
 
     @Mock
-    private PlayerActorTemplate pat;
-
-    @Mock
     private Pronoun pronoun;
 
     @Captor
     private ArgumentCaptor<UserDetails> userDetailsCaptor;
 
     @Captor
-    private ArgumentCaptor<PlayerActorTemplate> patCaptor;
+    private ArgumentCaptor<Actor> actorCaptor;
 
     private MainResource resource;
 
@@ -84,17 +84,17 @@ public class MainResourceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(playerActorTemplateRepository.save(any(PlayerActorTemplate.class))).thenAnswer(i -> {
-           PlayerActorTemplate pat = i.getArgument(0);
+        when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
+            Actor actor = i.getArgument(0);
 
-           pat.setId(UUID.randomUUID());
+            actor.setId(UUID.randomUUID());
 
-           return pat;
+            return actor;
         });
 
         when(pronounRepository.getOne(eq("he"))).thenReturn(pronoun);
 
-        resource = new MainResource(pronounRepository, playerActorTemplateRepository, userDetailsManager);
+        resource = new MainResource(actorRepository, pronounRepository, userDetailsManager);
     }
 
     @Test
@@ -199,16 +199,16 @@ public class MainResourceTest {
 
     @Test
     public void testAccount() {
-        List<PlayerActorTemplate> patList = new ArrayList<>();
+        List<Actor> patList = new ArrayList<>();
 
         when(principal.getName()).thenReturn("Shepherd");
-        when(playerActorTemplateRepository.findByAccount(eq("Shepherd"))).thenReturn(patList);
+        when(actorRepository.findByAccount(eq("Shepherd"))).thenReturn(patList);
 
         String view = resource.account(principal, model);
 
         assertEquals("account", view);
 
-        verify(playerActorTemplateRepository).findByAccount(eq("Shepherd"));
+        verify(actorRepository).findByAccount(eq("Shepherd"));
         verify(model).addAttribute(eq("actors"), eq(patList));
     }
 
@@ -229,14 +229,14 @@ public class MainResourceTest {
         assertEquals("redirect:/account", view);
 
         verify(errors).hasErrors();
-        verify(playerActorTemplateRepository).save(patCaptor.capture());
+        verify(actorRepository).save(actorCaptor.capture());
 
-        PlayerActorTemplate pat = patCaptor.getValue();
+        Actor actor = actorCaptor.getValue();
 
-        assertNotNull(pat.getId());
-        assertEquals("Frank", pat.getGivenName());
-        assertEquals(pronoun, pat.getPronoun());
-        assertEquals("Shepherd", pat.getAccount());
+        assertNotNull(actor.getId());
+        assertEquals("Frank", actor.getName());
+        assertEquals(pronoun, actor.getPronoun());
+        assertEquals("Shepherd", actor.getAccount());
     }
 
     @Test
@@ -254,7 +254,7 @@ public class MainResourceTest {
 
         verify(model).addAttribute(eq("errorText"), anyString());
         verify(model).addAttribute(eq("givenName"), eq(""));
-        verifyZeroInteractions(playerActorTemplateRepository);
+        verifyZeroInteractions(actorRepository);
     }
 
     @Test
@@ -262,9 +262,9 @@ public class MainResourceTest {
         UUID actorId = UUID.randomUUID();
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.of(pat));
-        when(pat.getId()).thenReturn(actorId);
-        when(pat.getAccount()).thenReturn("Shepherd");
+        when(actorRepository.findById(actorId)).thenReturn(Optional.of(actor));
+        when(actor.getId()).thenReturn(actorId);
+        when(actor.getAccount()).thenReturn("Shepherd");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);
@@ -282,9 +282,9 @@ public class MainResourceTest {
         UUID actorId = UUID.randomUUID();
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.empty());
-        when(pat.getId()).thenReturn(actorId);
-        when(pat.getAccount()).thenReturn("Shepherd");
+        when(actorRepository.findById(actorId)).thenReturn(Optional.empty());
+        when(actor.getId()).thenReturn(actorId);
+        when(actor.getAccount()).thenReturn("Shepherd");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);
@@ -302,9 +302,9 @@ public class MainResourceTest {
         UUID actorId = UUID.randomUUID();
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(actorId)).thenReturn(Optional.of(pat));
-        when(pat.getId()).thenReturn(actorId);
-        when(pat.getAccount()).thenReturn("Scion");
+        when(actorRepository.findById(actorId)).thenReturn(Optional.of(actor));
+        when(actor.getId()).thenReturn(actorId);
+        when(actor.getAccount()).thenReturn("Scion");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);

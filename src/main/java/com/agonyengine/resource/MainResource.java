@@ -1,7 +1,7 @@
 package com.agonyengine.resource;
 
-import com.agonyengine.model.actor.PlayerActorTemplate;
-import com.agonyengine.repository.PlayerActorTemplateRepository;
+import com.agonyengine.model.actor.Actor;
+import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.resource.model.AccountRegistration;
@@ -39,18 +39,18 @@ import java.util.UUID;
 public class MainResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainResource.class);
 
+    private ActorRepository actorRepository;
     private PronounRepository pronounRepository;
-    private PlayerActorTemplateRepository playerActorTemplateRepository;
     private UserDetailsManager userDetailsManager;
     private PasswordEncoder passwordEncoder;
 
     @Inject
-    public MainResource(PronounRepository pronounRepository,
-                        PlayerActorTemplateRepository playerActorTemplateRepository,
+    public MainResource(ActorRepository actorRepository,
+                        PronounRepository pronounRepository,
                         UserDetailsManager userDetailsManager) {
 
+        this.actorRepository = actorRepository;
         this.pronounRepository = pronounRepository;
-        this.playerActorTemplateRepository = playerActorTemplateRepository;
         this.userDetailsManager = userDetailsManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
@@ -116,7 +116,7 @@ public class MainResource {
 
     @RequestMapping("/account")
     public String account(Principal principal, Model model) {
-        List<PlayerActorTemplate> actors = playerActorTemplateRepository.findByAccount(principal.getName());
+        List<Actor> actors = actorRepository.findByAccount(principal.getName());
 
         model.addAttribute("actors", actors);
 
@@ -147,15 +147,15 @@ public class MainResource {
             return "actor";
         }
 
-        PlayerActorTemplate actor = new PlayerActorTemplate();
+        Actor actor = new Actor();
 
         actor.setAccount(principal.getName());
-        actor.setGivenName(registration.getGivenName());
+        actor.setName(registration.getGivenName());
         actor.setPronoun(pronounRepository.getOne(registration.getPronoun()));
 
-        actor = playerActorTemplateRepository.save(actor);
+        actor = actorRepository.save(actor);
 
-        LOGGER.info("New character created: {}", actor.getGivenName());
+        LOGGER.info("New character created: {}", actor.getName());
 
         return "redirect:/account";
     }
@@ -163,12 +163,12 @@ public class MainResource {
     @RequestMapping("/play")
     public String play(Principal principal, HttpServletRequest request, Model model, HttpSession httpSession) {
         try {
-            PlayerActorTemplate actor = playerActorTemplateRepository
+            Actor actor = actorRepository
                 .findById(UUID.fromString((String) httpSession.getAttribute("actor")))
-                .orElseThrow(() -> new NoSuchActorException("No PAT exists with specified ID"));
+                .orElseThrow(() -> new NoSuchActorException("No Actor exists with specified ID"));
 
             if (!actor.getAccount().equals(principal.getName())) {
-                throw new NoSuchActorException("PAT belongs to a different user");
+                throw new NoSuchActorException("Actor belongs to a different user");
             }
 
             httpSession.setAttribute("remoteIpAddress", extractRemoteIp(request));

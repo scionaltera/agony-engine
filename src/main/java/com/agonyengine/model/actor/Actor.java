@@ -19,15 +19,12 @@ public class Actor {
     @Type(type = "pg-uuid")
     private UUID id;
 
-    @ManyToOne
-    @Type(type = "pg-uuid")
-    private PlayerActorTemplate actorTemplate;
-
     private String name;
 
     @ManyToOne
     private Pronoun pronoun;
 
+    private String account;
     private String sessionUsername;
     private String sessionId;
     private String remoteIpAddress;
@@ -49,20 +46,12 @@ public class Actor {
         this.id = id;
     }
 
-    public PlayerActorTemplate getActorTemplate() {
-        return actorTemplate;
-    }
-
-    public void setActorTemplate(PlayerActorTemplate actorTemplate) {
-        this.actorTemplate = actorTemplate;
-    }
-
     public String[] getNameTokens() {
         return name.split(" ");
     }
 
     public String getName() {
-        if (sessionId != null) { // TODO this won't work for NPCs
+        if (account != null) { // TODO for NPC support add: || npcData != null
             return name;
         }
 
@@ -79,6 +68,14 @@ public class Actor {
 
     public void setPronoun(Pronoun pronoun) {
         this.pronoun = pronoun;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getSessionUsername() {

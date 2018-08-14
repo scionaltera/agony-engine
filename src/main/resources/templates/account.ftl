@@ -36,7 +36,7 @@
                 <tbody>
                 <#list actors as actor>
                 <tr>
-                    <td>${actor.givenName}</td>
+                    <td>${actor.name}</td>
                     <td>
                         <a role="button" class="btn btn-primary" href="<@spring.url '/play/${actor.id}'/>">
                             <i class="fa fa-play"></i> Play
