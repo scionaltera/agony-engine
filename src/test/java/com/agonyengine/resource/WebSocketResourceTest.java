@@ -1,6 +1,7 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
@@ -70,6 +71,9 @@ public class WebSocketResourceTest {
     private Actor actor;
 
     @Mock
+    private Connection connection;
+
+    @Mock
     private Pronoun pronoun;
 
     @Mock
@@ -91,7 +95,7 @@ public class WebSocketResourceTest {
     private CommService commService;
 
     @Captor
-    private ArgumentCaptor<Actor> actorCaptor;
+    private ArgumentCaptor<List> listCaptor;
 
     @Captor
     private ArgumentCaptor<GameMap> gameMapCaptor;
@@ -100,7 +104,7 @@ public class WebSocketResourceTest {
     private List<List<String>> sentences = new ArrayList<>();
     private String remoteIpAddress = "10.11.12.13";
     private UUID sessionId = UUID.randomUUID();
-    private UUID actorTemplateId = UUID.randomUUID();
+    private UUID actorId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> sessionAttributes = new HashMap<>();
     private Message<byte[]> message;
@@ -116,16 +120,11 @@ public class WebSocketResourceTest {
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
-        when(actor.getSessionId()).thenReturn("session-id");
-        when(actor.getSessionUsername()).thenReturn("session-username");
-        when(actor.getAccount()).thenReturn("Dude007");
-        when(actor.getName()).thenReturn("Frank");
-        when(actor.getPronoun()).thenReturn(pronoun);
-        when(actor.getGameMap()).thenReturn(gameMap);
-        when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
+        when(actor.getConnection()).thenReturn(connection);
+        when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
-        when(actorRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(actor));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
@@ -158,21 +157,37 @@ public class WebSocketResourceTest {
             commService);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testOnSubscribeReconnectInWorld() {
-        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
+        GameMap inventory = mock(GameMap.class);
 
-        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+        when(actor.getInventory()).thenReturn(inventory);
+        when(actor.getGameMap()).thenReturn(gameMap);
+
+        GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(actor, never()).setInventory(any());
+        verify(actor, never()).setGameMap(any());
+        verify(actor, never()).setX(any());
+        verify(actor, never()).setY(any());
+
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(anyString());
+        verify(connection).setRemoteIpAddress(anyString());
+        verify(connection).setDisconnectedDate(isNull());
+
         verify(commService).echo(eq(actor), any(GameOutput.class));
-        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
-        verify(actor).setDisconnectedDate(isNull());
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(eq(sessionId.toString()));
-        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
-        verify(actor, never()).setGameMap(any(GameMap.class));
-        verify(actor, never()).setX(anyInt());
-        verify(actor, never()).setY(anyInt());
-        verify(actorRepository).save(eq(actor));
+        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+
+        verify(actorRepository).save(actor);
+
+        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), listCaptor.capture());
+
+        List<String> invokeList = listCaptor.getValue();
+
+        assertEquals(1, invokeList.size());
+        assertEquals("look", invokeList.get(0));
 
         assertTrue(output.getOutput().stream()
             .noneMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -181,52 +196,74 @@ public class WebSocketResourceTest {
             .noneMatch(line -> line.equals("Breaking Space Greeting.")));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testOnSubscribeReconnectInVoid() {
+        GameMap inventory = mock(GameMap.class);
+
+        when(actor.getInventory()).thenReturn(inventory);
         when(actor.getGameMap()).thenReturn(null);
 
-        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
+        GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(actor, never()).setInventory(any());
+        verify(actor).setGameMap(eq(gameMap));
+        verify(actor).setX(0);
+        verify(actor).setY(0);
+
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(anyString());
+        verify(connection).setRemoteIpAddress(anyString());
+        verify(connection).setDisconnectedDate(isNull());
 
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-        verify(commService).echo(eq(actor), any(GameOutput.class));
-        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
-        verify(actor).setDisconnectedDate(isNull());
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(eq(sessionId.toString()));
-        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
-        verify(actor).setGameMap(eq(gameMap));
-        verify(actor).setX(eq(0));
-        verify(actor).setY(eq(0));
-        verify(actorRepository).save(eq(actor));
+
+        verify(actorRepository).save(actor);
+
+        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), listCaptor.capture());
+
+        List<String> invokeList = listCaptor.getValue();
+
+        assertEquals(1, invokeList.size());
+        assertEquals("look", invokeList.get(0));
 
         assertTrue(output.getOutput().stream()
-            .noneMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
+            .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
 
         assertTrue(output.getOutput().stream()
-            .noneMatch(line -> line.equals("Breaking Space Greeting.")));
+            .anyMatch(line -> line.equals("Breaking Space Greeting.")));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void testOnSubscribeConnect() {
-        when(actor.getSessionId()).thenReturn(null);
-        when(actor.getSessionUsername()).thenReturn(null);
-        when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.of(actor));
-        when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
-        when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
+    public void testOnSubscribeFirstTimeConnect() {
+        when(connection.getAccount()).thenReturn("Shepherd");
+        when(actor.getPronoun()).thenReturn(pronoun);
+        when(actor.getInventory()).thenReturn(null);
+        when(actor.getGameMap()).thenReturn(null);
 
-        GameOutput output = resource.onSubscribe(principal, message, actorTemplateId.toString());
+        GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
 
-        verify(commService).echoToRoom(any(Actor.class), any(GameOutput.class), any(Actor.class));
-        verify(invokerService).invoke(any(Actor.class), any(GameOutput.class), isNull(), anyList());
-        verify(actorRepository).save(actorCaptor.capture());
-
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(anyString());
-        verify(actor).setRemoteIpAddress(anyString());
         verify(actor).setInventory(gameMapCaptor.capture());
-        verify(actor).setGameMap(any(GameMap.class));
-        verify(actor).setX(eq(0));
-        verify(actor).setY(eq(0));
+        verify(actor).setGameMap(eq(gameMap));
+        verify(actor).setX(0);
+        verify(actor).setY(0);
+
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(anyString());
+        verify(connection).setRemoteIpAddress(anyString());
+        verify(connection).setDisconnectedDate(isNull());
+
+        verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+
+        verify(actorRepository).save(actor);
+
+        verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), listCaptor.capture());
+
+        List<String> invokeList = listCaptor.getValue();
+
+        assertEquals(1, invokeList.size());
+        assertEquals("look", invokeList.get(0));
 
         GameMap inventory = gameMapCaptor.getValue();
 
@@ -243,7 +280,7 @@ public class WebSocketResourceTest {
     public void testOnSubscribeNoTemplate() {
         when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        resource.onSubscribe(principal, message, actorTemplateId.toString());
+        resource.onSubscribe(principal, message, actorId.toString());
     }
 
     @Test
@@ -378,7 +415,7 @@ public class WebSocketResourceTest {
     }
 
     @Test
-    public void testOnInputNoPat() {
+    public void testOnInputNoActor() {
         UUID actorId = UUID.randomUUID();
 
         when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);

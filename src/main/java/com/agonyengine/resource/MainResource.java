@@ -1,7 +1,9 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.ConnectionRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.resource.model.AccountRegistration;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,16 +43,19 @@ public class MainResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainResource.class);
 
     private ActorRepository actorRepository;
+    private ConnectionRepository connectionRepository;
     private PronounRepository pronounRepository;
     private UserDetailsManager userDetailsManager;
     private PasswordEncoder passwordEncoder;
 
     @Inject
     public MainResource(ActorRepository actorRepository,
+                        ConnectionRepository connectionRepository,
                         PronounRepository pronounRepository,
-                        UserDetailsManager userDetailsManager) {
+                        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") UserDetailsManager userDetailsManager) {
 
         this.actorRepository = actorRepository;
+        this.connectionRepository = connectionRepository;
         this.pronounRepository = pronounRepository;
         this.userDetailsManager = userDetailsManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -116,7 +122,7 @@ public class MainResource {
 
     @RequestMapping("/account")
     public String account(Principal principal, Model model) {
-        List<Actor> actors = actorRepository.findByAccount(principal.getName());
+        List<Actor> actors = actorRepository.findByConnectionAccount(principal.getName());
 
         model.addAttribute("actors", actors);
 
@@ -148,8 +154,13 @@ public class MainResource {
         }
 
         Actor actor = new Actor();
+        Connection connection = new Connection();
 
-        actor.setAccount(principal.getName());
+        connection.setAccount(principal.getName());
+
+        connection = connectionRepository.save(connection);
+
+        actor.setConnection(connection);
         actor.setName(registration.getGivenName());
         actor.setPronoun(pronounRepository.getOne(registration.getPronoun()));
 
@@ -163,11 +174,18 @@ public class MainResource {
     @RequestMapping("/play")
     public String play(Principal principal, HttpServletRequest request, Model model, HttpSession httpSession) {
         try {
+            String actorIdString = (String) httpSession.getAttribute("actor");
+
+            if (StringUtils.isEmpty(actorIdString)) {
+                throw new NoSuchActorException("No Actor ID was available in the HTTP session");
+            }
+
+            UUID actorId = UUID.fromString(actorIdString);
             Actor actor = actorRepository
-                .findById(UUID.fromString((String) httpSession.getAttribute("actor")))
+                .findById(actorId)
                 .orElseThrow(() -> new NoSuchActorException("No Actor exists with specified ID"));
 
-            if (!actor.getAccount().equals(principal.getName())) {
+            if (actor.getConnection() == null || !principal.getName().equals(actor.getConnection().getAccount())) {
                 throw new NoSuchActorException("Actor belongs to a different user");
             }
 

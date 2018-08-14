@@ -1,6 +1,7 @@
 package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
@@ -33,6 +34,9 @@ public class CommServiceTest {
     private Actor actor;
 
     @Mock
+    private Connection connection;
+
+    @Mock
     private GameOutput output;
 
     @Captor
@@ -46,14 +50,17 @@ public class CommServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(actor.getSessionId()).thenReturn("sessionId");
-        when(actor.getSessionUsername()).thenReturn("sessionUsername");
+        when(actor.getConnection()).thenReturn(connection);
+        when(connection.getSessionId()).thenReturn("sessionId");
+        when(connection.getSessionUsername()).thenReturn("sessionUsername");
 
         for (int i = 0; i < 3; i++) {
             Actor o = mock(Actor.class);
+            Connection c = mock(Connection.class);
 
-            when(o.getSessionId()).thenReturn("sessionId-" + i);
-            when(o.getSessionUsername()).thenReturn("sessionUser-" + i);
+            when(o.getConnection()).thenReturn(c);
+            when(c.getSessionId()).thenReturn("sessionId-" + i);
+            when(c.getSessionUsername()).thenReturn("sessionUser-" + i);
 
             observers.add(o);
         }

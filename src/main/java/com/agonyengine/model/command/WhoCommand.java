@@ -21,13 +21,13 @@ public class WhoCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
-        List<Actor> actors = actorRepository.findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(Sort.by(Sort.Direction.ASC, "name"));
+        List<Actor> actors = actorRepository.findByConnectionIsNotNullAndGameMapIsNotNull(Sort.by(Sort.Direction.ASC, "name"));
 
         output.append("[dwhite][ [white]Who is Online [dwhite]]");
 
         actors.forEach(a -> output.append(String.format("[dwhite]%s%s",
                 a.getName(),
-                a.getDisconnectedDate() != null ? " [yellow][[dred]LINK DEAD[yellow]]" : "")));
+                a.getConnection().getDisconnectedDate() != null ? " [yellow][[dred]LINK DEAD[yellow]]" : "")));
 
         output.append("");
         output.append(String.format("%d player%s online.", actors.size(), actors.size() == 1 ? "" : "s"));
