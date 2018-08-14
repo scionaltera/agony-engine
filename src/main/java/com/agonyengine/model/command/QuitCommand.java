@@ -39,7 +39,7 @@ public class QuitCommand {
         output.append(String.format("[yellow]Goodbye, %s!", actor.getName()));
         output.append("<script type=\"text/javascript\">setTimeout(function() { window.location=\"/account\"; }, 1000);</script>");
 
-        LOGGER.info("{} has quit ({})", actor.getName(), actor.getRemoteIpAddress());
+        LOGGER.info("{} has quit ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
 
         commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s disappears in a puff of smoke!", StringUtils.capitalize(actor.getName()))), actor);
 

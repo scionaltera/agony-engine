@@ -31,7 +31,7 @@ public class PurgeCommand {
     public void invoke(Actor actor, GameOutput output, ActorSameRoom itemBinding) {
         Actor item = itemBinding.getTarget();
 
-        if (item.getSessionId() != null) {
+        if (item.getConnection() != null) {
             output.append("Sorry, you cannot purge other players.");
             return;
         }
@@ -51,7 +51,7 @@ public class PurgeCommand {
     public void invoke(Actor actor, GameOutput output, ActorInventory itemBinding) {
         Actor item = itemBinding.getTarget();
 
-        if (item.getSessionId() != null) {
+        if (item.getConnection() != null) {
             output.append("Sorry, you cannot purge other players.");
             return;
         }

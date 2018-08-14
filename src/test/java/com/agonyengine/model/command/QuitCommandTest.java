@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
@@ -29,6 +30,9 @@ public class QuitCommandTest {
     private Actor actor;
 
     @Mock
+    private Connection connection;
+
+    @Mock
     private Actor item;
 
     @Mock
@@ -47,6 +51,7 @@ public class QuitCommandTest {
         MockitoAnnotations.initMocks(this);
 
         when(quotedString.getToken()).thenReturn("NOW");
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getName()).thenReturn("Scion");
         when(actor.getInventory()).thenReturn(inventory);
         when(item.getName()).thenReturn("a flux capacitor");

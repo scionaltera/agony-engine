@@ -27,7 +27,7 @@ public class WhoCommand {
 
         actors.forEach(a -> output.append(String.format("[dwhite]%s%s",
                 a.getName(),
-                a.getDisconnectedDate() != null ? " [yellow][[dred]LINK DEAD[yellow]]" : "")));
+                a.getConnection().getDisconnectedDate() != null ? " [yellow][[dred]LINK DEAD[yellow]]" : "")));
 
         output.append("");
         output.append(String.format("%d player%s online.", actors.size(), actors.size() == 1 ? "" : "s"));

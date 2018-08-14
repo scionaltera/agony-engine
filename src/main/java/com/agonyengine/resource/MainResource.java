@@ -1,7 +1,9 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.ConnectionRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.resource.model.AccountRegistration;
@@ -40,16 +42,19 @@ public class MainResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainResource.class);
 
     private ActorRepository actorRepository;
+    private ConnectionRepository connectionRepository;
     private PronounRepository pronounRepository;
     private UserDetailsManager userDetailsManager;
     private PasswordEncoder passwordEncoder;
 
     @Inject
     public MainResource(ActorRepository actorRepository,
+                        ConnectionRepository connectionRepository,
                         PronounRepository pronounRepository,
-                        UserDetailsManager userDetailsManager) {
+                        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") UserDetailsManager userDetailsManager) {
 
         this.actorRepository = actorRepository;
+        this.connectionRepository = connectionRepository;
         this.pronounRepository = pronounRepository;
         this.userDetailsManager = userDetailsManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -148,8 +153,13 @@ public class MainResource {
         }
 
         Actor actor = new Actor();
+        Connection connection = new Connection();
 
-        actor.setAccount(principal.getName());
+        connection.setAccount(principal.getName());
+
+        connection = connectionRepository.save(connection);
+
+        actor.setConnection(connection);
         actor.setName(registration.getGivenName());
         actor.setPronoun(pronounRepository.getOne(registration.getPronoun()));
 
@@ -167,7 +177,7 @@ public class MainResource {
                 .findById(UUID.fromString((String) httpSession.getAttribute("actor")))
                 .orElseThrow(() -> new NoSuchActorException("No Actor exists with specified ID"));
 
-            if (!actor.getAccount().equals(principal.getName())) {
+            if (actor.getConnection() == null || !actor.getConnection().getAccount().equals(principal.getName())) {
                 throw new NoSuchActorException("Actor belongs to a different user");
             }
 

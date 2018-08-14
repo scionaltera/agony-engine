@@ -1,8 +1,10 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.ConnectionRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.resource.model.AccountRegistration;
 import com.agonyengine.resource.model.PlayerActorRegistration;
@@ -40,6 +42,9 @@ public class MainResourceTest {
     private ActorRepository actorRepository;
 
     @Mock
+    private ConnectionRepository connectionRepository;
+
+    @Mock
     private PronounRepository pronounRepository;
 
     @Mock
@@ -47,6 +52,9 @@ public class MainResourceTest {
 
     @Mock
     private Actor actor;
+
+    @Mock
+    private Connection connection;
 
     @Mock
     private Principal principal;
@@ -92,9 +100,17 @@ public class MainResourceTest {
             return actor;
         });
 
+        when(connectionRepository.save(any(Connection.class))).thenAnswer(i -> {
+            Connection connection = i.getArgument(0);
+
+            connection.setId(UUID.randomUUID());
+
+            return connection;
+        });
+
         when(pronounRepository.getOne(eq("he"))).thenReturn(pronoun);
 
-        resource = new MainResource(actorRepository, pronounRepository, userDetailsManager);
+        resource = new MainResource(actorRepository, connectionRepository, pronounRepository, userDetailsManager);
     }
 
     @Test
@@ -236,7 +252,7 @@ public class MainResourceTest {
         assertNotNull(actor.getId());
         assertEquals("Frank", actor.getName());
         assertEquals(pronoun, actor.getPronoun());
-        assertEquals("Shepherd", actor.getAccount());
+        assertEquals("Shepherd", actor.getConnection().getAccount());
     }
 
     @Test
@@ -263,8 +279,9 @@ public class MainResourceTest {
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(actorRepository.findById(actorId)).thenReturn(Optional.of(actor));
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getId()).thenReturn(actorId);
-        when(actor.getAccount()).thenReturn("Shepherd");
+        when(connection.getAccount()).thenReturn("Shepherd");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);
@@ -283,8 +300,9 @@ public class MainResourceTest {
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(actorRepository.findById(actorId)).thenReturn(Optional.empty());
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getId()).thenReturn(actorId);
-        when(actor.getAccount()).thenReturn("Shepherd");
+        when(connection.getAccount()).thenReturn("Shepherd");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);
@@ -303,8 +321,9 @@ public class MainResourceTest {
 
         when(httpSession.getAttribute(eq("actor"))).thenReturn(actorId.toString());
         when(actorRepository.findById(actorId)).thenReturn(Optional.of(actor));
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getId()).thenReturn(actorId);
-        when(actor.getAccount()).thenReturn("Scion");
+        when(connection.getAccount()).thenReturn("Scion");
         when(principal.getName()).thenReturn("Shepherd");
 
         String view = resource.play(principal, httpServletRequest, model, httpSession);

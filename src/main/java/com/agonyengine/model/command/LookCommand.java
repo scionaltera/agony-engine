@@ -49,7 +49,7 @@ public class LookCommand {
             .filter(target -> !actor.equals(target))
             .forEach(target -> output.append(String.format("[green]%s is here. %s",
                 StringUtils.capitalize(target.getName()),
-                target.getDisconnectedDate() == null ? "" : "[yellow][[dred]LINK DEAD[yellow]]")));
+                target.getConnection().getDisconnectedDate() == null ? "" : "[yellow][[dred]LINK DEAD[yellow]]")));
     }
 
     @Transactional

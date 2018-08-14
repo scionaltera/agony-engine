@@ -1,6 +1,7 @@
 package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
@@ -37,9 +38,11 @@ public class ReaperServiceTest {
 
         for (int i = 0; i < 5; i++) {
             Actor actor = mock(Actor.class);
+            Connection connection = mock(Connection.class);
 
+            when(actor.getConnection()).thenReturn(connection);
             when(actor.getName()).thenReturn("Actor-" + i);
-            when(actor.getDisconnectedDate()).thenReturn(new Date(0L));
+            when(connection.getDisconnectedDate()).thenReturn(new Date(0L));
 
             actors.add(actor);
         }

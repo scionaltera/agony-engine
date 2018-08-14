@@ -23,17 +23,17 @@ public class CommService {
     }
 
     public void echo(Actor target, GameOutput message) {
-        if (target.getSessionId() == null) {
+        if (target.getConnection() == null || target.getConnection().getSessionId() == null) {
             return;
         }
 
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
 
-        headerAccessor.setSessionId(target.getSessionId());
+        headerAccessor.setSessionId(target.getConnection().getSessionId());
 
         addPrompt(message);
 
-        simpMessagingTemplate.convertAndSendToUser(target.getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
+        simpMessagingTemplate.convertAndSendToUser(target.getConnection().getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
     }
 
     public void echoToRoom(Actor source, GameOutput message, Actor... exclude) {
@@ -43,14 +43,14 @@ public class CommService {
 
         actorRepository.findByGameMapAndXAndY(source.getGameMap(), source.getX(), source.getY())
             .stream()
-            .filter(t -> t.getSessionId() != null || t.getSessionUsername() != null)
+            .filter(t -> t.getConnection().getSessionId() != null || t.getConnection().getSessionUsername() != null)
             .filter(t -> !excludeList.contains(t))
             .forEach(t -> {
                 SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
 
-                headerAccessor.setSessionId(t.getSessionId());
+                headerAccessor.setSessionId(t.getConnection().getSessionId());
 
-                simpMessagingTemplate.convertAndSendToUser(t.getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
+                simpMessagingTemplate.convertAndSendToUser(t.getConnection().getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
             });
     }
 

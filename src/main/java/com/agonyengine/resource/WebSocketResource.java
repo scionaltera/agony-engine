@@ -87,7 +87,7 @@ public class WebSocketResource {
         Actor actor = actorRepository.findById(UUID.fromString(actorId))
             .orElseThrow(() -> new NoSuchActorException("Player Actor Template not found: " + actorUuid.toString()));
 
-        if (null == actor.getSessionUsername() && null == actor.getSessionId()) {
+        if (null == actor.getConnection().getSessionUsername() && null == actor.getConnection().getSessionId()) {
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
             GameMap inventoryMap = new GameMap();
 
@@ -96,9 +96,9 @@ public class WebSocketResource {
 
             inventoryMap = gameMapRepository.save(inventoryMap);
 
-            actor.setSessionUsername(principal.getName());
-            actor.setSessionId(getStompSessionId(message));
-            actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
+            actor.getConnection().setSessionUsername(principal.getName());
+            actor.getConnection().setSessionId(getStompSessionId(message));
+            actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
             actor.setInventory(inventoryMap);
             actor.setGameMap(defaultMap);
             actor.setX(0);
@@ -121,7 +121,7 @@ public class WebSocketResource {
                 "[dyellow]carries out its barbarous task...");
             output.append("");
 
-            LOGGER.info("{} has connected for the first time ({})", actor.getName(), actor.getRemoteIpAddress());
+            LOGGER.info("{} has connected for the first time ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
         } else {
@@ -132,10 +132,10 @@ public class WebSocketResource {
 
             commService.echo(actor, reconnect);
 
-            actor.setDisconnectedDate(null);
-            actor.setSessionUsername(principal.getName());
-            actor.setSessionId(getStompSessionId(message));
-            actor.setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
+            actor.getConnection().setDisconnectedDate(null);
+            actor.getConnection().setSessionUsername(principal.getName());
+            actor.getConnection().setSessionId(getStompSessionId(message));
+            actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
             // if they were in the void, move them back into the world
             if (null == actor.getGameMap()) {
@@ -145,11 +145,11 @@ public class WebSocketResource {
                 actor.setX(0);
                 actor.setY(0);
 
-                LOGGER.info("{} has connected ({})", actor.getName(), actor.getRemoteIpAddress());
+                LOGGER.info("{} has connected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
 
                 commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
             } else {
-                LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getRemoteIpAddress());
+                LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
 
                 commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
             }

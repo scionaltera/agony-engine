@@ -42,11 +42,11 @@ public class StompDisconnectListener implements ApplicationListener<SessionDisco
             return;
         }
 
-        LOGGER.info("{} has disconnected ({})", actor.getName(), actor.getRemoteIpAddress());
+        LOGGER.info("{} has disconnected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
 
         commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has disconnected.", actor.getName())), actor);
 
-        actor.setDisconnectedDate(new Date());
+        actor.getConnection().setDisconnectedDate(new Date());
         actorRepository.save(actor);
     }
 }

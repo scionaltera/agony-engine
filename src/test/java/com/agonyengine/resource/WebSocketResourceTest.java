@@ -1,6 +1,7 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
@@ -70,6 +71,9 @@ public class WebSocketResourceTest {
     private Actor actor;
 
     @Mock
+    private Connection connection;
+
+    @Mock
     private Pronoun pronoun;
 
     @Mock
@@ -116,12 +120,13 @@ public class WebSocketResourceTest {
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
-        when(actor.getSessionId()).thenReturn("session-id");
-        when(actor.getSessionUsername()).thenReturn("session-username");
-        when(actor.getAccount()).thenReturn("Dude007");
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getName()).thenReturn("Frank");
         when(actor.getPronoun()).thenReturn(pronoun);
         when(actor.getGameMap()).thenReturn(gameMap);
+        when(connection.getSessionId()).thenReturn("session-id");
+        when(connection.getSessionUsername()).thenReturn("session-username");
+        when(connection.getAccount()).thenReturn("Dude007");
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
@@ -165,10 +170,10 @@ public class WebSocketResourceTest {
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(commService).echo(eq(actor), any(GameOutput.class));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
-        verify(actor).setDisconnectedDate(isNull());
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(eq(sessionId.toString()));
-        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
+        verify(connection).setDisconnectedDate(isNull());
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(eq(sessionId.toString()));
+        verify(connection).setRemoteIpAddress(eq(remoteIpAddress));
         verify(actor, never()).setGameMap(any(GameMap.class));
         verify(actor, never()).setX(anyInt());
         verify(actor, never()).setY(anyInt());
@@ -190,10 +195,10 @@ public class WebSocketResourceTest {
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(commService).echo(eq(actor), any(GameOutput.class));
         verify(invokerService).invoke(eq(actor), any(GameOutput.class), isNull(), anyList());
-        verify(actor).setDisconnectedDate(isNull());
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(eq(sessionId.toString()));
-        verify(actor).setRemoteIpAddress(eq(remoteIpAddress));
+        verify(connection).setDisconnectedDate(isNull());
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(eq(sessionId.toString()));
+        verify(connection).setRemoteIpAddress(eq(remoteIpAddress));
         verify(actor).setGameMap(eq(gameMap));
         verify(actor).setX(eq(0));
         verify(actor).setY(eq(0));
@@ -208,8 +213,8 @@ public class WebSocketResourceTest {
 
     @Test
     public void testOnSubscribeConnect() {
-        when(actor.getSessionId()).thenReturn(null);
-        when(actor.getSessionUsername()).thenReturn(null);
+        when(connection.getSessionId()).thenReturn(null);
+        when(connection.getSessionUsername()).thenReturn(null);
         when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.of(actor));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
@@ -220,9 +225,9 @@ public class WebSocketResourceTest {
         verify(invokerService).invoke(any(Actor.class), any(GameOutput.class), isNull(), anyList());
         verify(actorRepository).save(actorCaptor.capture());
 
-        verify(actor).setSessionUsername(eq("Shepherd"));
-        verify(actor).setSessionId(anyString());
-        verify(actor).setRemoteIpAddress(anyString());
+        verify(connection).setSessionUsername(eq("Shepherd"));
+        verify(connection).setSessionId(anyString());
+        verify(connection).setRemoteIpAddress(anyString());
         verify(actor).setInventory(gameMapCaptor.capture());
         verify(actor).setGameMap(any(GameMap.class));
         verify(actor).setX(eq(0));

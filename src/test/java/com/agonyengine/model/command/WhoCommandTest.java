@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
@@ -26,9 +27,13 @@ public class WhoCommandTest {
     private Actor actor;
 
     @Mock
+    private Connection connection;
+
+    @Mock
     private GameOutput output;
 
     private List<Actor> onlineActors = new ArrayList<>();
+    private List<Connection> actorConnections = new ArrayList<>();
 
     private WhoCommand whoCommand;
 
@@ -38,12 +43,16 @@ public class WhoCommandTest {
 
         for (int i = 0; i < MOCK_ACTORS; i++) {
             Actor mockActor = mock(Actor.class);
+            Connection mockConnection = mock(Connection.class);
 
             when(mockActor.getName()).thenReturn("Actor-" + i);
+            when(mockActor.getConnection()).thenReturn(mockConnection);
 
             onlineActors.add(mockActor);
+            actorConnections.add(mockConnection);
         }
 
+        when(actor.getConnection()).thenReturn(connection);
         when(actor.getName()).thenReturn("Kadne");
 
         onlineActors.add(actor);
@@ -84,7 +93,7 @@ public class WhoCommandTest {
 
     @Test
     public void testInvokeLinkDead() {
-        when(onlineActors.get(0).getDisconnectedDate()).thenReturn(new Date());
+        when(actorConnections.get(0).getDisconnectedDate()).thenReturn(new Date());
 
         whoCommand.invoke(actor, output);
 
