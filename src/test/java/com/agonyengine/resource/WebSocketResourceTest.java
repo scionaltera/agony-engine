@@ -2,7 +2,6 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.actor.PlayerActorTemplate;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.interpret.QuotedString;
@@ -11,7 +10,6 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
-import com.agonyengine.repository.PlayerActorTemplateRepository;
 import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
@@ -63,16 +61,10 @@ public class WebSocketResourceTest {
     private SessionRepository sessionRepository;
 
     @Mock
-    private PlayerActorTemplateRepository playerActorTemplateRepository;
-
-    @Mock
     private ActorRepository actorRepository;
 
     @Mock
     private VerbRepository verbRepository;
-
-    @Mock
-    private PlayerActorTemplate pat;
 
     @Mock
     private Actor actor;
@@ -101,6 +93,9 @@ public class WebSocketResourceTest {
     @Captor
     private ArgumentCaptor<Actor> actorCaptor;
 
+    @Captor
+    private ArgumentCaptor<GameMap> gameMapCaptor;
+
     private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
     private String remoteIpAddress = "10.11.12.13";
@@ -121,16 +116,16 @@ public class WebSocketResourceTest {
         message = buildMockMessage(sessionId.toString());
 
         when(principal.getName()).thenReturn("Shepherd");
-        when(pat.getAccount()).thenReturn("Dude007");
-        when(pat.getGivenName()).thenReturn("Frank");
-        when(pat.getPronoun()).thenReturn(pronoun);
+        when(actor.getSessionId()).thenReturn("session-id");
+        when(actor.getSessionUsername()).thenReturn("session-username");
+        when(actor.getAccount()).thenReturn("Dude007");
         when(actor.getName()).thenReturn("Frank");
+        when(actor.getPronoun()).thenReturn(pronoun);
         when(actor.getGameMap()).thenReturn(gameMap);
         when(actorRepository.findBySessionUsernameAndSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
-        when(playerActorTemplateRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(pat));
-        when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.of(actor));
+        when(actorRepository.findById(eq(actorTemplateId))).thenReturn(Optional.of(actor));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
@@ -159,7 +154,6 @@ public class WebSocketResourceTest {
             gameMapRepository,
             sessionRepository,
             actorRepository,
-            playerActorTemplateRepository,
             invokerService,
             commService);
     }
@@ -214,8 +208,9 @@ public class WebSocketResourceTest {
 
     @Test
     public void testOnSubscribeConnect() {
-        when(actorRepository.findByActorTemplate(eq(pat))).thenReturn(Optional.empty());
-        when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.of(pat));
+        when(actor.getSessionId()).thenReturn(null);
+        when(actor.getSessionUsername()).thenReturn(null);
+        when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.of(actor));
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(session.getAttribute(eq("actor_template"))).thenReturn(UUID.randomUUID().toString());
 
@@ -225,20 +220,17 @@ public class WebSocketResourceTest {
         verify(invokerService).invoke(any(Actor.class), any(GameOutput.class), isNull(), anyList());
         verify(actorRepository).save(actorCaptor.capture());
 
-        Actor savedActor = actorCaptor.getValue();
+        verify(actor).setSessionUsername(eq("Shepherd"));
+        verify(actor).setSessionId(anyString());
+        verify(actor).setRemoteIpAddress(anyString());
+        verify(actor).setInventory(gameMapCaptor.capture());
+        verify(actor).setGameMap(any(GameMap.class));
+        verify(actor).setX(eq(0));
+        verify(actor).setY(eq(0));
 
-        assertNotNull(savedActor.getId());
-        assertNotNull(savedActor.getActorTemplate());
-        assertEquals("Frank", savedActor.getName());
-        assertEquals("Shepherd", savedActor.getSessionUsername());
-        assertEquals(sessionId.toString(), savedActor.getSessionId());
-        assertEquals(remoteIpAddress, savedActor.getRemoteIpAddress());
-        assertEquals(pronoun, savedActor.getPronoun());
-        assertEquals(gameMap, savedActor.getGameMap());
-        assertEquals(1, savedActor.getInventory().getWidth());
-        assertEquals((byte)0xFF, savedActor.getInventory().getTile(0, 0));
-        assertEquals((Integer)0, savedActor.getX());
-        assertEquals((Integer)0, savedActor.getY());
+        GameMap inventory = gameMapCaptor.getValue();
+
+        assertEquals((byte)0xFF, inventory.getTile(0, 0));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -249,7 +241,7 @@ public class WebSocketResourceTest {
 
     @Test(expected = NoSuchActorException.class)
     public void testOnSubscribeNoTemplate() {
-        when(playerActorTemplateRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+        when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         resource.onSubscribe(principal, message, actorTemplateId.toString());
     }
@@ -261,7 +253,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
 
         GameOutput output = resource.onInput(principal, input, message);
@@ -277,7 +269,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able. Baker. Charlie."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able. Baker. Charlie.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
 
         GameOutput output = resource.onInput(principal, input, message);
@@ -300,7 +292,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able baker charlie dog easy fox."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able baker charlie dog easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
@@ -322,7 +314,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
@@ -347,7 +339,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able      baker charlie dog easy fox."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able      baker charlie dog easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
@@ -374,7 +366,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able baker. Charlie dog. Easy fox."))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able baker. Charlie dog. Easy fox.");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.of(pat));
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(verbRepository.findFirstByNameIgnoreCaseStartingWith(any(Sort.class), eq("ABLE"))).thenReturn(Optional.of(verbs.get(0)));
         when(verbs.get(0).isQuoting()).thenReturn(true);
         when(applicationContext.getBean(eq("ableCommand"))).thenReturn(alphaBean);
@@ -392,7 +384,7 @@ public class WebSocketResourceTest {
         when(inputTokenizer.tokenize(eq("Able!"))).thenReturn(sentences);
         when(input.getInput()).thenReturn("Able!");
         when(session.getAttribute(eq("actor"))).thenReturn(actorId.toString());
-        when(playerActorTemplateRepository.findById(eq(actorId))).thenReturn(Optional.empty());
+        when(actorRepository.findById(eq(actorId))).thenReturn(Optional.empty());
 
         GameOutput output = resource.onInput(principal, input, message);
 

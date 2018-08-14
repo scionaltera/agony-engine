@@ -92,8 +92,7 @@ public class WebSocketResource {
             GameMap inventoryMap = new GameMap();
 
             inventoryMap.setWidth(1);
-            inventoryMap.setTiles(new byte[1]);
-            inventoryMap.setTile(0, 0, (byte)0xFF);
+            inventoryMap.setTiles(new byte[] { (byte)0xFF });
 
             inventoryMap = gameMapRepository.save(inventoryMap);
 
