@@ -43,7 +43,7 @@ public class CommService {
 
         actorRepository.findByGameMapAndXAndY(source.getGameMap(), source.getX(), source.getY())
             .stream()
-            .filter(t -> t.getConnection().getSessionId() != null || t.getConnection().getSessionUsername() != null)
+            .filter(t -> t.getConnection() != null)
             .filter(t -> !excludeList.contains(t))
             .forEach(t -> {
                 SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();

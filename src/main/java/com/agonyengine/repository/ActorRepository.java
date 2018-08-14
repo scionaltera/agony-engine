@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActorRepository extends JpaRepository<Actor, UUID> {
-    Actor findBySessionUsernameAndSessionId(String sessionUsername, String sessionId);
+    Actor findByConnectionSessionUsernameAndConnectionSessionId(String sessionUsername, String sessionId);
     List<Actor> findByGameMap(GameMap gameMap);
     List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
-    List<Actor> findByAccount(String account);
-    List<Actor> findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(Sort sort);
-    List<Actor> findByDisconnectedDateIsBeforeAndGameMapIsNotNull(Date cutoff);
+    List<Actor> findByConnectionAccount(String account);
+    List<Actor> findByConnectionIsNotNullAndGameMapIsNotNull(Sort sort);
+    List<Actor> findByConnectionDisconnectedDateIsBeforeAndGameMapIsNotNull(Date cutoff);
 }

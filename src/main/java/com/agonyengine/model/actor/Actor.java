@@ -24,7 +24,7 @@ public class Actor {
     @ManyToOne
     private Pronoun pronoun;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Connection connection;
 
     @ManyToOne

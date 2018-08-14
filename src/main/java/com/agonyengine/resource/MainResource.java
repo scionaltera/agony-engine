@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -121,7 +122,7 @@ public class MainResource {
 
     @RequestMapping("/account")
     public String account(Principal principal, Model model) {
-        List<Actor> actors = actorRepository.findByAccount(principal.getName());
+        List<Actor> actors = actorRepository.findByConnectionAccount(principal.getName());
 
         model.addAttribute("actors", actors);
 
@@ -173,11 +174,18 @@ public class MainResource {
     @RequestMapping("/play")
     public String play(Principal principal, HttpServletRequest request, Model model, HttpSession httpSession) {
         try {
+            String actorIdString = (String) httpSession.getAttribute("actor");
+
+            if (StringUtils.isEmpty(actorIdString)) {
+                throw new NoSuchActorException("No Actor ID was available in the HTTP session");
+            }
+
+            UUID actorId = UUID.fromString(actorIdString);
             Actor actor = actorRepository
-                .findById(UUID.fromString((String) httpSession.getAttribute("actor")))
+                .findById(actorId)
                 .orElseThrow(() -> new NoSuchActorException("No Actor exists with specified ID"));
 
-            if (actor.getConnection() == null || !actor.getConnection().getAccount().equals(principal.getName())) {
+            if (actor.getConnection() == null || !principal.getName().equals(actor.getConnection().getAccount())) {
                 throw new NoSuchActorException("Actor belongs to a different user");
             }
 

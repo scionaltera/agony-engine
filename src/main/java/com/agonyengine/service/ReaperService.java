@@ -32,7 +32,7 @@ public class ReaperService {
     public void reapLinkDeadActors() {
         LOGGER.debug("Querying for link-dead players to reap...");
 
-        List<Actor> actors = actorRepository.findByDisconnectedDateIsBeforeAndGameMapIsNotNull(new Date(System.currentTimeMillis() - (1000 * 60 * 30)));
+        List<Actor> actors = actorRepository.findByConnectionDisconnectedDateIsBeforeAndGameMapIsNotNull(new Date(System.currentTimeMillis() - (1000 * 60 * 30)));
 
         actors.forEach(actor -> {
             LOGGER.info("Reaping link-dead player: {}", actor.getName());

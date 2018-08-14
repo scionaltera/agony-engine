@@ -218,13 +218,13 @@ public class MainResourceTest {
         List<Actor> patList = new ArrayList<>();
 
         when(principal.getName()).thenReturn("Shepherd");
-        when(actorRepository.findByAccount(eq("Shepherd"))).thenReturn(patList);
+        when(actorRepository.findByConnectionAccount(eq("Shepherd"))).thenReturn(patList);
 
         String view = resource.account(principal, model);
 
         assertEquals("account", view);
 
-        verify(actorRepository).findByAccount(eq("Shepherd"));
+        verify(actorRepository).findByConnectionAccount(eq("Shepherd"));
         verify(model).addAttribute(eq("actors"), eq(patList));
     }
 
@@ -292,6 +292,20 @@ public class MainResourceTest {
         verify(httpSession).removeAttribute(eq("actor"));
 
         verify(model).addAttribute(eq("actor"), eq(actorId.toString()));
+    }
+
+    @Test
+    public void testPlayUuidNotInSession() {
+        when(httpSession.getAttribute(eq("actor"))).thenReturn(null);
+
+        String view = resource.play(principal, httpServletRequest, model, httpSession);
+
+        assertEquals("redirect:/account", view);
+
+        verify(httpSession, never()).setAttribute(eq("remoteIpAddress"), any());
+        verify(httpSession, never()).removeAttribute(eq("actor"));
+
+        verify(model, never()).addAttribute(eq("actor"), any());
     }
 
     @Test

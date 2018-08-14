@@ -21,7 +21,7 @@ public class WhoCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
-        List<Actor> actors = actorRepository.findBySessionUsernameIsNotNullAndSessionIdIsNotNullAndGameMapIsNotNull(Sort.by(Sort.Direction.ASC, "name"));
+        List<Actor> actors = actorRepository.findByConnectionIsNotNullAndGameMapIsNotNull(Sort.by(Sort.Direction.ASC, "name"));
 
         output.append("[dwhite][ [white]Who is Online [dwhite]]");
 

@@ -66,7 +66,7 @@ public class StompDisconnectListenerTest {
         when(disconnectEvent.getMessage()).thenReturn(message);
         when(disconnectEvent.getSessionId()).thenReturn("SessionId");
         when(principal.getName()).thenReturn("SessionUser");
-        when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(actor);
+        when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(actor);
         when(actor.getName()).thenReturn("Stan");
         when(connection.getRemoteIpAddress()).thenReturn("10.11.12.13");
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
@@ -81,7 +81,7 @@ public class StompDisconnectListenerTest {
         when(disconnectEvent.getMessage()).thenReturn(message);
         when(disconnectEvent.getSessionId()).thenReturn("SessionId");
         when(principal.getName()).thenReturn("SessionUser");
-        when(actorRepository.findBySessionUsernameAndSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(null);
+        when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("SessionUser"), eq("SessionId"))).thenReturn(null);
 
         stompDisconnectListener.onApplicationEvent(disconnectEvent);
 

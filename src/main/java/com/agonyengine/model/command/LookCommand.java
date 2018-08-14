@@ -47,9 +47,9 @@ public class LookCommand {
 
         actors.stream()
             .filter(target -> !actor.equals(target))
-            .forEach(target -> output.append(String.format("[green]%s is here. %s",
+            .forEach(target -> output.append(String.format("[green]%s is here.%s",
                 StringUtils.capitalize(target.getName()),
-                target.getConnection().getDisconnectedDate() == null ? "" : "[yellow][[dred]LINK DEAD[yellow]]")));
+                target.getConnection() == null || target.getConnection().getDisconnectedDate() == null ? "" : " [yellow][[dred]LINK DEAD[yellow]]")));
     }
 
     @Transactional
