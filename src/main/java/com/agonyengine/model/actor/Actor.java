@@ -52,6 +52,10 @@ public class Actor {
             return name;
         }
 
+        if (name.toLowerCase().startsWith("the ")) {
+            return name;
+        }
+
         return NameUtils.aoran(name);
     }
 
