@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import java.util.Date;
+import javax.persistence.OneToOne;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,11 +24,8 @@ public class Actor {
     @ManyToOne
     private Pronoun pronoun;
 
-    private String account;
-    private String sessionUsername;
-    private String sessionId;
-    private String remoteIpAddress;
-    private Date disconnectedDate = null;
+    @OneToOne
+    private Connection connection;
 
     @ManyToOne
     private GameMap gameMap;
@@ -51,7 +48,7 @@ public class Actor {
     }
 
     public String getName() {
-        if (account != null) { // TODO for NPC support add: || npcData != null
+        if (connection != null) { // TODO for NPC support add: || npcData != null
             return name;
         }
 
@@ -70,44 +67,12 @@ public class Actor {
         this.pronoun = pronoun;
     }
 
-    public String getAccount() {
-        return account;
+    public Connection getConnection() {
+        return connection;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getSessionUsername() {
-        return sessionUsername;
-    }
-
-    public void setSessionUsername(String sessionUsername) {
-        this.sessionUsername = sessionUsername;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public String getRemoteIpAddress() {
-        return remoteIpAddress;
-    }
-
-    public void setRemoteIpAddress(String remoteIpAddress) {
-        this.remoteIpAddress = remoteIpAddress;
-    }
-
-    public Date getDisconnectedDate() {
-        return disconnectedDate;
-    }
-
-    public void setDisconnectedDate(Date disconnectedDate) {
-        this.disconnectedDate = disconnectedDate;
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     public GameMap getGameMap() {
