@@ -121,6 +121,8 @@ public class WebSocketResource {
             output.append("");
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
+
+            LOGGER.info("{} has connected ({})", actor.getName(), actor.getId());
         } else {
             GameOutput reconnect = new GameOutput();
 
@@ -129,6 +131,8 @@ public class WebSocketResource {
 
             commService.echo(actor, reconnect);
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
+
+            LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getId());
         }
 
         actor.getConnection().setSessionUsername(principal.getName());
