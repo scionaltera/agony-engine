@@ -25,7 +25,7 @@ public class MoveCommand {
     }
 
     @PostConstruct
-    private void postConstruct() {
+    void postConstruct() {
         this.actorRepository = applicationContext.getBean("actorRepository", ActorRepository.class);
         this.invokerService = applicationContext.getBean("invokerService", InvokerService.class);
         this.commService = applicationContext.getBean("commService", CommService.class);
