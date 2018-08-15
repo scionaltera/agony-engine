@@ -98,10 +98,7 @@ public class WebSocketResource {
             actor.setInventory(inventoryMap);
         }
 
-        actor.getConnection().setSessionUsername(principal.getName());
-        actor.getConnection().setSessionId(getStompSessionId(message));
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
-        actor.getConnection().setDisconnectedDate(null);
 
         if (actor.getGameMap() == null) {
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
@@ -134,6 +131,10 @@ public class WebSocketResource {
 
             LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
         }
+
+        actor.getConnection().setSessionUsername(principal.getName());
+        actor.getConnection().setSessionId(getStompSessionId(message));
+        actor.getConnection().setDisconnectedDate(null);
 
         actor = actorRepository.save(actor);
 
