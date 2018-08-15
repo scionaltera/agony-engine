@@ -300,6 +300,17 @@ public class WebSocketResourceTest {
     }
 
     @Test
+    public void testOnInputReconnected() {
+        when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(any(), any())).thenReturn(null);
+
+        GameOutput output = resource.onInput(principal, input, message);
+
+        verify(inputTokenizer, never()).tokenize(any());
+
+        assertTrue(output.getOutput().stream().anyMatch(line -> line.contains("another browser")));
+    }
+
+    @Test
     public void testOnInputMultipleSentences() {
         UUID actorId = UUID.randomUUID();
 

@@ -3,7 +3,6 @@ package com.agonyengine.service;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +26,9 @@ public class CommService {
             return;
         }
 
-        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
-
-        headerAccessor.setSessionId(target.getConnection().getSessionId());
-
         addPrompt(message);
 
-        simpMessagingTemplate.convertAndSendToUser(target.getConnection().getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
+        simpMessagingTemplate.convertAndSendToUser(target.getConnection().getSessionUsername(), "/queue/output", message);
     }
 
     public void echoToRoom(Actor source, GameOutput message, Actor... exclude) {
@@ -45,13 +40,7 @@ public class CommService {
             .stream()
             .filter(t -> t.getConnection() != null)
             .filter(t -> !excludeList.contains(t))
-            .forEach(t -> {
-                SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
-
-                headerAccessor.setSessionId(t.getConnection().getSessionId());
-
-                simpMessagingTemplate.convertAndSendToUser(t.getConnection().getSessionUsername(), "/queue/output", message, headerAccessor.getMessageHeaders());
-            });
+            .forEach(t -> simpMessagingTemplate.convertAndSendToUser(t.getConnection().getSessionUsername(), "/queue/output", message));
     }
 
     private void addPrompt(GameOutput output) {

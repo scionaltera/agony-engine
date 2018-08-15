@@ -98,6 +98,11 @@ public class WebSocketResource {
             actor.setInventory(inventoryMap);
         }
 
+        actor.getConnection().setSessionUsername(principal.getName());
+        actor.getConnection().setSessionId(getStompSessionId(message));
+        actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
+        actor.getConnection().setDisconnectedDate(null);
+
         if (actor.getGameMap() == null) {
             GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
 
@@ -122,23 +127,13 @@ public class WebSocketResource {
 
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s appears in a puff of smoke!", actor.getName())), actor);
 
-            LOGGER.info("{} has connected ({})", actor.getName(), actor.getId());
+            LOGGER.info("{} has connected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
         } else {
-            GameOutput reconnect = new GameOutput();
-
-            reconnect.append("[yellow]Your connection has been reconnected in another browser!");
-            reconnect.append("<script type=\"text/javascript\">setTimeout(function() { window.location=\"/account\"; }, 1000);</script>");
-
-            commService.echo(actor, reconnect);
+            commService.echo(actor, handleReconnectedSession(new GameOutput()));
             commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s has reconnected.", actor.getName())), actor);
 
-            LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getId());
+            LOGGER.info("{} has reconnected ({})", actor.getName(), actor.getConnection().getRemoteIpAddress());
         }
-
-        actor.getConnection().setSessionUsername(principal.getName());
-        actor.getConnection().setSessionId(getStompSessionId(message));
-        actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
-        actor.getConnection().setDisconnectedDate(null);
 
         actor = actorRepository.save(actor);
 
@@ -155,8 +150,13 @@ public class WebSocketResource {
     @MessageMapping("/input")
     @SendToUser(value = "/queue/output", broadcast = false)
     public GameOutput onInput(Principal principal, UserInput input, Message<byte[]> message) {
-        Actor actor = actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(principal.getName(), getStompSessionId(message));
         GameOutput output = new GameOutput();
+        Actor actor = actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(principal.getName(), getStompSessionId(message));
+
+        if (actor == null) {
+            return handleReconnectedSession(output);
+        }
+
         List<List<String>> sentences = inputTokenizer.tokenize(input.getInput());
 
         if (sentences.size() > 0) {
@@ -194,5 +194,12 @@ public class WebSocketResource {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 
         return headerAccessor.getSessionId();
+    }
+
+    private GameOutput handleReconnectedSession(GameOutput output) {
+        output.append("[yellow]Your connection has been reconnected in another browser!");
+        output.append("<script type=\"text/javascript\">setTimeout(function() { window.location=\"/account\"; }, 1000);</script>");
+
+        return output;
     }
 }
