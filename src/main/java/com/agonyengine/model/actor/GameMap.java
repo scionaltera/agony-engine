@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -90,5 +91,19 @@ public class GameMap {
         }
 
         return y * width + x;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GameMap)) return false;
+        GameMap gameMap = (GameMap) o;
+        return Objects.equals(getId(), gameMap.getId());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getId());
     }
 }
