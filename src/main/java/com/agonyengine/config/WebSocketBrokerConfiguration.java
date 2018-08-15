@@ -32,10 +32,13 @@ public class WebSocketBrokerConfiguration extends AbstractSessionWebSocketMessag
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app", "/user");
-        registry.setUserDestinationPrefix("/user");
+        registry
+            .setApplicationDestinationPrefixes("/app", "/user")
+            .setUserDestinationPrefix("/user");
 
         StompBrokerRelayRegistration relayRegistration = registry.enableStompBrokerRelay("/queue", "/topic")
+                .setUserDestinationBroadcast("/topic/logbook-unresolved-user")
+                .setUserRegistryBroadcast("/topic/logbook-user-registry")
                 .setRelayHost(brokerProperties.getHost())
                 .setRelayPort(brokerProperties.getPort())
                 .setSystemLogin(brokerProperties.getSystemUsername())
