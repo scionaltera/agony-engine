@@ -1,5 +1,6 @@
 package com.agonyengine.config;
 
+import com.agonyengine.resource.UniqueHandshakeHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.config.StompBrokerRelayRegistration;
@@ -27,24 +28,26 @@ public class WebSocketBrokerConfiguration extends AbstractSessionWebSocketMessag
 
     @Override
     protected void configureStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/mud").withSockJS();
+        registry
+            .addEndpoint("/mud")
+            .setHandshakeHandler(new UniqueHandshakeHandler())
+            .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry
+        StompBrokerRelayRegistration relayRegistration = registry
             .setApplicationDestinationPrefixes("/app", "/user")
-            .setUserDestinationPrefix("/user");
-
-        StompBrokerRelayRegistration relayRegistration = registry.enableStompBrokerRelay("/queue", "/topic")
-                .setUserDestinationBroadcast("/topic/logbook-unresolved-user")
-                .setUserRegistryBroadcast("/topic/logbook-user-registry")
-                .setRelayHost(brokerProperties.getHost())
-                .setRelayPort(brokerProperties.getPort())
-                .setSystemLogin(brokerProperties.getSystemUsername())
-                .setSystemPasscode(brokerProperties.getSystemPassword())
-                .setClientLogin(brokerProperties.getClientUsername())
-                .setClientPasscode(brokerProperties.getClientPassword());
+            .setUserDestinationPrefix("/user")
+            .enableStompBrokerRelay("/queue", "/topic")
+            .setUserDestinationBroadcast("/topic/user-destination")
+            .setUserRegistryBroadcast("/topic/user-registry")
+            .setRelayHost(brokerProperties.getHost())
+            .setRelayPort(brokerProperties.getPort())
+            .setSystemLogin(brokerProperties.getSystemUsername())
+            .setSystemPasscode(brokerProperties.getSystemPassword())
+            .setClientLogin(brokerProperties.getClientUsername())
+            .setClientPasscode(brokerProperties.getClientPassword());
 
         if (brokerProperties.getSsl()) {
             relayRegistration.setTcpClient(createSslTcpClient());

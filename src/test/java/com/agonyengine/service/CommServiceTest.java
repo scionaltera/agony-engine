@@ -6,22 +6,17 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
-import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.SESSION_ID_HEADER;
 
 public class CommServiceTest {
     @Mock
@@ -38,9 +33,6 @@ public class CommServiceTest {
 
     @Mock
     private GameOutput output;
-
-    @Captor
-    private ArgumentCaptor<MessageHeaders> messageHeadersCaptor;
 
     private List<Actor> observers = new ArrayList<>();
 
@@ -78,13 +70,8 @@ public class CommServiceTest {
         verify(simpMessagingTemplate).convertAndSendToUser(
             eq("sessionUsername"),
             eq("/queue/output"),
-            eq(output),
-            messageHeadersCaptor.capture()
+            eq(output)
         );
-
-        MessageHeaders headers = messageHeadersCaptor.getValue();
-
-        assertEquals("sessionId", headers.get(SESSION_ID_HEADER));
     }
 
     @Test
@@ -95,35 +82,25 @@ public class CommServiceTest {
         verify(simpMessagingTemplate, never()).convertAndSendToUser(
             eq("sessionUsername"),
             eq("/queue/output"),
-            eq(output),
-            any(MessageHeaders.class)
+            eq(output)
         );
 
         verify(simpMessagingTemplate).convertAndSendToUser(
             eq("sessionUser-0"),
             eq("/queue/output"),
-            eq(output),
-            messageHeadersCaptor.capture()
+            eq(output)
         );
 
         verify(simpMessagingTemplate).convertAndSendToUser(
             eq("sessionUser-1"),
             eq("/queue/output"),
-            eq(output),
-            messageHeadersCaptor.capture()
+            eq(output)
         );
 
         verify(simpMessagingTemplate).convertAndSendToUser(
             eq("sessionUser-2"),
             eq("/queue/output"),
-            eq(output),
-            messageHeadersCaptor.capture()
+            eq(output)
         );
-
-        List<MessageHeaders> headers = messageHeadersCaptor.getAllValues();
-
-        assertEquals("sessionId-0", headers.get(0).get(SESSION_ID_HEADER));
-        assertEquals("sessionId-1", headers.get(1).get(SESSION_ID_HEADER));
-        assertEquals("sessionId-2", headers.get(2).get(SESSION_ID_HEADER));
     }
 }
