@@ -1,5 +1,5 @@
 group 'com.agonyengine'
-version '0.9.1-SNAPSHOT'
+version '0.10.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
@@ -91,9 +91,7 @@ build.dependsOn project.tasks.buildDocker
 pitest {
     excludedClasses = [
         'com.agonyengine.AgonyEngine',
-        'com.agonyengine.config.*',
-        'com.agonyengine.resource.model.*',
-        'com.agonyengine.resource.model.interpret.*'
+        'com.agonyengine.config.*'
     ]
     coverageThreshold = 70
     mutationThreshold = 70

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public abstract class BitfieldLabel {
     private static Map<Integer, BitfieldLabel> labelMap = new HashMap<>();
@@ -16,14 +15,12 @@ public abstract class BitfieldLabel {
         List<String> labels = new ArrayList<>();
 
         for (int i = 0; i < Long.SIZE; i++) {
-            if (bitfield.isSet(i)) {
-                if (labelMap.get(i) != null) {
-                    labels.add(labelMap.get(i).getName());
-                }
+            if (bitfield.isSet(i) && labelMap.containsKey(i)) {
+                labels.add(labelMap.get(i).getName());
             }
         }
 
-        return labels.stream().collect(Collectors.joining(", ")).trim();
+        return String.join(", ", labels).trim();
     }
 
     protected BitfieldLabel(int index, String name) {
