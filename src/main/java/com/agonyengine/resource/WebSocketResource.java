@@ -1,7 +1,9 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
+import com.agonyengine.model.generator.BodyGenerator;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
@@ -48,6 +50,7 @@ public class WebSocketResource {
     private ActorRepository actorRepository;
     private InvokerService invokerService;
     private CommService commService;
+    private BodyGenerator bodyGenerator;
     private List<String> greeting;
 
     @Inject
@@ -60,7 +63,8 @@ public class WebSocketResource {
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         InvokerService invokerService,
-        CommService commService) {
+        CommService commService,
+        BodyGenerator bodyGenerator) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
@@ -71,6 +75,7 @@ public class WebSocketResource {
         this.actorRepository = actorRepository;
         this.invokerService = invokerService;
         this.commService = commService;
+        this.bodyGenerator = bodyGenerator;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -96,6 +101,14 @@ public class WebSocketResource {
             inventoryMap = gameMapRepository.save(inventoryMap);
 
             actor.setInventory(inventoryMap);
+        }
+
+        if (actor.getCreatureInfo() == null) {
+            CreatureInfo creatureInfo = new CreatureInfo();
+
+            creatureInfo.setBodyParts(bodyGenerator.generate(BodyGenerator.HUMANOID_TEMPLATE));
+
+            actor.setCreatureInfo(creatureInfo);
         }
 
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));

@@ -27,6 +27,9 @@ public class Actor {
     @OneToOne(cascade = CascadeType.ALL)
     private Connection connection;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private CreatureInfo creatureInfo;
+
     @ManyToOne
     private GameMap gameMap;
     private Integer x;
@@ -77,6 +80,14 @@ public class Actor {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public CreatureInfo getCreatureInfo() {
+        return creatureInfo;
+    }
+
+    public void setCreatureInfo(CreatureInfo creatureInfo) {
+        this.creatureInfo = creatureInfo;
     }
 
     public GameMap getGameMap() {

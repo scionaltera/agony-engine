@@ -1,6 +1,8 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.BodyPartCapability;
+import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -37,6 +39,9 @@ public class MoveCommandTest {
     private Actor actor;
 
     @Mock
+    private CreatureInfo creatureInfo;
+
+    @Mock
     private GameMap gameMap;
 
     @Mock
@@ -59,8 +64,11 @@ public class MoveCommandTest {
 
         when(actor.getName()).thenReturn("Frank");
         when(actor.getGameMap()).thenReturn(gameMap);
+        when(actor.getCreatureInfo()).thenReturn(creatureInfo);
         when(actor.getX()).thenReturn(0);
         when(actor.getY()).thenReturn(0);
+
+        when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
 
         when(gameMap.hasTile(anyInt(), anyInt())).thenReturn(true);
 
@@ -90,7 +98,7 @@ public class MoveCommandTest {
     }
 
     @Test
-    public void testInvokeIllegalMovement() {
+    public void testInvokeIllegalDirection() {
         when(gameMap.hasTile(0, 1)).thenReturn(false);
 
         moveCommand.invoke(actor, output);
@@ -98,6 +106,24 @@ public class MoveCommandTest {
         verify(output).append(contains("Alas, you cannot go that way."));
 
         verify(gameMap).hasTile(anyInt(), anyInt());
+
+        verify(commService, never()).echoToRoom(any(), any(), any());
+
+        verify(actor, never()).setX(anyInt());
+        verify(actor, never()).setY(anyInt());
+
+        verify(actorRepository, never()).save(any());
+
+        verify(invokerService, never()).invoke(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testInvokeIncapableOfWalking() {
+        when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(false);
+
+        moveCommand.invoke(actor, output);
+
+        verify(output).append(contains("Alas, you are unable to walk."));
 
         verify(commService, never()).echoToRoom(any(), any(), any());
 

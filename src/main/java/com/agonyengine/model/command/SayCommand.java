@@ -10,6 +10,8 @@ import org.springframework.util.StringUtils;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import static com.agonyengine.model.actor.BodyPartCapability.SPEAK;
+
 @Component
 public class SayCommand {
     private CommService commService;
@@ -21,6 +23,11 @@ public class SayCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output, QuotedString message) {
+        if (!actor.getCreatureInfo().hasCapability(SPEAK)) {
+            output.append("[default]Alas, you are unable to speak.");
+            return;
+        }
+
         commService.echoToRoom(actor, new GameOutput(String.format("[cyan]%s says '%s[cyan]'", StringUtils.capitalize(actor.getName()), message.getToken())), actor);
         output.append("[cyan]You say '" + message.getToken() + "[cyan]'");
     }

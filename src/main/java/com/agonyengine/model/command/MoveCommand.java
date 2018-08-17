@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Collections;
 
+import static com.agonyengine.model.actor.BodyPartCapability.WALK;
+
 public class MoveCommand {
     private Direction direction;
     private ActorRepository actorRepository;
@@ -33,6 +35,12 @@ public class MoveCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
+        // TODO could commands declare the capabilities they require via an annotation, so that the invoker could perform this check?
+        if (!actor.getCreatureInfo().hasCapability(WALK)) {
+            output.append("[default]Alas, you are unable to walk.");
+            return;
+        }
+
         int newX = actor.getX() + direction.getX();
         int newY = actor.getY() + direction.getY();
 

@@ -5,6 +5,7 @@ import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
+import com.agonyengine.model.generator.BodyGenerator;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.stomp.GameOutput;
@@ -94,6 +95,9 @@ public class WebSocketResourceTest {
     @Mock
     private CommService commService;
 
+    @Mock
+    private BodyGenerator bodyGenerator;
+
     @Captor
     private ArgumentCaptor<List> listCaptor;
 
@@ -154,7 +158,8 @@ public class WebSocketResourceTest {
             sessionRepository,
             actorRepository,
             invokerService,
-            commService);
+            commService,
+            bodyGenerator);
     }
 
     @SuppressWarnings("unchecked")
