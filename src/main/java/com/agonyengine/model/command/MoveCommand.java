@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
@@ -33,6 +34,11 @@ public class MoveCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
+        if (!actor.getCreatureInfo().hasCapability(BodyPartCapability.CAN_WALK)) {
+            output.append("[default]Alas, you are unable to move.");
+            return;
+        }
+
         int newX = actor.getX() + direction.getX();
         int newY = actor.getY() + direction.getY();
 

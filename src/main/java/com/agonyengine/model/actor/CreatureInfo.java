@@ -40,6 +40,11 @@ public class CreatureInfo {
         this.bodyParts = bodyParts;
     }
 
+    public boolean hasCapability(BodyPartCapability capability) {
+        return bodyParts.stream()
+            .anyMatch(part -> part.getCapabilities().isSet(capability.getIndex()));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

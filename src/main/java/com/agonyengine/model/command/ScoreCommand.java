@@ -23,19 +23,7 @@ public class ScoreCommand {
             output.append("[cyan]Body Parts:");
             actor.getCreatureInfo().getBodyParts().forEach(part -> output.append(String.format("&nbsp;&nbsp;[dcyan]%s [cyan]- [dcyan]%s",
                 part.getName(),
-                capabilitiesList(part.getCapabilities()))));
+                BodyPartCapability.toLabels(part.getCapabilities()))));
         }
-    }
-
-    private String capabilitiesList(Bitfield bitfield) {
-        List<String> capabilities = new ArrayList<>();
-
-        for (int i = 0; i < Long.SIZE; i++) {
-            if (bitfield.isSet(i)) {
-                capabilities.add(BodyPartCapability.forIndex(i).getName());
-            }
-        }
-
-        return capabilities.stream().collect(Collectors.joining(", "));
     }
 }
