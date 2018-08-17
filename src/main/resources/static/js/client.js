@@ -61,21 +61,23 @@ function connect() {
             { "actor" : actor });
         },
         function () {
+            var actualDelay = Math.random() * reconnectDelay;
+
             if (isReconnecting === false) {
-                showOutput(["[red]Disconnected from server. Attempting to reconnect in " + reconnectDelay + " seconds..."]);
+                showOutput(["[red]Disconnected from server. Will attempt to reconnect in " + actualDelay.toFixed(0) + " seconds."]);
 
                 isReconnecting = true;
 
                 setTimeout(function () {
                     console.log('Disconnected.');
-                    showOutput(["[dyellow]Reconnecting to server."]);
+                    showOutput(["[dyellow]Reconnecting to server..."]);
 
                     isReconnecting = false;
 
                     this.connect();
-                }, reconnectDelay * 1000);
+                }, actualDelay * 1000);
 
-                reconnectDelay = Math.min(reconnectDelay * 2, 60);
+                reconnectDelay = Math.min(reconnectDelay * 2, 128);
             }
         });
 }
