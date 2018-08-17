@@ -1,6 +1,8 @@
 package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.BodyPart;
+import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
@@ -32,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.agonyengine.model.actor.BodyPartCapability.*;
 
 @Controller
 public class WebSocketResource {
@@ -96,6 +100,41 @@ public class WebSocketResource {
             inventoryMap = gameMapRepository.save(inventoryMap);
 
             actor.setInventory(inventoryMap);
+        }
+
+        if (actor.getCreatureInfo() == null) {
+            CreatureInfo creatureInfo = new CreatureInfo();
+            BodyPart torso = new BodyPart();
+            BodyPart leftLeg = new BodyPart();
+            BodyPart rightLeg = new BodyPart();
+            BodyPart leftArm = new BodyPart();
+            BodyPart rightArm = new BodyPart();
+            BodyPart head = new BodyPart();
+
+            torso.setName("torso");
+            leftLeg.setName("left leg");
+            rightLeg.setName("right leg");
+            leftArm.setName("left arm");
+            rightArm.setName("right arm");
+            head.setName("head");
+
+            leftLeg.getCapabilities().set(CAN_WALK.getIndex());
+            rightLeg.getCapabilities().set(CAN_WALK.getIndex());
+            leftArm.getCapabilities().set(CAN_HOLD.getIndex());
+            rightArm.getCapabilities().set(CAN_HOLD.getIndex());
+            head.getCapabilities().set(CAN_SEE.getIndex());
+            head.getCapabilities().set(CAN_EAT.getIndex());
+            head.getCapabilities().set(CAN_HEAR.getIndex());
+            head.getCapabilities().set(CAN_SPEAK.getIndex());
+
+            creatureInfo.getBodyParts().add(torso);
+            creatureInfo.getBodyParts().add(leftLeg);
+            creatureInfo.getBodyParts().add(rightLeg);
+            creatureInfo.getBodyParts().add(leftArm);
+            creatureInfo.getBodyParts().add(rightArm);
+            creatureInfo.getBodyParts().add(head);
+
+            actor.setCreatureInfo(creatureInfo);
         }
 
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
