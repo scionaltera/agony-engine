@@ -27,6 +27,10 @@ public abstract class BitfieldLabel {
         this.index = index;
         this.name = name;
 
+        if (this.index < 0 || this.index >= Long.SIZE) {
+            throw new IllegalArgumentException("Bitfield indexes can only be between 0 and 63.");
+        }
+
         labelMap.put(this.index, this);
     }
 

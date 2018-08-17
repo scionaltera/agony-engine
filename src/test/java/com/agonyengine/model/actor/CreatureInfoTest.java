@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.agonyengine.model.actor.BodyPartCapability.CAN_WALK;
+import static com.agonyengine.model.actor.BodyPartCapability.WALK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -55,7 +56,7 @@ public class CreatureInfoTest {
             when(part.getCapabilities()).thenReturn(capabilities);
 
             if (i == 0) {
-                when(capabilities.isSet(eq(CAN_WALK.getIndex()))).thenReturn(true);
+                when(capabilities.isSet(eq(WALK.getIndex()))).thenReturn(true);
             }
 
             bodyParts.add(part);
@@ -63,6 +64,24 @@ public class CreatureInfoTest {
 
         creatureInfo.setBodyParts(bodyParts);
 
-        assertTrue(creatureInfo.hasCapability(CAN_WALK));
+        assertTrue(creatureInfo.hasCapability(WALK));
+    }
+
+    @Test
+    public void testHasNoCapability() {
+        List<BodyPart> bodyParts = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            BodyPart part = mock(BodyPart.class);
+            Bitfield capabilities = mock(Bitfield.class);
+
+            when(part.getCapabilities()).thenReturn(capabilities);
+
+            bodyParts.add(part);
+        }
+
+        creatureInfo.setBodyParts(bodyParts);
+
+        assertFalse(creatureInfo.hasCapability(WALK));
     }
 }

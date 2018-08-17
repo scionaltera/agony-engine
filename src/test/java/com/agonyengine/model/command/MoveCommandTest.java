@@ -68,7 +68,7 @@ public class MoveCommandTest {
         when(actor.getX()).thenReturn(0);
         when(actor.getY()).thenReturn(0);
 
-        when(creatureInfo.hasCapability(eq(BodyPartCapability.CAN_WALK))).thenReturn(true);
+        when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
 
         when(gameMap.hasTile(anyInt(), anyInt())).thenReturn(true);
 
@@ -119,11 +119,11 @@ public class MoveCommandTest {
 
     @Test
     public void testInvokeIncapableOfWalking() {
-        when(creatureInfo.hasCapability(eq(BodyPartCapability.CAN_WALK))).thenReturn(false);
+        when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(false);
 
         moveCommand.invoke(actor, output);
 
-        verify(output).append(contains("Alas, you are unable to move."));
+        verify(output).append(contains("Alas, you are unable to walk."));
 
         verify(commService, never()).echoToRoom(any(), any(), any());
 

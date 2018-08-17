@@ -26,6 +26,6 @@ public class BodyGeneratorTest {
 
         assertTrue(parts
             .stream()
-            .anyMatch(part -> part.getCapabilities().isSet(BodyPartCapability.CAN_WALK.getIndex())));
+            .anyMatch(part -> part.getCapabilities().isSet(BodyPartCapability.WALK.getIndex())));
     }
 }

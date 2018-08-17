@@ -1,7 +1,6 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.service.CommService;
@@ -12,6 +11,8 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Collections;
+
+import static com.agonyengine.model.actor.BodyPartCapability.WALK;
 
 public class MoveCommand {
     private Direction direction;
@@ -34,8 +35,9 @@ public class MoveCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
-        if (!actor.getCreatureInfo().hasCapability(BodyPartCapability.CAN_WALK)) {
-            output.append("[default]Alas, you are unable to move.");
+        // TODO could commands declare the capabilities they require via an annotation, so that the invoker could perform this check?
+        if (!actor.getCreatureInfo().hasCapability(WALK)) {
+            output.append("[default]Alas, you are unable to walk.");
             return;
         }
 

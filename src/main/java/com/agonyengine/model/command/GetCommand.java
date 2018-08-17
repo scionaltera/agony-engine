@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.Collections;
 
+import static com.agonyengine.model.actor.BodyPartCapability.HOLD;
+
 @Component
 public class GetCommand {
     private CommService commService;
@@ -28,6 +30,11 @@ public class GetCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output, ActorSameRoom itemBinding) {
+        if (!actor.getCreatureInfo().hasCapability(HOLD)) {
+            output.append("[default]Alas, you are unable to hold items.");
+            return;
+        }
+
         Actor item = itemBinding.getTarget();
         GameOutput itemLook = new GameOutput();
 
