@@ -35,9 +35,10 @@ public class RemoveCommand {
         commService.echo(equipped, new GameOutput(String.format("[default]%s removes you.", actor.getName())));
         commService.echoToRoom(
             actor,
-            new GameOutput(String.format("[default]%s removes %s[default].",
+            new GameOutput(String.format("[default]%s removes %s %s[default].",
                 actor.getName(),
-                equipped.getName())),
+                actor.getPronoun().getPossessive(),
+                equipped.getPlainName())),
             actor, equipped);
     }
 }

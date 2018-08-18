@@ -53,6 +53,10 @@ public class Actor {
         return name.split(" ");
     }
 
+    public String getPlainName() {
+        return name;
+    }
+
     public String getName() {
         if (connection != null) { // TODO for NPC support add: || npcData != null
             return name;
