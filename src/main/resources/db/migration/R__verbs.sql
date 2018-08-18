@@ -51,7 +51,19 @@ VALUES ('drop', 500, 'dropCommand') ON CONFLICT (name) DO
 UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
 
 INSERT INTO verb (name, priority, bean)
+VALUES ('wear', 500, 'wearCommand') ON CONFLICT (name) DO
+UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
+
+INSERT INTO verb (name, priority, bean)
+VALUES ('remove', 500, 'removeCommand') ON CONFLICT (name) DO
+UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
+
+INSERT INTO verb (name, priority, bean)
 VALUES ('inventory', 500, 'inventoryCommand') ON CONFLICT (name) DO
+UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
+
+INSERT INTO verb (name, priority, bean)
+VALUES ('equipment', 500, 'equipmentCommand') ON CONFLICT (name) DO
 UPDATE SET name=EXCLUDED.name, priority=EXCLUDED.priority, bean=EXCLUDED.bean;
 
 INSERT INTO verb (name, priority, bean)

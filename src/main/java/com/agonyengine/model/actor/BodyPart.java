@@ -9,6 +9,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,6 +25,9 @@ public class BodyPart {
     @Embedded
     @AttributeOverride(name = "bits", column = @Column(name = "capabilities"))
     private Bitfield capabilities = new Bitfield();
+
+    @ManyToOne
+    private Actor equipment;
 
     public UUID getId() {
         return id;
@@ -47,6 +51,14 @@ public class BodyPart {
 
     public void setCapabilities(Bitfield capabilities) {
         this.capabilities = capabilities;
+    }
+
+    public Actor getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(Actor equipment) {
+        this.equipment = equipment;
     }
 
     @Override
