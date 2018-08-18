@@ -45,7 +45,7 @@ public class ActorEquipped implements ArgumentBinding {
         return target;
     }
 
-    public BodyPart wearLocation() {
+    public BodyPart getWearLocation() {
         return wearLocation;
     }
 }
