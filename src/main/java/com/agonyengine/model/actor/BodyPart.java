@@ -27,7 +27,7 @@ public class BodyPart {
     private Bitfield capabilities = new Bitfield();
 
     @ManyToOne
-    private Actor equipment;
+    private Actor armor;
 
     public UUID getId() {
         return id;
@@ -53,12 +53,12 @@ public class BodyPart {
         this.capabilities = capabilities;
     }
 
-    public Actor getEquipment() {
-        return equipment;
+    public Actor getArmor() {
+        return armor;
     }
 
-    public void setEquipment(Actor equipment) {
-        this.equipment = equipment;
+    public void setArmor(Actor armor) {
+        this.armor = armor;
     }
 
     @Override

@@ -25,11 +25,11 @@ public class ActorEquipped implements ArgumentBinding {
         }
 
         actor.getCreatureInfo().getBodyParts().stream()
-            .filter(part -> part.getEquipment() != null)
-            .filter(part -> Arrays.stream(part.getEquipment().getNameTokens()).anyMatch(word -> word.toUpperCase().startsWith(token.toUpperCase())))
+            .filter(part -> part.getArmor() != null)
+            .filter(part -> Arrays.stream(part.getArmor().getNameTokens()).anyMatch(word -> word.toUpperCase().startsWith(token.toUpperCase())))
             .findFirst()
             .ifPresent(wearLocation -> {
-                target = wearLocation.getEquipment();
+                target = wearLocation.getArmor();
                 this.wearLocation = wearLocation;
             });
 

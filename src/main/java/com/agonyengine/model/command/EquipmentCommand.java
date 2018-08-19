@@ -20,6 +20,6 @@ public class EquipmentCommand {
         actor.getCreatureInfo().getBodyParts()
             .forEach(part -> output.append(String.format("&nbsp;&nbsp;%s - %s",
                 part.getName(),
-                part.getEquipment() == null ? "" : part.getEquipment().getName() )));
+                part.getArmor() == null ? "" : part.getArmor().getName() )));
     }
 }

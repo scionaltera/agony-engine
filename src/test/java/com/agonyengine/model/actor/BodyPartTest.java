@@ -49,8 +49,8 @@ public class BodyPartTest {
     public void testEquipment() {
         Actor equipment = mock(Actor.class);
 
-        bodyPart.setEquipment(equipment);
+        bodyPart.setArmor(equipment);
 
-        assertEquals(equipment, bodyPart.getEquipment());
+        assertEquals(equipment, bodyPart.getArmor());
     }
 }

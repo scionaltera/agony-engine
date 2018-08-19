@@ -40,7 +40,7 @@ public class ActorEquippedTest {
 
     @Test
     public void testBind() {
-        when(bodyPart.getEquipment()).thenReturn(equipment);
+        when(bodyPart.getArmor()).thenReturn(equipment);
         when(equipment.getNameTokens()).thenReturn(new String[] { "equipment" });
 
         String token = "equipment";
@@ -68,7 +68,7 @@ public class ActorEquippedTest {
 
     @Test
     public void testBindNotEquipped() {
-        when(bodyPart.getEquipment()).thenReturn(null);
+        when(bodyPart.getArmor()).thenReturn(null);
 
         String token = "equipment";
 

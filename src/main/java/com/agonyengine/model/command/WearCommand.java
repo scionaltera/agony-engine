@@ -38,7 +38,7 @@ public class WearCommand {
         }
 
         Optional<BodyPart> wearLocationOptional = actor.getCreatureInfo().getBodyParts().stream()
-            .filter(part -> part.getEquipment() == null)
+            .filter(part -> part.getArmor() == null)
             .findFirst();
 
         if (!wearLocationOptional.isPresent()) {
@@ -48,7 +48,7 @@ public class WearCommand {
 
         BodyPart wearLocation = wearLocationOptional.get();
 
-        wearLocation.setEquipment(item);
+        wearLocation.setArmor(item);
         item.setGameMap(null);
 
         actorRepository.save(actor);
