@@ -23,12 +23,28 @@ public class BodyGenerator {
     private static Map<String, Bitfield> humanoid() {
         Map<String, Bitfield> template = new HashMap<>();
 
-        template.put("head", new Bitfield(SPEAK));
+        template.put("head", new Bitfield());
+        template.put("left ear", new Bitfield());
+        template.put("right ear", new Bitfield());
+        template.put("left eye", new Bitfield());
+        template.put("right eye", new Bitfield());
+        template.put("nose", new Bitfield());
+        template.put("mouth", new Bitfield());
+        template.put("teeth", new Bitfield());
+        template.put("tongue", new Bitfield(SPEAK));
+        template.put("neck", new Bitfield());
         template.put("torso", new Bitfield());
-        template.put("left arm", new Bitfield(HOLD));
-        template.put("right arm", new Bitfield(HOLD));
+        template.put("body", new Bitfield());
+        template.put("left arm", new Bitfield());
+        template.put("right arm", new Bitfield());
+        template.put("left hand", new Bitfield(HOLD));
+        template.put("right hand", new Bitfield(HOLD));
+        template.put("left finger", new Bitfield());
+        template.put("right finger", new Bitfield());
         template.put("left leg", new Bitfield(WALK));
         template.put("right leg", new Bitfield(WALK));
+        template.put("left foot", new Bitfield());
+        template.put("right foot", new Bitfield());
 
         return template;
     }
