@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 
 public class ActorTest {
@@ -30,6 +31,13 @@ public class ActorTest {
         actor.setId(id);
 
         assertEquals(id, actor.getId());
+    }
+
+    @Test
+    public void testNameTokens() {
+        actor.setName("test object");
+
+        assertArrayEquals(new String[] {"test", "object"}, actor.getNameTokens());
     }
 
     @Test
@@ -59,6 +67,13 @@ public class ActorTest {
         actor.setName("Scion");
 
         assertEquals("Scion", actor.getName());
+    }
+
+    @Test
+    public void testPlainName() {
+        actor.setName("test object");
+
+        assertEquals("test object", actor.getPlainName());
     }
 
     @Test
