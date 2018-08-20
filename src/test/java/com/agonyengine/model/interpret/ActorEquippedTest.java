@@ -49,7 +49,7 @@ public class ActorEquippedTest {
 
         assertEquals(token, actorEquipped.getToken());
         assertEquals(equipment, actorEquipped.getTarget());
-        assertEquals(bodyPart, actorEquipped.getWearLocation());
+        assertTrue(actorEquipped.getWearLocations().contains(bodyPart));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ActorEquippedTest {
         assertEquals(token, actorEquipped.getToken());
 
         assertNull(actorEquipped.getTarget());
-        assertNull(actorEquipped.getWearLocation());
+        assertNull(actorEquipped.getWearLocations());
     }
 
     @Test
@@ -77,6 +77,6 @@ public class ActorEquippedTest {
         assertEquals(token, actorEquipped.getToken());
 
         assertNull(actorEquipped.getTarget());
-        assertNull(actorEquipped.getWearLocation());
+        assertNull(actorEquipped.getWearLocations());
     }
 }

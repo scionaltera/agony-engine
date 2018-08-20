@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Scope(scopeName = "prototype")
 public class ActorEquipped implements ArgumentBinding {
     private String token;
     private Actor target;
-    private BodyPart wearLocation;
+    private List<BodyPart> wearLocations;
 
     @Transactional
     @Override
@@ -30,7 +32,10 @@ public class ActorEquipped implements ArgumentBinding {
             .findFirst()
             .ifPresent(wearLocation -> {
                 target = wearLocation.getArmor();
-                this.wearLocation = wearLocation;
+
+                wearLocations = actor.getCreatureInfo().getBodyParts().stream()
+                    .filter(part -> target.equals(part.getArmor()))
+                    .collect(Collectors.toList());
             });
 
         return target != null;
@@ -45,7 +50,7 @@ public class ActorEquipped implements ArgumentBinding {
         return target;
     }
 
-    public BodyPart getWearLocation() {
-        return wearLocation;
+    public List<BodyPart> getWearLocations() {
+        return wearLocations;
     }
 }

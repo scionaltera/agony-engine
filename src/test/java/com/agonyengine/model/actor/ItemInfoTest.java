@@ -1,5 +1,6 @@
 package com.agonyengine.model.actor;
 
+import com.agonyengine.model.util.Bitfield;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -25,5 +26,14 @@ public class ItemInfoTest {
         itemInfo.setId(id);
 
         assertEquals(id, itemInfo.getId());
+    }
+
+    @Test
+    public void testWearLocations() {
+        Bitfield bitfield = new Bitfield();
+
+        itemInfo.setWearLocations(bitfield);
+
+        assertEquals(bitfield, itemInfo.getWearLocations());
     }
 }

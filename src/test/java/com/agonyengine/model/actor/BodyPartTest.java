@@ -46,6 +46,13 @@ public class BodyPartTest {
     }
 
     @Test
+    public void testWearLocation() {
+        bodyPart.setWearLocation(WearLocation.FINGER);
+
+        assertEquals(WearLocation.FINGER, bodyPart.getWearLocation());
+    }
+
+    @Test
     public void testEquipment() {
         Actor equipment = mock(Actor.class);
 

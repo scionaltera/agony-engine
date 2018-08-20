@@ -56,7 +56,7 @@ public class CreatureInfoTest {
             when(part.getCapabilities()).thenReturn(capabilities);
 
             if (i == 0) {
-                when(capabilities.isSet(eq(WALK.getIndex()))).thenReturn(true);
+                when(capabilities.isSet(eq(WALK.ordinal()))).thenReturn(true);
             }
 
             bodyParts.add(part);

@@ -1,7 +1,11 @@
 package com.agonyengine.model.actor;
 
+import com.agonyengine.model.util.Bitfield;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -15,12 +19,24 @@ public class ItemInfo {
     @Type(type = "pg-uuid")
     private UUID id;
 
+    @Embedded
+    @AttributeOverride(name = "bits", column = @Column(name = "wear_locations"))
+    private Bitfield wearLocations;
+
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public Bitfield getWearLocations() {
+        return wearLocations;
+    }
+
+    public void setWearLocations(Bitfield wearLocations) {
+        this.wearLocations = wearLocations;
     }
 
     @Override

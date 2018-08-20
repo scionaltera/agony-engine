@@ -2,6 +2,7 @@ package com.agonyengine.model.generator;
 
 import com.agonyengine.model.actor.BodyPart;
 import com.agonyengine.model.actor.BodyPartCapability;
+import com.agonyengine.model.actor.WearLocation;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -26,6 +27,14 @@ public class BodyGeneratorTest {
 
         assertTrue(parts
             .stream()
-            .anyMatch(part -> part.getCapabilities().isSet(BodyPartCapability.WALK.getIndex())));
+            .anyMatch(part ->
+                part.getCapabilities().isSet(BodyPartCapability.WALK.ordinal())
+                && part.getWearLocation() == WearLocation.LEG
+                && "left leg".equals(part.getName())));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGenerateMissingTemplate() {
+        bodyGenerator.generate("foo");
     }
 }

@@ -25,7 +25,7 @@ public class RemoveCommand {
     public void invoke(Actor actor, GameOutput output, ActorEquipped equippedBinding) {
         Actor equipped = equippedBinding.getTarget();
 
-        equippedBinding.getWearLocation().setArmor(null);
+        equippedBinding.getWearLocations().forEach(part -> part.setArmor(null));
         equipped.setGameMap(actor.getInventory());
 
         actorRepository.save(actor);

@@ -23,6 +23,26 @@ public class BitfieldTest {
     }
 
     @Test
+    public void testSubset() {
+        Bitfield superset = new Bitfield();
+
+        superset.set(0);
+        superset.set(1);
+        superset.set(2);
+        superset.set(3);
+
+        bitfield.set(0);
+        bitfield.set(2);
+        bitfield.set(3);
+
+        assertTrue(bitfield.isSubset(superset));
+
+        superset.clear(2);
+
+        assertFalse(bitfield.isSubset(superset));
+    }
+
+    @Test
     public void testSetEachBit() {
         for (int i = 0; i < Long.SIZE; i++) {
             bitfield.set(i);

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class WearCommand {
@@ -37,18 +39,33 @@ public class WearCommand {
             return;
         }
 
-        Optional<BodyPart> wearLocationOptional = actor.getCreatureInfo().getBodyParts().stream()
-            .filter(part -> part.getArmor() == null)
-            .findFirst();
+        List<BodyPart> wearLocations = new ArrayList<>();
 
-        if (!wearLocationOptional.isPresent()) {
-            output.append("[default]You have nowhere to wear that.");
+        for (int i = 0; i < Long.SIZE; i++) {
+            final int bit = i;
+
+            if (item.getItemInfo().getWearLocations().isSet(i)) {
+                List<BodyPart> parts = actor.getCreatureInfo().getBodyParts().stream()
+                    .filter(part -> part.getArmor() == null)
+                    .filter(part -> part.getWearLocation() != null)
+                    .filter(part -> part.getWearLocation().ordinal() == bit)
+                    .collect(Collectors.toList());
+
+                if (parts.isEmpty()) {
+                    output.append("You need to remove some other equipment first.");
+                    return;
+                }
+
+                wearLocations.addAll(parts);
+            }
+        }
+
+        if (wearLocations.isEmpty()) {
+            output.append("That doesn't seem like you can wear it.");
             return;
         }
 
-        BodyPart wearLocation = wearLocationOptional.get();
-
-        wearLocation.setArmor(item);
+        wearLocations.forEach(part -> part.setArmor(item));
         item.setGameMap(null);
 
         actorRepository.save(actor);

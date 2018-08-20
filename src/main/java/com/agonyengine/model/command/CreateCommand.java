@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.ItemInfo;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
+import com.agonyengine.model.util.Bitfield;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.service.CommService;
@@ -34,6 +35,8 @@ public class CreateCommand {
     public void invoke(Actor actor, GameOutput output, QuotedString itemName) {
         Actor item = new Actor();
         ItemInfo itemInfo = new ItemInfo();
+
+        itemInfo.setWearLocations(new Bitfield());
 
         item.setName(itemName.getToken());
         item.setPronoun(pronounRepository.getOne("it"));

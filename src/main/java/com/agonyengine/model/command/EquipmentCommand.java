@@ -17,7 +17,8 @@ public class EquipmentCommand {
 
         output.append("[default]Your Equipment:");
 
-        actor.getCreatureInfo().getBodyParts()
+        actor.getCreatureInfo().getBodyParts().stream()
+            .filter(part -> part.getWearLocation() != null)
             .forEach(part -> output.append(String.format("&nbsp;&nbsp;%s - %s",
                 part.getName(),
                 part.getArmor() == null ? "" : part.getArmor().getName() )));
