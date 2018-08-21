@@ -17,7 +17,7 @@ ALTER TABLE body_part ADD CONSTRAINT body_part_armor_fk FOREIGN KEY (armor_id) R
 INSERT INTO item_info (id, actor_id, wear_locations)
   SELECT uuid_generate_v4(), id, 0
   FROM actor
-  WHERE connection_id IS NOT NULL;
+  WHERE connection_id IS NULL;
 
 UPDATE actor SET item_info_id=(SELECT id FROM item_info WHERE actor.id=item_info.actor_id);
 

@@ -35,7 +35,7 @@ public class WearCommand {
         }
 
         if (item.getItemInfo() == null) { // TODO make ArgumentBinding for this
-            output.append("[default]You may only wear items as equipment.");
+            output.append("[default]That's not something you can wear.");
             return;
         }
 
