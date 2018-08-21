@@ -7,8 +7,11 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,6 +27,12 @@ public class BodyPart {
     @Embedded
     @AttributeOverride(name = "bits", column = @Column(name = "capabilities"))
     private Bitfield capabilities = new Bitfield();
+
+    @Enumerated(EnumType.STRING)
+    private WearLocation wearLocation;
+
+    @ManyToOne
+    private Actor armor;
 
     public UUID getId() {
         return id;
@@ -47,6 +56,22 @@ public class BodyPart {
 
     public void setCapabilities(Bitfield capabilities) {
         this.capabilities = capabilities;
+    }
+
+    public WearLocation getWearLocation() {
+        return wearLocation;
+    }
+
+    public void setWearLocation(WearLocation wearLocation) {
+        this.wearLocation = wearLocation;
+    }
+
+    public Actor getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Actor armor) {
+        this.armor = armor;
     }
 
     @Override

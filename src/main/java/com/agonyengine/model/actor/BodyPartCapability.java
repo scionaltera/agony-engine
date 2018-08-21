@@ -1,13 +1,29 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.BitfieldLabel;
+import com.agonyengine.model.util.Bitfield;
 
-public final class BodyPartCapability extends BitfieldLabel {
-    public static final BodyPartCapability WALK = new BodyPartCapability(0, "walk");
-    public static final BodyPartCapability SPEAK = new BodyPartCapability(1, "speak");
-    public static final BodyPartCapability HOLD = new BodyPartCapability(2, "hold items");
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-    private BodyPartCapability(int index, String name) {
-        super(index, name);
+public enum BodyPartCapability {
+    SPEAK("speak"),
+    WALK("walk"),
+    HOLD("hold items");
+
+    private String description;
+
+    BodyPartCapability(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public static String toLabels(Bitfield bitfield) {
+        return Arrays.stream(values())
+            .filter(v -> bitfield.isSet(v.ordinal()))
+            .map(BodyPartCapability::getDescription)
+            .collect(Collectors.joining(", "));
     }
 }

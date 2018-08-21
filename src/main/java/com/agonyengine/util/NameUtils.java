@@ -1,6 +1,10 @@
 package com.agonyengine.util;
 
-public class NameUtils {
+public final class NameUtils {
+    private NameUtils() {
+        // this method intentionally left blank
+    }
+
     /**
      * Return the string with "a" or "an" in front of it. The very basic rule is that words starting with vowels
      * get "an" and consonants get "a", but English has many, many exceptions. This method will be iterated upon

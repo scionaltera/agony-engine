@@ -103,6 +103,14 @@ public class WebSocketResource {
             actor.setInventory(inventoryMap);
         }
 
+        // TEMPORARY
+        // Delete any first generation bodies and generate new ones.
+        // This block can be removed once all first generation bodies are upgraded in prod.
+        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyParts().stream().noneMatch(part -> "nose".equals(part.getName()))) {
+            actor.setCreatureInfo(null);
+            actor = actorRepository.save(actor);
+        }
+
         if (actor.getCreatureInfo() == null) {
             CreatureInfo creatureInfo = new CreatureInfo();
 

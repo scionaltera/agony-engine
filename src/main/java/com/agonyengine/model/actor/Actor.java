@@ -30,6 +30,9 @@ public class Actor {
     @OneToOne(cascade = CascadeType.ALL)
     private CreatureInfo creatureInfo;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private ItemInfo itemInfo;
+
     @ManyToOne
     private GameMap gameMap;
     private Integer x;
@@ -48,6 +51,10 @@ public class Actor {
 
     public String[] getNameTokens() {
         return name.split(" ");
+    }
+
+    public String getPlainName() {
+        return name;
     }
 
     public String getName() {
@@ -88,6 +95,14 @@ public class Actor {
 
     public void setCreatureInfo(CreatureInfo creatureInfo) {
         this.creatureInfo = creatureInfo;
+    }
+
+    public ItemInfo getItemInfo() {
+        return itemInfo;
+    }
+
+    public void setItemInfo(ItemInfo itemInfo) {
+        this.itemInfo = itemInfo;
     }
 
     public GameMap getGameMap() {
