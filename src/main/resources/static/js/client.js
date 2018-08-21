@@ -17,6 +17,19 @@ $(document).ready(function () {
     connect();
 });
 
+$(document).keydown(function (event) {
+    if ("" === $("#user-input").val()) {
+        return true;
+    }
+
+    if (event.which === 9) { // tab
+        if (event.preventDefault()) {
+            event.preventDefault();
+            return false;
+        }
+    }
+});
+
 $(document).keyup(function (event) {
     if (event.which === 38) { // up arrow
         commandHistoryIndex++;
