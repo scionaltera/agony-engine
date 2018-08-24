@@ -56,7 +56,11 @@ public class WearCommand {
                     return;
                 }
 
-                wearLocations.addAll(parts);
+                if (item.getItemInfo().isUseAllSlots()) {
+                    wearLocations.addAll(parts);
+                } else {
+                    wearLocations.add(parts.get(0));
+                }
             }
         }
 

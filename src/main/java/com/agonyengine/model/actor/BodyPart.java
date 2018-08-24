@@ -9,9 +9,11 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +32,9 @@ public class BodyPart {
 
     @Enumerated(EnumType.STRING)
     private WearLocation wearLocation;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private BodyPart connection;
 
     @ManyToOne
     private Actor armor;
@@ -64,6 +69,14 @@ public class BodyPart {
 
     public void setWearLocation(WearLocation wearLocation) {
         this.wearLocation = wearLocation;
+    }
+
+    public BodyPart getConnection() {
+        return connection;
+    }
+
+    public void setConnection(BodyPart connection) {
+        this.connection = connection;
     }
 
     public Actor getArmor() {

@@ -22,6 +22,7 @@ public class ItemInfo {
     @Embedded
     @AttributeOverride(name = "bits", column = @Column(name = "wear_locations"))
     private Bitfield wearLocations;
+    private boolean useAllSlots = false;
 
     public UUID getId() {
         return id;
@@ -37,6 +38,14 @@ public class ItemInfo {
 
     public void setWearLocations(Bitfield wearLocations) {
         this.wearLocations = wearLocations;
+    }
+
+    public boolean isUseAllSlots() {
+        return useAllSlots;
+    }
+
+    public void setUseAllSlots(boolean useAllSlots) {
+        this.useAllSlots = useAllSlots;
     }
 
     @Override
