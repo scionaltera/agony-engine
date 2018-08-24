@@ -2,15 +2,15 @@ package com.agonyengine.model.actor;
 
 public enum WearLocation {
     HEAD,
-    EAR,
-    EYE,
-    NOSE,
-    TONGUE,
     NECK,
-    BODY,
-    ARM,
+    WRIST,
     HAND,
     FINGER,
-    LEG,
-    FOOT
+    FOOT,
+    BODY_UPPER,
+    BODY_LOWER,
+    ARM_UPPER,
+    ARM_LOWER,
+    LEG_UPPER,
+    LEG_LOWER
 }
