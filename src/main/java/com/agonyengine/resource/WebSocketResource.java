@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.agonyengine.model.actor.WearLocation.LEG_LOWER;
+
 @Controller
 public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
@@ -106,7 +108,7 @@ public class WebSocketResource {
         // TEMPORARY
         // Delete any first generation bodies and generate new ones.
         // This block can be removed once all first generation bodies are upgraded in prod.
-        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyParts().stream().noneMatch(part -> "nose".equals(part.getName()))) {
+        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyParts().stream().noneMatch(part -> LEG_LOWER == part.getWearLocation())) {
             actor.setCreatureInfo(null);
             actor = actorRepository.save(actor);
         }
