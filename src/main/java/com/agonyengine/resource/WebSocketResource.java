@@ -35,13 +35,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.agonyengine.model.actor.WearLocation.LEG_LOWER;
-
 @Controller
 public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
+    private static final int BODY_VERSION = 0;
 
     private String applicationVersion;
     private Date applicationBootDate;
@@ -105,17 +104,31 @@ public class WebSocketResource {
             actor.setInventory(inventoryMap);
         }
 
-        // TEMPORARY
-        // Delete any first generation bodies and generate new ones.
-        // This block can be removed once all first generation bodies are upgraded in prod.
-        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyParts().stream().noneMatch(part -> LEG_LOWER == part.getWearLocation())) {
+        // Upgrade old bodies with new ones.
+        // This can probably get removed at some point but for awhile there needs to be a framework to allow for
+        // breaking changes. The system for bodies is complex and changing frequently.
+        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
+            final GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+
+            // Remove any equipment and return it to the start room so it doesn't get lost.
+            actor.getCreatureInfo().getBodyParts().stream()
+                .filter(part -> part.getArmor() != null)
+                .forEach(part -> {
+                    part.getArmor().setX(0);
+                    part.getArmor().setY(0);
+                    part.getArmor().setGameMap(defaultMap);
+                    part.setArmor(null);
+
+                    actorRepository.save(part.getArmor());
+                });
+
             actor.setCreatureInfo(null);
-            actor = actorRepository.save(actor);
         }
 
         if (actor.getCreatureInfo() == null) {
             CreatureInfo creatureInfo = new CreatureInfo();
 
+            creatureInfo.setBodyVersion(BODY_VERSION);
             creatureInfo.setBodyParts(bodyGenerator.generate(BodyGenerator.HUMANOID_TEMPLATE));
 
             actor.setCreatureInfo(creatureInfo);

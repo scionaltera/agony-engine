@@ -23,6 +23,7 @@ public class CreatureInfo {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "creature_info_id")
     private List<BodyPart> bodyParts = new ArrayList<>();
+    private int bodyVersion;
 
     public UUID getId() {
         return id;
@@ -38,6 +39,14 @@ public class CreatureInfo {
 
     public void setBodyParts(List<BodyPart> bodyParts) {
         this.bodyParts = bodyParts;
+    }
+
+    public int getBodyVersion() {
+        return bodyVersion;
+    }
+
+    public void setBodyVersion(int bodyVersion) {
+        this.bodyVersion = bodyVersion;
     }
 
     public boolean hasCapability(BodyPartCapability capability) {
