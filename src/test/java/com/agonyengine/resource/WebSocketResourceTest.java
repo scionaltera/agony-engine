@@ -2,6 +2,7 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Connection;
+import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.command.SayCommand;
@@ -42,9 +43,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -70,6 +69,9 @@ public class WebSocketResourceTest {
 
     @Mock
     private Actor actor;
+
+    @Mock
+    private CreatureInfo creatureInfo;
 
     @Mock
     private Connection connection;
@@ -125,6 +127,7 @@ public class WebSocketResourceTest {
 
         when(principal.getName()).thenReturn("Shepherd");
         when(actor.getConnection()).thenReturn(connection);
+        when(actor.getCreatureInfo()).thenReturn(creatureInfo);
         when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
@@ -279,6 +282,27 @@ public class WebSocketResourceTest {
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Breaking Space Greeting.")));
+    }
+
+    @Test
+    public void testOnSubscribeBodyUpgrade() {
+        when(creatureInfo.getBodyVersion()).thenReturn(-1);
+
+        resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(actor).setCreatureInfo(isNull());
+        verify(actorRepository).save(eq(actor));
+    }
+
+    @Test
+    public void testOnSubscribeGenerateBody() {
+        when(actor.getCreatureInfo()).thenReturn(null);
+
+        resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(bodyGenerator).generate(anyString());
+        verify(actor).setCreatureInfo(any(CreatureInfo.class));
+        verify(actorRepository).save(eq(actor));
     }
 
     @Test(expected = NoSuchActorException.class)
