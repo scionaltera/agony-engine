@@ -40,6 +40,7 @@ public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
+    private static final int BODY_VERSION = 0;
 
     private String applicationVersion;
     private Date applicationBootDate;
@@ -106,7 +107,7 @@ public class WebSocketResource {
         // Upgrade old bodies with new ones.
         // This can probably get removed at some point but for awhile there needs to be a framework to allow for
         // breaking changes. The system for bodies is complex and changing frequently.
-        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < 0) {
+        if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
             final GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
@@ -127,6 +128,7 @@ public class WebSocketResource {
         if (actor.getCreatureInfo() == null) {
             CreatureInfo creatureInfo = new CreatureInfo();
 
+            creatureInfo.setBodyVersion(BODY_VERSION);
             creatureInfo.setBodyParts(bodyGenerator.generate(BodyGenerator.HUMANOID_TEMPLATE));
 
             actor.setCreatureInfo(creatureInfo);
