@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.ExitRepository;
 import com.agonyengine.service.CommService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -16,12 +17,19 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 public class LookCommand {
+    private ExitRepository exitRepository;
     private ActorRepository actorRepository;
     private CommService commService;
     private List<Direction> directions;
 
     @Inject
-    public LookCommand(ActorRepository actorRepository, CommService commservice, List<Direction> directions) {
+    public LookCommand(
+        ExitRepository exitRepository,
+        ActorRepository actorRepository,
+        CommService commservice,
+        List<Direction> directions) {
+
+        this.exitRepository = exitRepository;
         this.actorRepository = actorRepository;
         this.commService = commservice;
         this.directions = directions;
@@ -41,7 +49,8 @@ public class LookCommand {
             Integer.toHexString(Byte.toUnsignedInt(actor.getGameMap().getTile(actor.getX(), actor.getY())))));
 
         output.append(directions.stream()
-            .filter(direction -> actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()))
+            .filter(direction -> exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY()) != null
+                || actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()))
             .map(Direction::getName)
             .collect(joining(" ", "[cyan]Exits: ", "")));
 
