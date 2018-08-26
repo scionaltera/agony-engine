@@ -4,8 +4,11 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
+import com.agonyengine.model.exit.Exit;
 import com.agonyengine.model.stomp.GameOutput;
+import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.ActorRepository;
+import com.agonyengine.repository.ExitRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
@@ -28,6 +31,9 @@ public class MoveCommandTest {
 
     @Mock
     private ActorRepository actorRepository;
+
+    @Mock
+    private ExitRepository exitRepository;
 
     @Mock
     private InvokerService invokerService;
@@ -59,6 +65,7 @@ public class MoveCommandTest {
         MockitoAnnotations.initMocks(this);
 
         when(applicationContext.getBean(eq("actorRepository"), eq(ActorRepository.class))).thenReturn(actorRepository);
+        when(applicationContext.getBean(eq("exitRepository"), eq(ExitRepository.class))).thenReturn(exitRepository);
         when(applicationContext.getBean(eq("invokerService"), eq(InvokerService.class))).thenReturn(invokerService);
         when(applicationContext.getBean(eq("commService"), eq(CommService.class))).thenReturn(commService);
 
@@ -86,6 +93,39 @@ public class MoveCommandTest {
 
         verify(actor).setX(0);
         verify(actor).setY(1);
+
+        verify(actorRepository).save(actor);
+
+        verify(invokerService).invoke(eq(actor), eq(output), isNull(), listCaptor.capture());
+
+        List<String> args = listCaptor.getValue();
+
+        assertEquals(1, args.size());
+        assertEquals("look", args.get(0));
+    }
+
+    @Test
+    public void testExit() {
+        GameMap map = new GameMap();
+        Exit exit = new Exit();
+        Location destination = new Location();
+
+        destination.setGameMap(map);
+        destination.setX(4);
+        destination.setY(5);
+
+        exit.setDirection("north");
+        exit.setDestination(destination);
+
+        when(exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(any(), any(), any(), any())).thenReturn(exit);
+
+        moveCommand.invoke(actor, output);
+
+        verify(commService, times(2)).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+
+        verify(actor).setGameMap(eq(map));
+        verify(actor).setX(eq(destination.getX()));
+        verify(actor).setY(eq(destination.getY()));
 
         verify(actorRepository).save(actor);
 
