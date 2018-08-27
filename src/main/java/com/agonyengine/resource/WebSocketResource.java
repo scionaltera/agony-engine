@@ -131,7 +131,8 @@ public class WebSocketResource {
             creatureInfo.setBodyVersion(BODY_VERSION);
             creatureInfo.setBodyParts(bodyGenerator.generate(
                 BodyGenerator.HUMAN_TEMPLATE,
-                BodyGenerator.HUMAN_MOUTH
+                BodyGenerator.MOUTH,
+                BodyGenerator.TWO_EYES
             ));
 
             actor.setCreatureInfo(creatureInfo);

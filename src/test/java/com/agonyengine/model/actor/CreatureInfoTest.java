@@ -46,6 +46,13 @@ public class CreatureInfoTest {
     }
 
     @Test
+    public void testBodyVersion() {
+        creatureInfo.setBodyVersion(8);
+
+        assertEquals(8, creatureInfo.getBodyVersion());
+    }
+
+    @Test
     public void testHasCapability() {
         List<BodyPart> bodyParts = new ArrayList<>();
 

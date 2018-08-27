@@ -8,6 +8,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ItemInfoTest {
     private ItemInfo itemInfo;
@@ -35,5 +37,16 @@ public class ItemInfoTest {
         itemInfo.setWearLocations(bitfield);
 
         assertEquals(bitfield, itemInfo.getWearLocations());
+    }
+
+    @Test
+    public void testUseAllSlots() {
+        itemInfo.setUseAllSlots(false);
+
+        assertFalse(itemInfo.isUseAllSlots());
+
+        itemInfo.setUseAllSlots(true);
+
+        assertTrue(itemInfo.isUseAllSlots());
     }
 }

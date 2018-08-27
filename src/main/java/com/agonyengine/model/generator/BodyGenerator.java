@@ -20,11 +20,8 @@ import java.util.Map;
 @Component
 public class BodyGenerator {
     public static final String HUMAN_TEMPLATE = "humanoid";
-    public static final String HUMAN_MOUTH = "human_mouth";
-    public static final String TWO_EYES = "two_eyes";
-    public static final String TWO_EARS = "two_ears";
-    public static final String TWO_ARMS = "two_arms";
-    public static final String TWO_LEGS = "two_legs";
+    public static final String MOUTH = "mouth";
+    public static final String TWO_EYES = "two eyes";
 
     private BodyPartRepository bodyPartRepository;
     private BodyPartGroupRepository bodyPartGroupRepository;

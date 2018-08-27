@@ -300,7 +300,7 @@ public class WebSocketResourceTest {
 
         resource.onSubscribe(principal, message, actorId.toString());
 
-        verify(bodyGenerator).generate(anyString());
+        verify(bodyGenerator).generate(any());
         verify(actor).setCreatureInfo(any(CreatureInfo.class));
         verify(actorRepository).save(eq(actor));
     }
