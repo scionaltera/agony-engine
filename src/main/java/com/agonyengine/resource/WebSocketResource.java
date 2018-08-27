@@ -40,7 +40,7 @@ public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
-    private static final int BODY_VERSION = 0;
+    private static final int BODY_VERSION = 1;
 
     private String applicationVersion;
     private Date applicationBootDate;
@@ -129,7 +129,11 @@ public class WebSocketResource {
             CreatureInfo creatureInfo = new CreatureInfo();
 
             creatureInfo.setBodyVersion(BODY_VERSION);
-            creatureInfo.setBodyParts(bodyGenerator.generate(BodyGenerator.HUMANOID_TEMPLATE));
+            creatureInfo.setBodyParts(bodyGenerator.generate(
+                BodyGenerator.HUMAN_TEMPLATE,
+                BodyGenerator.MOUTH,
+                BodyGenerator.TWO_EYES
+            ));
 
             actor.setCreatureInfo(creatureInfo);
         }

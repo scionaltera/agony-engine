@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 public enum BodyPartCapability {
     SPEAK("speak"),
     WALK("walk"),
-    HOLD("hold items");
+    HOLD("hold items"),
+    SEE("see");
 
     private String description;
 

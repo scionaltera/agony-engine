@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
 
+import static com.agonyengine.model.actor.BodyPartCapability.SEE;
 import static java.util.stream.Collectors.joining;
 
 @Component
@@ -37,6 +38,12 @@ public class LookCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
+        // TODO could commands declare the capabilities they require via an annotation, so that the invoker could perform this check?
+        if (!actor.getCreatureInfo().hasCapability(SEE)) {
+            output.append("[default]Alas, you are unable to see.");
+            return;
+        }
+
         List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
 
         // TODO game maps will need names

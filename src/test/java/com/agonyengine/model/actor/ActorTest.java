@@ -104,6 +104,15 @@ public class ActorTest {
     }
 
     @Test
+    public void testItemInfo() {
+        ItemInfo itemInfo = new ItemInfo();
+
+        actor.setItemInfo(itemInfo);
+
+        assertEquals(itemInfo, actor.getItemInfo());
+    }
+
+    @Test
     public void testGameMap() {
         GameMap gameMap = mock(GameMap.class);
 
