@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,6 +17,9 @@ public class GameMap {
     private UUID id;
     private int width;
     private byte[] tiles;
+
+    @ManyToOne
+    private Tileset tileset;
 
     public GameMap() {
         // this method is required for Hibernate
@@ -50,6 +54,14 @@ public class GameMap {
         this.tiles = tiles;
     }
 
+    public Tileset getTileset() {
+        return tileset;
+    }
+
+    public void setTileset(Tileset tileset) {
+        this.tileset = tileset;
+    }
+
     /*
      * Maps are rectangles of {width} tiles on the X axis, where (0, 0) is the bottom left corner. So
      * given the following map:
@@ -71,8 +83,14 @@ public class GameMap {
      * having to deal directly with the byte array.
      */
 
-    public byte getTile(int x, int y) {
-        return tiles[computeIndex(x, y)];
+    public Tile getTile(int x, int y) {
+        int index = tiles[computeIndex(x, y)];
+
+        if (index == -1) {
+            return null;
+        }
+
+        return getTileset().getTile(index);
     }
 
     public boolean hasTile(int x, int y) {

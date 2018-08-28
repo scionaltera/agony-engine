@@ -113,6 +113,10 @@ public class Actor {
         this.gameMap = gameMap;
     }
 
+    public Tile getTile() {
+        return getGameMap().getTile(x, y);
+    }
+
     public Integer getX() {
         return x;
     }

@@ -8,6 +8,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
@@ -45,10 +46,12 @@ public class WebSocketResource {
     private String applicationVersion;
     private Date applicationBootDate;
     private UUID defaultMapId;
+    private UUID inventoryTilesetId;
     private InputTokenizer inputTokenizer;
     private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
+    private TilesetRepository tilesetRepository;
     private InvokerService invokerService;
     private CommService commService;
     private BodyGenerator bodyGenerator;
@@ -59,10 +62,12 @@ public class WebSocketResource {
         String applicationVersion,
         Date applicationBootDate,
         UUID defaultMapId,
+        UUID inventoryTilesetId,
         InputTokenizer inputTokenizer,
         GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
+        TilesetRepository tilesetRepository,
         InvokerService invokerService,
         CommService commService,
         BodyGenerator bodyGenerator) {
@@ -70,10 +75,12 @@ public class WebSocketResource {
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
         this.defaultMapId = defaultMapId;
+        this.inventoryTilesetId = inventoryTilesetId;
         this.inputTokenizer = inputTokenizer;
         this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
+        this.tilesetRepository = tilesetRepository;
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
@@ -98,6 +105,7 @@ public class WebSocketResource {
 
             inventoryMap.setWidth(1);
             inventoryMap.setTiles(new byte[] { (byte)0xFF });
+            inventoryMap.setTileset(tilesetRepository.getOne(inventoryTilesetId));
 
             inventoryMap = gameMapRepository.save(inventoryMap);
 

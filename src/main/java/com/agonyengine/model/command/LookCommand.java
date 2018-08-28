@@ -1,6 +1,8 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.Tile;
+import com.agonyengine.model.actor.Tileset;
 import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -45,15 +47,14 @@ public class LookCommand {
         }
 
         List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
+        Tile tile = actor.getTile();
 
-        // TODO game maps will need names
         output.append(String.format("[yellow](%d, %d) %s",
             actor.getX(),
             actor.getY(),
-            actor.getGameMap().getId()));
+            tile.getRoomTitle()));
 
-        output.append(String.format("[black](tile=0x%s) You see nothing but the inky void swirling around you.",
-            Integer.toHexString(Byte.toUnsignedInt(actor.getGameMap().getTile(actor.getX(), actor.getY())))));
+        output.append("[default]Room descriptions coming soon.");
 
         output.append(directions.stream()
             .filter(direction -> exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY()) != null
