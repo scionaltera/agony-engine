@@ -93,6 +93,10 @@ pitest {
         'com.agonyengine.AgonyEngine',
         'com.agonyengine.config.*'
     ]
+    excludedMethods = [
+        'hashCode',
+        'equals'
+    ]
     coverageThreshold = 70
     mutationThreshold = 70
     timestampedReports = false

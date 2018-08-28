@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -17,13 +19,27 @@ public class GameMapTest {
         0x07, 0x08, 0x09,
     };
 
+    private Map<Integer, Tile> tiles = new HashMap<>();
     private GameMap map;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        Tileset tileset = new Tileset();
+
+        for (int i = 1; i < 10; i++) {
+            Tile tile = new Tile();
+
+            tile.setId(UUID.randomUUID());
+            tile.setIndex(i);
+
+            tileset.setTile(tile);
+            tiles.put(tile.getIndex(), tile);
+        }
+
         map = new GameMap(3, defaultMap);
+        map.setTileset(tileset);
     }
 
     @Test
@@ -61,24 +77,33 @@ public class GameMapTest {
 
     @Test
     public void testSetGetTile() {
-        assertEquals(0x05, map.getTile(1, 1));
+        assertEquals(tiles.get(5), map.getTile(1, 1));
 
-        map.setTile(1, 1, (byte)0x7F);
+        map.setTile(1, 1, (byte)0x01);
 
-        assertEquals((byte)0x7F, map.getTile(1, 1));
+        assertEquals(tiles.get(1), map.getTile(1, 1));
     }
 
     @Test
     public void testGetTiles() {
-        assertEquals(0x1, map.getTile(0, 0));
-        assertEquals(0x2, map.getTile(1, 0));
-        assertEquals(0x3, map.getTile(2, 0));
-        assertEquals(0x4, map.getTile(0, 1));
-        assertEquals(0x5, map.getTile(1, 1));
-        assertEquals(0x6, map.getTile(2, 1));
-        assertEquals(0x7, map.getTile(0, 2));
-        assertEquals(0x8, map.getTile(1, 2));
-        assertEquals(0x9, map.getTile(2, 2));
+        assertEquals(tiles.get(1), map.getTile(0, 0));
+        assertEquals(tiles.get(2), map.getTile(1, 0));
+        assertEquals(tiles.get(3), map.getTile(2, 0));
+        assertEquals(tiles.get(4), map.getTile(0, 1));
+        assertEquals(tiles.get(5), map.getTile(1, 1));
+        assertEquals(tiles.get(6), map.getTile(2, 1));
+        assertEquals(tiles.get(7), map.getTile(0, 2));
+        assertEquals(tiles.get(8), map.getTile(1, 2));
+        assertEquals(tiles.get(9), map.getTile(2, 2));
+    }
+
+    @Test
+    public void testTileset() {
+        Tileset tileset = new Tileset();
+
+        map.setTileset(tileset);
+
+        assertEquals(tileset, map.getTileset());
     }
 
     @Test

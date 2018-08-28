@@ -1,7 +1,7 @@
 package com.agonyengine.util;
 
 public final class FormattingUtils {
-    private static final int WRAP_LENGTH = 80;
+    static final int WRAP_LENGTH = 80;
 
     private FormattingUtils() {
         // this method intentionally left blank

@@ -1,6 +1,8 @@
 package com.agonyengine.model.actor;
 
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +13,8 @@ import java.util.UUID;
 
 @Entity
 public class GameMap {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
+
     @Id
     @GeneratedValue
     @Type(type = "pg-uuid")
@@ -84,17 +88,22 @@ public class GameMap {
      */
 
     public Tile getTile(int x, int y) {
-        int index = tiles[computeIndex(x, y)];
-
-        if (index == -1) {
+        if (tileset == null) {
+            LOGGER.error("GameMap has no Tileset!");
             return null;
         }
 
-        return getTileset().getTile(index);
+        return tileset.getTile(tiles[computeIndex(x, y)]);
     }
 
     public boolean hasTile(int x, int y) {
-        int index = computeIndex(x, y);
+        int index;
+
+        try {
+            index = computeIndex(x, y);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
 
         return index >= 0 && index < tiles.length;
     }
@@ -104,8 +113,8 @@ public class GameMap {
     }
 
     private int computeIndex(int x, int y) {
-        if (x < 0 || x >= width) {
-            return -1;
+        if (x < 0 || x >= width || y < 0 || y * width >= tiles.length) {
+            throw new IllegalArgumentException("Provided coordinates are outside the map's bounds.");
         }
 
         return y * width + x;
