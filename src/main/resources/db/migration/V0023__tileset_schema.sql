@@ -15,6 +15,5 @@ CREATE TABLE tile (
 );
 
 ALTER TABLE game_map ADD COLUMN tileset_id UUID;
-ALTER TABLE game_map ADD CONSTRAINT game_map_tileset_fk FOREIGN KEY (tileset_id) REFERENCES tileset (id);
 
 UPDATE game_map SET tileset_id='429a3d68-7658-47b0-bba7-8a1d52fb097e';
