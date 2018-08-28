@@ -5,6 +5,8 @@ import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
+import com.agonyengine.model.actor.Tile;
+import com.agonyengine.model.actor.Tileset;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.generator.BodyGenerator;
 import com.agonyengine.model.interpret.QuotedString;
@@ -13,6 +15,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
@@ -65,6 +68,9 @@ public class WebSocketResourceTest {
     private ActorRepository actorRepository;
 
     @Mock
+    private TilesetRepository tilesetRepository;
+
+    @Mock
     private VerbRepository verbRepository;
 
     @Mock
@@ -81,6 +87,12 @@ public class WebSocketResourceTest {
 
     @Mock
     private GameMap gameMap;
+
+    @Mock
+    private Tileset tileset;
+
+    @Mock
+    private Tile tile;
 
     @Mock
     private Session session;
@@ -107,6 +119,7 @@ public class WebSocketResourceTest {
     private ArgumentCaptor<GameMap> gameMapCaptor;
 
     private UUID defaultMapId = UUID.randomUUID();
+    private UUID inventoryTilesetId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
     private String remoteIpAddress = "10.11.12.13";
     private UUID sessionId = UUID.randomUUID();
@@ -133,6 +146,8 @@ public class WebSocketResourceTest {
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
+        when(tilesetRepository.getOne(any(UUID.class))).thenReturn(tileset);
+        when(tileset.getTile(anyInt())).thenReturn(tile);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);
@@ -156,10 +171,12 @@ public class WebSocketResourceTest {
             "0.1.2-UNIT-TEST",
             new Date(),
             defaultMapId,
+            inventoryTilesetId,
             inputTokenizer,
             gameMapRepository,
             sessionRepository,
             actorRepository,
+            tilesetRepository,
             invokerService,
             commService,
             bodyGenerator);
@@ -275,7 +292,7 @@ public class WebSocketResourceTest {
 
         GameMap inventory = gameMapCaptor.getValue();
 
-        assertEquals((byte)0xFF, inventory.getTile(0, 0));
+        assertEquals(tile, inventory.getTile(0, 0));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));

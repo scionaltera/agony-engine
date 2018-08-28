@@ -1,6 +1,6 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.util.NameUtils;
+import com.agonyengine.util.FormattingUtils;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.CascadeType;
@@ -66,7 +66,7 @@ public class Actor {
             return name;
         }
 
-        return NameUtils.aoran(name);
+        return FormattingUtils.aoran(name);
     }
 
     public void setName(String name) {
@@ -111,6 +111,10 @@ public class Actor {
 
     public void setGameMap(GameMap gameMap) {
         this.gameMap = gameMap;
+    }
+
+    public Tile getTile() {
+        return getGameMap().getTile(x, y);
     }
 
     public Integer getX() {

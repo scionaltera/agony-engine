@@ -1,5 +1,5 @@
 group 'com.agonyengine'
-version '0.11.2-SNAPSHOT'
+version '0.12.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
@@ -92,6 +92,10 @@ pitest {
     excludedClasses = [
         'com.agonyengine.AgonyEngine',
         'com.agonyengine.config.*'
+    ]
+    excludedMethods = [
+        'hashCode',
+        'equals'
     ]
     coverageThreshold = 70
     mutationThreshold = 70

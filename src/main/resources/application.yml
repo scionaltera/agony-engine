@@ -1,6 +1,8 @@
 agonyengine:
   maps:
     default: "5231e20f-0658-4685-9396-6e69ebfb2c3b"
+  tilesets:
+    inventory: "429a3d68-7658-47b0-bba7-8a1d52fb097e"
 
 spring:
   jpa:
