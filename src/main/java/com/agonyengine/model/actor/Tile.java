@@ -1,6 +1,7 @@
 package com.agonyengine.model.actor;
 
 import com.agonyengine.model.util.Bitfield;
+import com.agonyengine.util.FormattingUtils;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.AttributeOverride;
@@ -20,6 +21,7 @@ public class Tile {
     private UUID id;
     private int index;
     private String roomTitle;
+    private String roomDescription;
 
     @Embedded
     @AttributeOverride(name = "bits", column = @Column(name = "flags"))
@@ -47,6 +49,14 @@ public class Tile {
 
     public void setRoomTitle(String roomTitle) {
         this.roomTitle = roomTitle;
+    }
+
+    public String getRoomDescription() {
+        return FormattingUtils.softWrap(roomDescription);
+    }
+
+    public void setRoomDescription(String roomDescription) {
+        this.roomDescription = roomDescription;
     }
 
     public Bitfield getFlags() {

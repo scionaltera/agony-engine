@@ -54,7 +54,7 @@ public class LookCommand {
             actor.getY(),
             tile.getRoomTitle()));
 
-        output.append("[default]Room descriptions coming soon.");
+        output.append(String.format("[default]%s", tile.getRoomDescription()));
 
         output.append(directions.stream()
             .filter(direction -> exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY()) != null

@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "citext";
+
 CREATE TABLE tileset (
   id UUID NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -9,6 +11,7 @@ CREATE TABLE tile (
   index INT NOT NULL,
   tileset UUID NOT NULL,
   room_title VARCHAR(255) NOT NULL,
+  room_description citext,
   flags BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (id),
   CONSTRAINT tile_tileset_fk FOREIGN KEY (tileset) REFERENCES tileset (id)

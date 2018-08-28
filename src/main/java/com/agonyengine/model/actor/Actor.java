@@ -1,6 +1,6 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.util.NameUtils;
+import com.agonyengine.util.FormattingUtils;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.CascadeType;
@@ -66,7 +66,7 @@ public class Actor {
             return name;
         }
 
-        return NameUtils.aoran(name);
+        return FormattingUtils.aoran(name);
     }
 
     public void setName(String name) {
