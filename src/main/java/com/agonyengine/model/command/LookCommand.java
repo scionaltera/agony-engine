@@ -41,7 +41,7 @@ public class LookCommand {
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
         // TODO could commands declare the capabilities they require via an annotation, so that the invoker could perform this check?
-        if (!actor.getCreatureInfo().hasCapability(SEE)) {
+        if (actor.getCreatureInfo() == null || !actor.getCreatureInfo().hasCapability(SEE)) {
             output.append("[default]Alas, you are unable to see.");
             return;
         }

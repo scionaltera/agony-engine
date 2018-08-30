@@ -23,7 +23,7 @@ public class SayCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output, QuotedString message) {
-        if (!actor.getCreatureInfo().hasCapability(SPEAK)) {
+        if (actor.getCreatureInfo() == null || !actor.getCreatureInfo().hasCapability(SPEAK)) {
             output.append("[default]Alas, you are unable to speak.");
             return;
         }
