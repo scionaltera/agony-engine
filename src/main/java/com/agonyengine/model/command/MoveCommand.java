@@ -40,7 +40,7 @@ public class MoveCommand {
     @Transactional
     public void invoke(Actor actor, GameOutput output) {
         // TODO could commands declare the capabilities they require via an annotation, so that the invoker could perform this check?
-        if (!actor.getCreatureInfo().hasCapability(WALK)) {
+        if (actor.getCreatureInfo() == null || !actor.getCreatureInfo().hasCapability(WALK)) {
             output.append("[default]Alas, you are unable to walk.");
             return;
         }

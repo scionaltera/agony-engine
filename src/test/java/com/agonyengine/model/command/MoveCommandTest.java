@@ -105,6 +105,15 @@ public class MoveCommandTest {
     }
 
     @Test
+    public void testInvokeNonCreature() {
+        when(actor.getCreatureInfo()).thenReturn(null);
+
+        moveCommand.invoke(actor, output);
+
+        verify(output).append(contains("Alas"));
+    }
+
+    @Test
     public void testExit() {
         GameMap map = new GameMap();
         Exit exit = new Exit();

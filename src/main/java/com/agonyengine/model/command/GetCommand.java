@@ -30,7 +30,7 @@ public class GetCommand {
 
     @Transactional
     public void invoke(Actor actor, GameOutput output, ActorSameRoom itemBinding) {
-        if (!actor.getCreatureInfo().hasCapability(HOLD)) {
+        if (actor.getCreatureInfo() == null || !actor.getCreatureInfo().hasCapability(HOLD)) {
             output.append("[default]Alas, you are unable to hold items.");
             return;
         }
