@@ -1,11 +1,9 @@
 package com.agonyengine.model.converter;
 
-import org.apache.commons.lang3.EnumUtils;
-
 import javax.persistence.AttributeConverter;
 import java.util.EnumSet;
 
-public abstract class BaseEnumSetConverter<E extends Enum<E>> implements AttributeConverter<EnumSet<E>, Long> {
+public abstract class BaseEnumSetConverter<E extends Enum<E> & PersistentEnum> implements AttributeConverter<EnumSet<E>, Long> {
     private final Class<E> klass;
 
     public BaseEnumSetConverter(Class<E> klass) {
@@ -14,11 +12,25 @@ public abstract class BaseEnumSetConverter<E extends Enum<E>> implements Attribu
 
     @Override
     public Long convertToDatabaseColumn(EnumSet<E> attribute) {
-        return EnumUtils.generateBitVector(klass, attribute);
+        long total = 0;
+
+        for (E constant : attribute) {
+            total |= 1L << constant.getIndex();
+        }
+
+        return total;
     }
 
     @Override
     public EnumSet<E> convertToEntityAttribute(Long dbData) {
-        return EnumUtils.processBitVector(klass, dbData);
+        EnumSet<E> results = EnumSet.noneOf(klass);
+
+        for (E constant : klass.getEnumConstants()) {
+            if ((dbData & 1L << constant.getIndex()) != 0) {
+                results.add(constant);
+            }
+        }
+
+        return results;
     }
 }

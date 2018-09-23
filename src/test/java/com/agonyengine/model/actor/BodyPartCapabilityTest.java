@@ -11,6 +11,16 @@ import static org.junit.Assert.assertEquals;
 
 public class BodyPartCapabilityTest {
     @Test
+    public void testIndex() {
+        assertEquals(0, SPEAK.getIndex());
+    }
+
+    @Test
+    public void testConverter() {
+        new BodyPartCapability.Converter();
+    }
+
+    @Test
     public void testDescription() {
         assertEquals("speak", SPEAK.getDescription());
     }
