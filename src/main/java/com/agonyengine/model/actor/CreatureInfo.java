@@ -51,7 +51,7 @@ public class CreatureInfo {
 
     public boolean hasCapability(BodyPartCapability capability) {
         return bodyParts.stream()
-            .anyMatch(part -> part.getCapabilities().isSet(capability.ordinal()));
+            .anyMatch(part -> part.getCapabilities().contains(capability));
     }
 
     @Override

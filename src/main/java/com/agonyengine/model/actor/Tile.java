@@ -1,15 +1,13 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import com.agonyengine.util.FormattingUtils;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,9 +21,8 @@ public class Tile {
     private String roomTitle;
     private String roomDescription;
 
-    @Embedded
-    @AttributeOverride(name = "bits", column = @Column(name = "flags"))
-    private Bitfield flags;
+    @Convert(converter = TileFlag.Converter.class)
+    private EnumSet<TileFlag> flags = EnumSet.noneOf(TileFlag.class);
 
     public UUID getId() {
         return id;
@@ -59,11 +56,11 @@ public class Tile {
         this.roomDescription = roomDescription;
     }
 
-    public Bitfield getFlags() {
+    public EnumSet<TileFlag> getFlags() {
         return flags;
     }
 
-    public void setFlags(Bitfield flags) {
+    public void setFlags(EnumSet<TileFlag> flags) {
         this.flags = flags;
     }
 

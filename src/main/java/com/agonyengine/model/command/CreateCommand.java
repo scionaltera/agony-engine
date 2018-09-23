@@ -2,9 +2,9 @@ package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.ItemInfo;
+import com.agonyengine.model.actor.WearLocation;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
-import com.agonyengine.model.util.Bitfield;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.PronounRepository;
 import com.agonyengine.service.CommService;
@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.EnumSet;
 
 @Component
 public class CreateCommand {
@@ -36,7 +37,7 @@ public class CreateCommand {
         Actor item = new Actor();
         ItemInfo itemInfo = new ItemInfo();
 
-        itemInfo.setWearLocations(new Bitfield());
+        itemInfo.setWearLocations(EnumSet.noneOf(WearLocation.class));
 
         item.setName(itemName.getToken());
         item.setPronoun(pronounRepository.getOne("it"));

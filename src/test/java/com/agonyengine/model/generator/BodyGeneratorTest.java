@@ -100,7 +100,7 @@ public class BodyGeneratorTest {
         assertTrue(parts
             .stream()
             .anyMatch(part ->
-                part.getCapabilities().isSet(BodyPartCapability.WALK.ordinal())
+                part.getCapabilities().contains(BodyPartCapability.WALK)
                 && part.getWearLocation() == WearLocation.FOOT
                 && "left foot".equals(part.getName())
                 && LEG_LOWER == part.getConnection().getWearLocation()

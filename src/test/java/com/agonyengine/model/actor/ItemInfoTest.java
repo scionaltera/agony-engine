@@ -1,10 +1,10 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ public class ItemInfoTest {
 
     @Test
     public void testWearLocations() {
-        Bitfield bitfield = new Bitfield();
+        EnumSet<WearLocation> bitfield = EnumSet.noneOf(WearLocation.class);
 
         itemInfo.setWearLocations(bitfield);
 
