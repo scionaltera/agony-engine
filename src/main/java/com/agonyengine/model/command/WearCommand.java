@@ -2,6 +2,7 @@ package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.BodyPart;
+import com.agonyengine.model.actor.WearLocation;
 import com.agonyengine.model.interpret.ActorInventory;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -44,7 +45,7 @@ public class WearCommand {
         for (int i = 0; i < Long.SIZE; i++) {
             final int bit = i;
 
-            if (item.getItemInfo().getWearLocations().isSet(i)) {
+            if (item.getItemInfo().getWearLocations().contains(WearLocation.values()[i])) {
                 List<BodyPart> parts = actor.getCreatureInfo().getBodyParts().stream()
                     .filter(part -> part.getArmor() == null)
                     .filter(part -> part.getWearLocation() != null)

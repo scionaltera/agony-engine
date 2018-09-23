@@ -1,7 +1,8 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.junit.Test;
+
+import java.util.EnumSet;
 
 import static com.agonyengine.model.actor.BodyPartCapability.HOLD;
 import static com.agonyengine.model.actor.BodyPartCapability.SPEAK;
@@ -16,7 +17,7 @@ public class BodyPartCapabilityTest {
 
     @Test
     public void testToLabels() {
-        Bitfield bitfield = new Bitfield(SPEAK, WALK, HOLD);
+        EnumSet<BodyPartCapability> bitfield = EnumSet.of(SPEAK, WALK, HOLD);
 
         assertEquals("speak, walk, hold items", BodyPartCapability.toLabels(bitfield));
     }

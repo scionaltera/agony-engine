@@ -1,11 +1,11 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +13,6 @@ import static com.agonyengine.model.actor.BodyPartCapability.WALK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,12 +57,12 @@ public class CreatureInfoTest {
 
         for (int i = 0; i < 3; i++) {
             BodyPart part = mock(BodyPart.class);
-            Bitfield capabilities = mock(Bitfield.class);
+            EnumSet<BodyPartCapability> capabilities = EnumSet.noneOf(BodyPartCapability.class);
 
             when(part.getCapabilities()).thenReturn(capabilities);
 
             if (i == 0) {
-                when(capabilities.isSet(eq(WALK.ordinal()))).thenReturn(true);
+                capabilities.add(WALK);
             }
 
             bodyParts.add(part);
@@ -80,7 +79,7 @@ public class CreatureInfoTest {
 
         for (int i = 0; i < 3; i++) {
             BodyPart part = mock(BodyPart.class);
-            Bitfield capabilities = mock(Bitfield.class);
+            EnumSet<BodyPartCapability> capabilities = EnumSet.noneOf(BodyPartCapability.class);
 
             when(part.getCapabilities()).thenReturn(capabilities);
 

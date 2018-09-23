@@ -1,10 +1,10 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -74,12 +74,13 @@ public class TileTest {
 
     @Test
     public void testFlags() {
-        Bitfield flags = new Bitfield();
+        EnumSet<TileFlag> flags = EnumSet.noneOf(TileFlag.class);
 
-        flags.set(5);
+        flags.add(TileFlag.IMPASSABLE);
 
         tile.setFlags(flags);
 
         assertEquals(flags, tile.getFlags());
+        assertTrue(tile.getFlags().contains(TileFlag.IMPASSABLE));
     }
 }

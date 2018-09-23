@@ -4,7 +4,6 @@ import com.agonyengine.model.actor.BodyPart;
 import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.actor.BodyPartGroup;
 import com.agonyengine.model.actor.BodyPartTemplate;
-import com.agonyengine.model.util.Bitfield;
 import com.agonyengine.repository.BodyPartGroupRepository;
 import com.agonyengine.repository.BodyPartRepository;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,7 @@ import org.springframework.util.StringUtils;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +75,10 @@ public class BodyGenerator {
 
         bodyPartTemplates.forEach(template -> {
             BodyPart part = new BodyPart();
-            Bitfield capabilities = new Bitfield();
+            EnumSet<BodyPartCapability> capabilities = EnumSet.noneOf(BodyPartCapability.class);
 
             if (!StringUtils.isEmpty(template.getCapabilities())) {
-                Arrays.stream(template.getCapabilities().split(",")).forEach(cap -> capabilities.set(BodyPartCapability.valueOf(cap).ordinal()));
+                Arrays.stream(template.getCapabilities().split(",")).forEach(cap -> capabilities.add(BodyPartCapability.valueOf(cap)));
             }
 
             part.setName(template.getName());

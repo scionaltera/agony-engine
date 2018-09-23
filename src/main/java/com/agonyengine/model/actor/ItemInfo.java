@@ -1,14 +1,12 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,9 +17,8 @@ public class ItemInfo {
     @Type(type = "pg-uuid")
     private UUID id;
 
-    @Embedded
-    @AttributeOverride(name = "bits", column = @Column(name = "wear_locations"))
-    private Bitfield wearLocations;
+    @Convert(converter = WearLocation.Converter.class)
+    private EnumSet<WearLocation> wearLocations = EnumSet.noneOf(WearLocation.class);
     private boolean useAllSlots = false;
 
     public UUID getId() {
@@ -32,11 +29,11 @@ public class ItemInfo {
         this.id = id;
     }
 
-    public Bitfield getWearLocations() {
+    public EnumSet<WearLocation> getWearLocations() {
         return wearLocations;
     }
 
-    public void setWearLocations(Bitfield wearLocations) {
+    public void setWearLocations(EnumSet<WearLocation> wearLocations) {
         this.wearLocations = wearLocations;
     }
 

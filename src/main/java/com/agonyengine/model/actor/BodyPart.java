@@ -1,11 +1,8 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,9 +24,8 @@ public class BodyPart {
 
     private String name;
 
-    @Embedded
-    @AttributeOverride(name = "bits", column = @Column(name = "capabilities"))
-    private Bitfield capabilities = new Bitfield();
+    @Convert(converter = BodyPartCapability.Converter.class)
+    private EnumSet<BodyPartCapability> capabilities = EnumSet.noneOf(BodyPartCapability.class);
 
     @Enumerated(EnumType.STRING)
     private WearLocation wearLocation;
@@ -55,11 +52,11 @@ public class BodyPart {
         this.name = name;
     }
 
-    public Bitfield getCapabilities() {
+    public EnumSet<BodyPartCapability> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Bitfield capabilities) {
+    public void setCapabilities(EnumSet<BodyPartCapability> capabilities) {
         this.capabilities = capabilities;
     }
 

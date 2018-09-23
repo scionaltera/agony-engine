@@ -1,5 +1,5 @@
 group 'com.agonyengine'
-version '0.12.1-SNAPSHOT'
+version '0.12.2-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'

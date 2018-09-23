@@ -1,8 +1,9 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.util.Bitfield;
+import com.agonyengine.model.converter.BaseEnumSetConverter;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.stream.Collectors;
 
 public enum BodyPartCapability {
@@ -21,10 +22,16 @@ public enum BodyPartCapability {
         return description;
     }
 
-    public static String toLabels(Bitfield bitfield) {
+    public static String toLabels(EnumSet<BodyPartCapability> bitfield) {
         return Arrays.stream(values())
-            .filter(v -> bitfield.isSet(v.ordinal()))
+            .filter(bitfield::contains)
             .map(BodyPartCapability::getDescription)
             .collect(Collectors.joining(", "));
+    }
+
+    public static class Converter extends BaseEnumSetConverter<BodyPartCapability> {
+        public Converter() {
+            super(BodyPartCapability.class);
+        }
     }
 }
