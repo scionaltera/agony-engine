@@ -1,21 +1,29 @@
 package com.agonyengine.model.actor;
 
 import com.agonyengine.model.converter.BaseEnumSetConverter;
+import com.agonyengine.model.converter.PersistentEnum;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.stream.Collectors;
 
-public enum BodyPartCapability {
-    SPEAK("speak"),
-    WALK("walk"),
-    HOLD("hold items"),
-    SEE("see");
+public enum BodyPartCapability implements PersistentEnum {
+    SPEAK(0, "speak"),
+    WALK(1, "walk"),
+    HOLD(2, "hold items"),
+    SEE(3, "see");
 
+    private int index;
     private String description;
 
-    BodyPartCapability(String description) {
+    BodyPartCapability(int index, String description) {
+        this.index = index;
         this.description = description;
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
     }
 
     public String getDescription() {
