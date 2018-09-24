@@ -2,7 +2,7 @@ package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Tile;
-import com.agonyengine.model.actor.Tileset;
+import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.interpret.ActorSameRoom;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -58,7 +58,9 @@ public class LookCommand {
 
         output.append(directions.stream()
             .filter(direction -> exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY()) != null
-                || actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()))
+                || (actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY())
+                    && !(actor.getGameMap().getTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()).getFlags().contains(TileFlag.IMPASSABLE)))
+            )
             .map(Direction::getName)
             .collect(joining(" ", "[cyan]Exits: ", "")));
 

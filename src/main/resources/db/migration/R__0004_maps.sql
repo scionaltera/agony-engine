@@ -3,7 +3,7 @@ VALUES ('5231e20f-0658-4685-9396-6e69ebfb2c3b', 3, decode('000102010301040105', 
 UPDATE SET width=EXCLUDED.width, tiles=EXCLUDED.tiles, tileset_id=EXCLUDED.tileset_id;
 
 INSERT INTO game_map (id, width, tiles, tileset_id)
-VALUES ('a70bdd6f-b2a3-451e-aed2-90d1fe37f0dd', 5, decode('00000000000000000000000000000000000000000000000000', 'hex'), '6b9cdb5b-0560-4dde-b40b-89dd1b928844') ON CONFLICT (id) DO
+VALUES ('a70bdd6f-b2a3-451e-aed2-90d1fe37f0dd', 5, decode('01020304010203040102030401020304010203040102030400', 'hex'), '6b9cdb5b-0560-4dde-b40b-89dd1b928844') ON CONFLICT (id) DO
 UPDATE SET width=EXCLUDED.width, tiles=EXCLUDED.tiles, tileset_id=EXCLUDED.tileset_id;
 
 INSERT INTO exit (id, direction, location_map_id, location_x, location_y, destination_map_id, destination_x, destination_y)

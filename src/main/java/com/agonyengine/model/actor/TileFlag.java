@@ -4,7 +4,8 @@ import com.agonyengine.model.converter.BaseEnumSetConverter;
 import com.agonyengine.model.converter.PersistentEnum;
 
 public enum TileFlag implements PersistentEnum {
-    IMPASSABLE(0);
+    IMPASSABLE(0),
+    WILDERNESS(1);
 
     private int index;
 

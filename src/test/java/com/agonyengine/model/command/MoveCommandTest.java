@@ -4,6 +4,8 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
+import com.agonyengine.model.actor.Tile;
+import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.exit.Exit;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.util.Location;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,6 +54,9 @@ public class MoveCommandTest {
     private GameMap gameMap;
 
     @Mock
+    private Tile tile;
+
+    @Mock
     private GameOutput output;
 
     @Captor
@@ -77,7 +83,10 @@ public class MoveCommandTest {
 
         when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
 
+        when(tile.getFlags()).thenReturn(EnumSet.noneOf(TileFlag.class));
+
         when(gameMap.hasTile(anyInt(), anyInt())).thenReturn(true);
+        when(gameMap.getTile(anyInt(), anyInt())).thenReturn(tile);
 
         moveCommand = new MoveCommand(direction, applicationContext);
         moveCommand.postConstruct();
@@ -147,8 +156,28 @@ public class MoveCommandTest {
     }
 
     @Test
-    public void testInvokeIllegalDirection() {
+    public void testInvokeIntoNonexistentRoom() {
         when(gameMap.hasTile(0, 1)).thenReturn(false);
+
+        moveCommand.invoke(actor, output);
+
+        verify(output).append(contains("Alas, you cannot go that way."));
+
+        verify(gameMap).hasTile(anyInt(), anyInt());
+
+        verify(commService, never()).echoToRoom(any(), any(), any());
+
+        verify(actor, never()).setX(anyInt());
+        verify(actor, never()).setY(anyInt());
+
+        verify(actorRepository, never()).save(any());
+
+        verify(invokerService, never()).invoke(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testInvokeIntoImpassableRoom() {
+        when(tile.getFlags()).thenReturn(EnumSet.of(TileFlag.IMPASSABLE));
 
         moveCommand.invoke(actor, output);
 
