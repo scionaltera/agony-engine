@@ -1,6 +1,7 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.exit.Exit;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -53,7 +54,7 @@ public class MoveCommand {
             newX = actor.getX() + direction.getX();
             newY = actor.getY() + direction.getY();
 
-            if (!actor.getGameMap().hasTile(newX, newY)) {
+            if (!actor.getGameMap().hasTile(newX, newY) || actor.getGameMap().getTile(newX, newY).getFlags().contains(TileFlag.IMPASSABLE)) {
                 output.append("[default]Alas, you cannot go that way.");
                 return;
             }
