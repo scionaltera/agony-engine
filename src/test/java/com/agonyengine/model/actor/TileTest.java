@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class TileTest {
     private Tile tile;
@@ -70,6 +71,15 @@ public class TileTest {
 
         assertTrue(out.contains("<br/>"));
         assertTrue(out.contains("word "));
+    }
+
+    @Test
+    public void testTileset() {
+        Tileset tileset = mock(Tileset.class);
+
+        tile.setTileset(tileset);
+
+        assertEquals(tileset, tile.getTileset());
     }
 
     @Test

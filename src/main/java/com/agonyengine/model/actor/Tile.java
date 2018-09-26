@@ -7,6 +7,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,6 +21,9 @@ public class Tile {
     private int index;
     private String roomTitle;
     private String roomDescription;
+
+    @ManyToOne
+    private Tileset tileset;
 
     @Convert(converter = TileFlag.Converter.class)
     private EnumSet<TileFlag> flags = EnumSet.noneOf(TileFlag.class);
@@ -54,6 +58,14 @@ public class Tile {
 
     public void setRoomDescription(String roomDescription) {
         this.roomDescription = roomDescription;
+    }
+
+    public Tileset getTileset() {
+        return tileset;
+    }
+
+    public void setTileset(Tileset tileset) {
+        this.tileset = tileset;
     }
 
     public EnumSet<TileFlag> getFlags() {
