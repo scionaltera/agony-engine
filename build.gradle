@@ -107,3 +107,6 @@ dependencyCheck {
 }
 
 check.dependsOn project.tasks.pitest, project.tasks.dependencyCheckAnalyze, project.tasks.stats
+
+// ensure pitest runs after junit, because pitest requires all tests to have passed
+project.tasks.pitest.mustRunAfter test
