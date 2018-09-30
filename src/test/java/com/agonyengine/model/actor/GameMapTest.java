@@ -52,6 +52,15 @@ public class GameMapTest {
     }
 
     @Test
+    public void testVersion() {
+        int version = 5;
+
+        map.setVersion(version);
+
+        assertEquals(version, map.getVersion());
+    }
+
+    @Test
     public void testWidth() {
         assertEquals(3, map.getWidth());
 

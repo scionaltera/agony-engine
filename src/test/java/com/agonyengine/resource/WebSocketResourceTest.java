@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -292,6 +293,10 @@ public class WebSocketResourceTest {
 
         GameMap inventory = gameMapCaptor.getValue();
 
+        assertEquals(NO_UPDATE_VERSION, inventory.getVersion());
+        assertEquals(1, inventory.getWidth());
+        assertEquals(tileset, inventory.getTileset());
+        assertEquals((byte)0x00, inventory.getTiles()[0]);
         assertEquals(tile, inventory.getTile(0, 0));
 
         assertTrue(output.getOutput().stream()

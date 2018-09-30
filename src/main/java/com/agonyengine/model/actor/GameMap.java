@@ -13,12 +13,16 @@ import java.util.UUID;
 
 @Entity
 public class GameMap {
+    public static final int CURRENT_MAP_VERSION = 1;
+    public static final int NO_UPDATE_VERSION = -1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
 
     @Id
     @GeneratedValue
     @Type(type = "pg-uuid")
     private UUID id;
+    private int version;
     private int width;
     private byte[] tiles;
 
@@ -40,6 +44,14 @@ public class GameMap {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     public int getWidth() {
