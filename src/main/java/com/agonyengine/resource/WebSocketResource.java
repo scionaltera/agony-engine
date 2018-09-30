@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
+
 @Controller
 public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
@@ -103,8 +105,9 @@ public class WebSocketResource {
         if (actor.getInventory() == null) {
             GameMap inventoryMap = new GameMap();
 
+            inventoryMap.setVersion(NO_UPDATE_VERSION);
             inventoryMap.setWidth(1);
-            inventoryMap.setTiles(new byte[] { (byte)0xFF });
+            inventoryMap.setTiles(new byte[] { (byte)0x00 });
             inventoryMap.setTileset(tilesetRepository.getOne(inventoryTilesetId));
 
             inventoryMap = gameMapRepository.save(inventoryMap);
