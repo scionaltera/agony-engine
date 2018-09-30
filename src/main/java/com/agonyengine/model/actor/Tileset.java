@@ -5,7 +5,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import java.util.HashMap;
@@ -22,8 +21,7 @@ public class Tileset {
 
     private String name;
 
-    @OneToMany
-    @JoinColumn(name = "tileset")
+    @OneToMany(mappedBy = "tileset")
     @MapKey(name = "index")
     private Map<Integer, Tile> tiles = new HashMap<>();
 
