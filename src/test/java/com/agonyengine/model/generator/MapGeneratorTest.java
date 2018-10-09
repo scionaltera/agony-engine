@@ -123,7 +123,6 @@ public class MapGeneratorTest {
 
         assertEquals(map, savedMap);
         assertEquals(CURRENT_MAP_VERSION, map.getVersion());
-        verify(map, atLeastOnce()).setTile(anyInt(), anyInt(), anyByte());
         verify(gameMapRepository).save(eq(map));
     }
 

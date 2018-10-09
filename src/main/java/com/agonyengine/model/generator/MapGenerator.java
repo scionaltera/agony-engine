@@ -39,13 +39,10 @@ public class MapGenerator {
         RANDOM = new Random();
     }
 
-    MapGenerator(
-        GameMapRepository gameMapRepository,
-        TileRepository tileRepository,
-        Random random) {
-
+    MapGenerator(GameMapRepository gameMapRepository, TileRepository tileRepository, Random random) {
         this.gameMapRepository = gameMapRepository;
         this.tileRepository = tileRepository;
+
         RANDOM = random;
     }
 
@@ -56,6 +53,15 @@ public class MapGenerator {
         List<Tile> impassable = findTilesByFlag(map.getTileset(), TileFlag.IMPASSABLE);
 
         floodFill(map, wilderness);
+
+        for (int i = 0; i < RANDOM.nextInt(3); i++) {
+            drawCircle(
+                map,
+                impassable.get(0),
+                RANDOM.nextInt(map.getWidth()),
+                RANDOM.nextInt(map.getWidth()),
+                RANDOM.nextInt(map.getWidth() / 3));
+        }
 
         map.setVersion(CURRENT_MAP_VERSION);
 
@@ -72,7 +78,7 @@ public class MapGenerator {
         List<Tile> wilderness = findTilesByFlag(map.getTileset(), TileFlag.WILDERNESS);
         List<Tile> impassable = findTilesByFlag(map.getTileset(), TileFlag.IMPASSABLE);
 
-        floodFill(map, wilderness);
+        // Required changes between previous version and latest version go here.
 
         map.setVersion(CURRENT_MAP_VERSION);
 
