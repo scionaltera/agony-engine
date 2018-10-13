@@ -83,6 +83,20 @@ public class MapGeneratorTest {
         }
     }
 
+    @Test
+    public void testSquareOverlapsMapBoundary() {
+        GameMap map = mapGenerator.createBlankMap(tileset);
+
+        mapGenerator.drawSquare(map, impassable, 0, 0, 2);
+    }
+
+    @Test
+    public void testCircleOverlapsMapBoundary() {
+        GameMap map = mapGenerator.createBlankMap(tileset);
+
+        mapGenerator.drawCircle(map, impassable, 0, 0, 2);
+    }
+
     @SuppressWarnings("Duplicates")
     @Test
     public void testUpdateMapWillNotUpdateCurrentVersion() {

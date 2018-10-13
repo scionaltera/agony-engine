@@ -106,7 +106,11 @@ public class MapGenerator {
     void drawSquare(GameMap map, Tile tile, int centerX, int centerY, int radius) {
         for (int x = centerX - radius; x <= centerX + radius; x++) {
             for (int y = centerY - radius; y <= centerY + radius; y++) {
-                map.setTile(x, y, (byte)tile.getIndex());
+                try {
+                    map.setTile(x, y, (byte) tile.getIndex());
+                } catch (IllegalArgumentException e) {
+                    LOGGER.trace("Square is partially outside map boundaries: ({}, {})", x, y);
+                }
             }
         }
     }
@@ -115,7 +119,11 @@ public class MapGenerator {
         for (int x = centerX - radius; x <= centerX + radius; x++) {
             for (int y = centerY - radius; y <= centerY + radius; y++) {
                 if (distance(centerX, centerY, x, y) <= radius) {
-                    map.setTile(x, y, (byte) tile.getIndex());
+                    try {
+                        map.setTile(x, y, (byte) tile.getIndex());
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.trace("Circle is partially outside map boundaries: ({}, {})", x, y);
+                    }
                 }
             }
         }
