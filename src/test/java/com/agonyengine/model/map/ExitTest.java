@@ -1,4 +1,4 @@
-package com.agonyengine.model.exit;
+package com.agonyengine.model.map;
 
 import com.agonyengine.model.util.Location;
 import org.junit.Before;

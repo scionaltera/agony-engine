@@ -1,7 +1,7 @@
 package com.agonyengine.repository;
 
 import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.exit.Exit;
+import com.agonyengine.model.map.Exit;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
