@@ -3,14 +3,19 @@ package com.agonyengine.model.generator;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Tile;
 import com.agonyengine.model.actor.Tileset;
+import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TileRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -36,7 +41,13 @@ public class MapGeneratorTest {
     private TileRepository tileRepository;
 
     @Mock
+    private StartLocationRepository startLocationRepository;
+
+    @Mock
     private Tileset tileset;
+
+    @Captor
+    private ArgumentCaptor<StartLocation> startLocationArgumentCaptor;
 
     private List<Tile> wilderness;
     private Tile impassable;
@@ -66,7 +77,7 @@ public class MapGeneratorTest {
 
         when(tileRepository.findByTileset(any(Tileset.class))).thenReturn(fakeTiles);
 
-        mapGenerator = new MapGenerator(gameMapRepository, tileRepository);
+        mapGenerator = new MapGenerator(gameMapRepository, tileRepository, startLocationRepository);
     }
 
     @Test
@@ -76,11 +87,44 @@ public class MapGeneratorTest {
         assertNotNull(map.getId());
         assertEquals(CURRENT_MAP_VERSION, map.getVersion());
 
+        boolean foundImpassable = false;
+
         for (int x = 0; x < map.getWidth(); x++) {
             for (int y = 0; y < map.getWidth(); y++) {
-                assertNotNull(map.getTile(x, y));
+                Tile tile = map.getTile(x, y);
+
+                assertNotNull(tile);
+
+                if (!foundImpassable) {
+                    if (tile.getFlags().contains(IMPASSABLE)) {
+                        foundImpassable = true;
+                    }
+                }
             }
         }
+    }
+
+    @Test
+    public void testStartLocationIsNotImpassable() {
+        GameMap map = mapGenerator.generateMap(tileset);
+
+        verify(startLocationRepository).save(startLocationArgumentCaptor.capture());
+
+        StartLocation startLocation = startLocationArgumentCaptor.getValue();
+        Tile tile = map.getTile(
+            startLocation.getLocation().getX(),
+            startLocation.getLocation().getY());
+
+        assertEquals(map, startLocation.getLocation().getGameMap());
+        assertFalse(tile.getFlags().contains(IMPASSABLE));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testUnableToPlaceStartLocation() {
+        GameMap map = mapGenerator.createBlankMap(tileset);
+
+        mapGenerator.floodFill(map, Collections.singletonList(impassable));
+        mapGenerator.placeStartLocation(map);
     }
 
     @Test
@@ -160,7 +204,7 @@ public class MapGeneratorTest {
 
         when(mockRandom.nextInt(anyInt())).thenReturn(mapAdditionalWidth);
 
-        MapGenerator mapGenerator = new MapGenerator(gameMapRepository, tileRepository, mockRandom);
+        MapGenerator mapGenerator = new MapGenerator(gameMapRepository, tileRepository, startLocationRepository, mockRandom);
         GameMap map = mapGenerator.createBlankMap(tileset);
 
         assertEquals(MAP_MIN_WIDTH + mapAdditionalWidth, map.getWidth());

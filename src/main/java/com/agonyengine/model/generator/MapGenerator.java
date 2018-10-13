@@ -4,7 +4,10 @@ import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Tile;
 import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.actor.Tileset;
+import com.agonyengine.model.map.StartLocation;
+import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,18 +33,30 @@ public class MapGenerator {
 
     private GameMapRepository gameMapRepository;
     private TileRepository tileRepository;
+    private StartLocationRepository startLocationRepository;
 
     @Inject
-    public MapGenerator(GameMapRepository gameMapRepository, TileRepository tileRepository) {
+    public MapGenerator(
+        GameMapRepository gameMapRepository,
+        TileRepository tileRepository,
+        StartLocationRepository startLocationRepository) {
+
         this.gameMapRepository = gameMapRepository;
         this.tileRepository = tileRepository;
+        this.startLocationRepository = startLocationRepository;
 
         RANDOM = new Random();
     }
 
-    MapGenerator(GameMapRepository gameMapRepository, TileRepository tileRepository, Random random) {
+    MapGenerator(
+        GameMapRepository gameMapRepository,
+        TileRepository tileRepository,
+        StartLocationRepository startLocationRepository,
+        Random random) {
+
         this.gameMapRepository = gameMapRepository;
         this.tileRepository = tileRepository;
+        this.startLocationRepository = startLocationRepository;
 
         RANDOM = random;
     }
@@ -63,6 +78,7 @@ public class MapGenerator {
                 RANDOM.nextInt(map.getWidth() / 3));
         }
 
+        placeStartLocation(map);
         map.setVersion(CURRENT_MAP_VERSION);
 
         return gameMapRepository.save(map);
@@ -92,6 +108,35 @@ public class MapGenerator {
         map.setTileset(tileset);
 
         return map;
+    }
+
+    void placeStartLocation(GameMap map) {
+        Tile tile;
+        int tries = 0;
+        int x;
+        int y;
+
+        do {
+            x = RANDOM.nextInt(map.getWidth());
+            y = RANDOM.nextInt(map.getWidth());
+            tile = map.getTile(x, y);
+            tries++;
+
+            if (tries > Math.pow(map.getWidth(), 2)) {
+                throw new IllegalStateException("Unable to place start location on map!");
+            }
+        } while (tile == null || tile.getFlags().contains(TileFlag.IMPASSABLE));
+
+        Location location = new Location();
+        StartLocation startLocation = new StartLocation();
+
+        location.setGameMap(map);
+        location.setX(x);
+        location.setY(y);
+
+        startLocation.setLocation(location);
+
+        startLocationRepository.save(startLocation);
     }
 
     void floodFill(GameMap map, List<Tile> tiles) {

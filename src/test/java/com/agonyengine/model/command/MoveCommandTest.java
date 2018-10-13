@@ -6,7 +6,7 @@ import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Tile;
 import com.agonyengine.model.actor.TileFlag;
-import com.agonyengine.model.exit.Exit;
+import com.agonyengine.model.map.Exit;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.ActorRepository;
