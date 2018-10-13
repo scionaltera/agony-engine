@@ -39,13 +39,10 @@ public class MapGenerator {
         RANDOM = new Random();
     }
 
-    MapGenerator(
-        GameMapRepository gameMapRepository,
-        TileRepository tileRepository,
-        Random random) {
-
+    MapGenerator(GameMapRepository gameMapRepository, TileRepository tileRepository, Random random) {
         this.gameMapRepository = gameMapRepository;
         this.tileRepository = tileRepository;
+
         RANDOM = random;
     }
 
@@ -56,6 +53,15 @@ public class MapGenerator {
         List<Tile> impassable = findTilesByFlag(map.getTileset(), TileFlag.IMPASSABLE);
 
         floodFill(map, wilderness);
+
+        for (int i = 0; i < RANDOM.nextInt(3); i++) {
+            drawCircle(
+                map,
+                impassable.get(0),
+                RANDOM.nextInt(map.getWidth()),
+                RANDOM.nextInt(map.getWidth()),
+                RANDOM.nextInt(map.getWidth() / 3));
+        }
 
         map.setVersion(CURRENT_MAP_VERSION);
 
@@ -72,7 +78,7 @@ public class MapGenerator {
         List<Tile> wilderness = findTilesByFlag(map.getTileset(), TileFlag.WILDERNESS);
         List<Tile> impassable = findTilesByFlag(map.getTileset(), TileFlag.IMPASSABLE);
 
-        floodFill(map, wilderness);
+        // Required changes between previous version and latest version go here.
 
         map.setVersion(CURRENT_MAP_VERSION);
 
@@ -100,7 +106,11 @@ public class MapGenerator {
     void drawSquare(GameMap map, Tile tile, int centerX, int centerY, int radius) {
         for (int x = centerX - radius; x <= centerX + radius; x++) {
             for (int y = centerY - radius; y <= centerY + radius; y++) {
-                map.setTile(x, y, (byte)tile.getIndex());
+                try {
+                    map.setTile(x, y, (byte) tile.getIndex());
+                } catch (IllegalArgumentException e) {
+                    LOGGER.trace("Square is partially outside map boundaries: ({}, {})", x, y);
+                }
             }
         }
     }
@@ -109,7 +119,11 @@ public class MapGenerator {
         for (int x = centerX - radius; x <= centerX + radius; x++) {
             for (int y = centerY - radius; y <= centerY + radius; y++) {
                 if (distance(centerX, centerY, x, y) <= radius) {
-                    map.setTile(x, y, (byte) tile.getIndex());
+                    try {
+                        map.setTile(x, y, (byte) tile.getIndex());
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.trace("Circle is partially outside map boundaries: ({}, {})", x, y);
+                    }
                 }
             }
         }
