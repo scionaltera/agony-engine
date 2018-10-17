@@ -15,6 +15,8 @@ import java.util.UUID;
 
 @Entity
 public class CreatureInfo {
+    public static final int BODY_VERSION = 1;
+
     @Id
     @GeneratedValue
     @Type(type = "pg-uuid")
