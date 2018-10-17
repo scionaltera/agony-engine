@@ -4,12 +4,15 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.generator.BodyGenerator;
+import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
+import com.agonyengine.resource.exception.StartLocationNotFoundException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
@@ -36,6 +39,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.agonyengine.model.actor.CreatureInfo.BODY_VERSION;
 import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
 
 @Controller
@@ -43,17 +47,16 @@ public class WebSocketResource {
     static final String SPRING_SESSION_ID_KEY = "SPRING.SESSION.ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketResource.class);
-    private static final int BODY_VERSION = 1;
 
     private String applicationVersion;
     private Date applicationBootDate;
-    private UUID defaultMapId;
     private UUID inventoryTilesetId;
     private InputTokenizer inputTokenizer;
     private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
     private TilesetRepository tilesetRepository;
+    private StartLocationRepository startLocationRepository;
     private InvokerService invokerService;
     private CommService commService;
     private BodyGenerator bodyGenerator;
@@ -63,26 +66,26 @@ public class WebSocketResource {
     public WebSocketResource(
         String applicationVersion,
         Date applicationBootDate,
-        UUID defaultMapId,
         UUID inventoryTilesetId,
         InputTokenizer inputTokenizer,
         GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         TilesetRepository tilesetRepository,
+        StartLocationRepository startLocationRepository,
         InvokerService invokerService,
         CommService commService,
         BodyGenerator bodyGenerator) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
-        this.defaultMapId = defaultMapId;
         this.inventoryTilesetId = inventoryTilesetId;
         this.inputTokenizer = inputTokenizer;
         this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
         this.tilesetRepository = tilesetRepository;
+        this.startLocationRepository = startLocationRepository;
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
@@ -119,7 +122,11 @@ public class WebSocketResource {
         // This can probably get removed at some point but for awhile there needs to be a framework to allow for
         // breaking changes. The system for bodies is complex and changing frequently.
         if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
-            final GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+            final StartLocation startLocation = startLocationRepository
+                .findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new StartLocationNotFoundException("No start locations exist in database!"));
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
             actor.getCreatureInfo().getBodyParts().stream()
@@ -127,7 +134,7 @@ public class WebSocketResource {
                 .forEach(part -> {
                     part.getArmor().setX(0);
                     part.getArmor().setY(0);
-                    part.getArmor().setGameMap(defaultMap);
+                    part.getArmor().setGameMap(startLocation.getLocation().getGameMap());
                     part.setArmor(null);
 
                     actorRepository.save(part.getArmor());
@@ -152,11 +159,15 @@ public class WebSocketResource {
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
         if (actor.getGameMap() == null) {
-            GameMap defaultMap = gameMapRepository.getOne(defaultMapId);
+            StartLocation startLocation = startLocationRepository
+                .findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new StartLocationNotFoundException("No start locations exist in database!"));
 
-            actor.setGameMap(defaultMap);
-            actor.setX(0);
-            actor.setY(0);
+            actor.setGameMap(startLocation.getLocation().getGameMap());
+            actor.setX(startLocation.getLocation().getX());
+            actor.setY(startLocation.getLocation().getY());
 
             greeting.forEach(line -> {
                 if (line.startsWith("*")) {

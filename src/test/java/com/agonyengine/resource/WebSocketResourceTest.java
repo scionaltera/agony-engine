@@ -11,13 +11,17 @@ import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.generator.BodyGenerator;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
+import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
+import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
+import com.agonyengine.resource.exception.StartLocationNotFoundException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
@@ -45,6 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.agonyengine.model.actor.CreatureInfo.BODY_VERSION;
 import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
 import static org.junit.Assert.*;
@@ -53,6 +58,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class WebSocketResourceTest {
+    private static final int START_X = 2;
+    private static final int START_Y = 3;
+
     @Mock
     private ApplicationContext applicationContext;
 
@@ -70,6 +78,9 @@ public class WebSocketResourceTest {
 
     @Mock
     private TilesetRepository tilesetRepository;
+
+    @Mock
+    private StartLocationRepository startLocationRepository;
 
     @Mock
     private VerbRepository verbRepository;
@@ -120,7 +131,6 @@ public class WebSocketResourceTest {
     private ArgumentCaptor<GameMap> gameMapCaptor;
 
     private UUID defaultMapId = UUID.randomUUID();
-    private UUID inventoryTilesetId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
     private String remoteIpAddress = "10.11.12.13";
     private UUID sessionId = UUID.randomUUID();
@@ -129,6 +139,7 @@ public class WebSocketResourceTest {
     private Map<String, Object> sessionAttributes = new HashMap<>();
     private Message<byte[]> message;
     private List<Verb> verbs;
+    private StartLocation startLocation = new StartLocation();
 
     private WebSocketResource resource;
 
@@ -138,6 +149,14 @@ public class WebSocketResourceTest {
 
         sentences.add(Collections.singletonList("ABLE"));
         message = buildMockMessage(sessionId.toString());
+
+        Location location = new Location();
+
+        location.setGameMap(gameMap);
+        location.setX(START_X);
+        location.setY(START_Y);
+
+        startLocation.setLocation(location);
 
         when(principal.getName()).thenReturn("Shepherd");
         when(actor.getConnection()).thenReturn(connection);
@@ -149,6 +168,7 @@ public class WebSocketResourceTest {
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(tilesetRepository.getOne(any(UUID.class))).thenReturn(tileset);
         when(tileset.getTile(anyInt())).thenReturn(tile);
+        when(startLocationRepository.findAll()).thenReturn(Collections.singletonList(startLocation));
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);
@@ -172,12 +192,12 @@ public class WebSocketResourceTest {
             "0.1.2-UNIT-TEST",
             new Date(),
             defaultMapId,
-            inventoryTilesetId,
             inputTokenizer,
             gameMapRepository,
             sessionRepository,
             actorRepository,
             tilesetRepository,
+            startLocationRepository,
             invokerService,
             commService,
             bodyGenerator);
@@ -234,8 +254,8 @@ public class WebSocketResourceTest {
 
         verify(actor, never()).setInventory(any());
         verify(actor).setGameMap(eq(gameMap));
-        verify(actor).setX(0);
-        verify(actor).setY(0);
+        verify(actor).setX(START_X);
+        verify(actor).setY(START_Y);
 
         verify(connection).setSessionUsername(eq("Shepherd"));
         verify(connection).setSessionId(anyString());
@@ -272,8 +292,8 @@ public class WebSocketResourceTest {
 
         verify(actor).setInventory(gameMapCaptor.capture());
         verify(actor).setGameMap(eq(gameMap));
-        verify(actor).setX(0);
-        verify(actor).setY(0);
+        verify(actor).setX(START_X);
+        verify(actor).setY(START_Y);
 
         verify(connection).setSessionUsername(eq("Shepherd"));
         verify(connection).setSessionId(anyString());
@@ -330,6 +350,22 @@ public class WebSocketResourceTest {
     @Test(expected = NoSuchActorException.class)
     public void testOnSubscribeNoTemplate() {
         when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        resource.onSubscribe(principal, message, actorId.toString());
+    }
+
+    @Test(expected = StartLocationNotFoundException.class)
+    public void testOnSubscribeNoStartLocationsDuringBodyUpgrade() {
+        when(startLocationRepository.findAll()).thenReturn(Collections.emptyList());
+
+        resource.onSubscribe(principal, message, actorId.toString());
+    }
+
+    @Test(expected = StartLocationNotFoundException.class)
+    public void testOnSubscribeNoStartLocationDuringMapTransfer() {
+        when(actor.getCreatureInfo()).thenReturn(creatureInfo);
+        when(creatureInfo.getBodyVersion()).thenReturn(BODY_VERSION);
+        when(startLocationRepository.findAll()).thenReturn(Collections.emptyList());
 
         resource.onSubscribe(principal, message, actorId.toString());
     }

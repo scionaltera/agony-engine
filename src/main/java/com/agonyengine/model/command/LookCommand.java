@@ -49,11 +49,7 @@ public class LookCommand {
         List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
         Tile tile = actor.getTile();
 
-        output.append(String.format("[yellow](%d, %d) %s",
-            actor.getX(),
-            actor.getY(),
-            tile.getRoomTitle()));
-
+        output.append(String.format("[yellow]%s", tile.getRoomTitle()));
         output.append(String.format("[default]%s", tile.getRoomDescription()));
 
         output.append(directions.stream()
