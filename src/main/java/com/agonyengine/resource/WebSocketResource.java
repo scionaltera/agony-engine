@@ -248,9 +248,9 @@ public class WebSocketResource {
     private StartLocation generateStartingMap() {
         Tileset tileset = tilesetRepository.findAll()
             .stream()
-            .filter(t -> t.getFlags().contains(TilesetFlag.START_ZONE))
+            .filter(t -> t.getFlags().contains(TilesetFlag.START_MAP))
             .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("No tilesets exist with START_ZONE flag!"));
+            .orElseThrow(() -> new IllegalArgumentException("No tilesets exist with START_MAP flag!"));
 
         GameMap map = mapGenerator.generateMap(tileset);
 

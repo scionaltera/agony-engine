@@ -362,7 +362,7 @@ public class WebSocketResourceTest {
     @Test
     public void testOnSubscribeNoStartLocationsDuringBodyUpgrade() {
         when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
-        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_ZONE));
+        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
 
         //noinspection unchecked
         when(startLocationRepository.findAll()).thenReturn(
@@ -378,7 +378,7 @@ public class WebSocketResourceTest {
     @Test
     public void testOnSubscribeNoStartLocationDuringMapTransfer() {
         when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
-        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_ZONE));
+        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
         when(actor.getCreatureInfo()).thenReturn(creatureInfo);
         when(creatureInfo.getBodyVersion()).thenReturn(BODY_VERSION);
 

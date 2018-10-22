@@ -4,7 +4,7 @@ import com.agonyengine.model.converter.BaseEnumSetConverter;
 import com.agonyengine.model.converter.PersistentEnum;
 
 public enum TilesetFlag implements PersistentEnum {
-    START_ZONE(0);
+    START_MAP(0);
 
     private int index;
 
