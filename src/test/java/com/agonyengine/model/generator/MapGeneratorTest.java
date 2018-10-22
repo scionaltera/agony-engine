@@ -9,8 +9,6 @@ import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TileRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -46,9 +44,6 @@ public class MapGeneratorTest {
     @Mock
     private Tileset tileset;
 
-    @Captor
-    private ArgumentCaptor<StartLocation> startLocationArgumentCaptor;
-
     private List<Tile> wilderness;
     private Tile impassable;
 
@@ -73,6 +68,14 @@ public class MapGeneratorTest {
             map.setId(UUID.randomUUID());
 
             return map;
+        });
+
+        when(startLocationRepository.save(any(StartLocation.class))).thenAnswer(i -> {
+            StartLocation startLocation = i.getArgument(0);
+
+            startLocation.setId(UUID.randomUUID());
+
+            return startLocation;
         });
 
         when(tileRepository.findByTileset(any(Tileset.class))).thenReturn(fakeTiles);
@@ -107,10 +110,11 @@ public class MapGeneratorTest {
     @Test
     public void testStartLocationIsNotImpassable() {
         GameMap map = mapGenerator.generateMap(tileset);
+        StartLocation startLocation = mapGenerator.placeStartLocation(map);
 
-        verify(startLocationRepository).save(startLocationArgumentCaptor.capture());
+        verify(gameMapRepository).save(any(GameMap.class));
+        verify(startLocationRepository).save(any(StartLocation.class));
 
-        StartLocation startLocation = startLocationArgumentCaptor.getValue();
         Tile tile = map.getTile(
             startLocation.getLocation().getX(),
             startLocation.getLocation().getY());

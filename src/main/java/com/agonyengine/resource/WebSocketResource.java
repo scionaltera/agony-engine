@@ -3,7 +3,10 @@ package com.agonyengine.resource;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.CreatureInfo;
 import com.agonyengine.model.actor.GameMap;
+import com.agonyengine.model.actor.Tileset;
+import com.agonyengine.model.actor.TilesetFlag;
 import com.agonyengine.model.generator.BodyGenerator;
+import com.agonyengine.model.generator.MapGenerator;
 import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
@@ -12,7 +15,6 @@ import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
-import com.agonyengine.resource.exception.StartLocationNotFoundException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ public class WebSocketResource {
     private InvokerService invokerService;
     private CommService commService;
     private BodyGenerator bodyGenerator;
+    private MapGenerator mapGenerator;
     private List<String> greeting;
 
     @Inject
@@ -75,7 +78,8 @@ public class WebSocketResource {
         StartLocationRepository startLocationRepository,
         InvokerService invokerService,
         CommService commService,
-        BodyGenerator bodyGenerator) {
+        BodyGenerator bodyGenerator,
+        MapGenerator mapGenerator) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
@@ -89,6 +93,7 @@ public class WebSocketResource {
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
+        this.mapGenerator = mapGenerator;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -126,7 +131,7 @@ public class WebSocketResource {
                 .findAll()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new StartLocationNotFoundException("No start locations exist in database!"));
+                .orElseGet(this::generateStartingMap);
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
             actor.getCreatureInfo().getBodyParts().stream()
@@ -163,7 +168,7 @@ public class WebSocketResource {
                 .findAll()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new StartLocationNotFoundException("No start locations exist in database!"));
+                .orElseGet(this::generateStartingMap);
 
             actor.setGameMap(startLocation.getLocation().getGameMap());
             actor.setX(startLocation.getLocation().getX());
@@ -238,6 +243,18 @@ public class WebSocketResource {
             .append("[dwhite]> ");
 
         return output;
+    }
+
+    private StartLocation generateStartingMap() {
+        Tileset tileset = tilesetRepository.findAll()
+            .stream()
+            .filter(t -> t.getFlags().contains(TilesetFlag.START_ZONE))
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("No tilesets exist with START_ZONE flag!"));
+
+        GameMap map = mapGenerator.generateMap(tileset);
+
+        return mapGenerator.placeStartLocation(map);
     }
 
     private Session getSpringSession(Message<byte[]> message) {
