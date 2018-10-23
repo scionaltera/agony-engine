@@ -7,8 +7,10 @@ import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
 import com.agonyengine.model.actor.Tile;
 import com.agonyengine.model.actor.Tileset;
+import com.agonyengine.model.actor.TilesetFlag;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.generator.BodyGenerator;
+import com.agonyengine.model.generator.MapGenerator;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
 import com.agonyengine.model.map.StartLocation;
@@ -21,7 +23,6 @@ import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
-import com.agonyengine.resource.exception.StartLocationNotFoundException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +126,9 @@ public class WebSocketResourceTest {
     @Mock
     private BodyGenerator bodyGenerator;
 
+    @Mock
+    private MapGenerator mapGenerator;
+
     @Captor
     private ArgumentCaptor<List> listCaptor;
 
@@ -132,7 +137,6 @@ public class WebSocketResourceTest {
 
     private UUID defaultMapId = UUID.randomUUID();
     private List<List<String>> sentences = new ArrayList<>();
-    private String remoteIpAddress = "10.11.12.13";
     private UUID sessionId = UUID.randomUUID();
     private UUID actorId = UUID.randomUUID();
     private Map<String, Object> headers = new HashMap<>();
@@ -164,7 +168,7 @@ public class WebSocketResourceTest {
         when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
-        when(session.getAttribute(eq("remoteIpAddress"))).thenReturn(remoteIpAddress);
+        when(session.getAttribute(eq("remoteIpAddress"))).thenReturn("10.11.12.13");
         when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
         when(tilesetRepository.getOne(any(UUID.class))).thenReturn(tileset);
         when(tileset.getTile(anyInt())).thenReturn(tile);
@@ -200,7 +204,8 @@ public class WebSocketResourceTest {
             startLocationRepository,
             invokerService,
             commService,
-            bodyGenerator);
+            bodyGenerator,
+            mapGenerator);
     }
 
     @SuppressWarnings("unchecked")
@@ -354,17 +359,46 @@ public class WebSocketResourceTest {
         resource.onSubscribe(principal, message, actorId.toString());
     }
 
-    @Test(expected = StartLocationNotFoundException.class)
+    @Test
     public void testOnSubscribeNoStartLocationsDuringBodyUpgrade() {
-        when(startLocationRepository.findAll()).thenReturn(Collections.emptyList());
+        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
+        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
+
+        //noinspection unchecked
+        when(startLocationRepository.findAll()).thenReturn(
+            Collections.emptyList(),
+            Collections.singletonList(startLocation));
 
         resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(mapGenerator).generateMap(eq(tileset));
+        verify(actor).setCreatureInfo(isNull());
     }
 
-    @Test(expected = StartLocationNotFoundException.class)
+    @Test
     public void testOnSubscribeNoStartLocationDuringMapTransfer() {
+        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
+        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
         when(actor.getCreatureInfo()).thenReturn(creatureInfo);
         when(creatureInfo.getBodyVersion()).thenReturn(BODY_VERSION);
+
+        //noinspection unchecked
+        when(startLocationRepository.findAll()).thenReturn(
+            Collections.emptyList(),
+            Collections.singletonList(startLocation));
+
+        when(mapGenerator.generateMap(any(Tileset.class))).thenReturn(gameMap);
+        when(mapGenerator.placeStartLocation(any(GameMap.class))).thenReturn(startLocation);
+
+        resource.onSubscribe(principal, message, actorId.toString());
+
+        verify(actor).setGameMap(any(GameMap.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testOnSubscribeNoEligibleZones() {
+        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
+        when(tileset.getFlags()).thenReturn(EnumSet.noneOf(TilesetFlag.class));
         when(startLocationRepository.findAll()).thenReturn(Collections.emptyList());
 
         resource.onSubscribe(principal, message, actorId.toString());

@@ -26,9 +26,9 @@ INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
 VALUES ('6ad8680b-1539-429a-b6c8-6d86e8465088', 5, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Lounge', 'Several couches and overstuffed chairs have been arranged here, offering comfort to weary travellers.', 0) ON CONFLICT (id) DO
 UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
 
-INSERT INTO tileset (id, name)
-VALUES ('6b9cdb5b-0560-4dde-b40b-89dd1b928844', 'Temperate Rain Forest') ON CONFLICT (id) DO
-UPDATE SET name=EXCLUDED.name;
+INSERT INTO tileset (id, name, flags)
+VALUES ('6b9cdb5b-0560-4dde-b40b-89dd1b928844', 'Temperate Rain Forest', 1) ON CONFLICT (id) DO
+UPDATE SET name=EXCLUDED.name, flags=EXCLUDED.flags;
 
 INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
 VALUES ('ff6d419e-35ff-441a-8d52-15ec048fdbf9', 0, '6b9cdb5b-0560-4dde-b40b-89dd1b928844', 'Impassable', 'This room is impassable, and not actually part of the map. What are you doing here?', 1) ON CONFLICT (id) DO

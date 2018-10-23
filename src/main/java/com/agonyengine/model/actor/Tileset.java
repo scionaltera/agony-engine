@@ -2,11 +2,13 @@ package com.agonyengine.model.actor;
 
 import org.hibernate.annotations.Type;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +26,9 @@ public class Tileset {
     @OneToMany(mappedBy = "tileset")
     @MapKey(name = "index")
     private Map<Integer, Tile> tiles = new HashMap<>();
+
+    @Convert(converter = TilesetFlag.Converter.class)
+    private EnumSet<TilesetFlag> flags = EnumSet.noneOf(TilesetFlag.class);
 
     public UUID getId() {
         return id;
@@ -47,6 +52,14 @@ public class Tileset {
 
     public void setTile(Tile tile) {
         tiles.put(tile.getIndex(), tile);
+    }
+
+    public EnumSet<TilesetFlag> getFlags() {
+        return flags;
+    }
+
+    public void setFlags(EnumSet<TilesetFlag> flags) {
+        this.flags = flags;
     }
 
     @Override

@@ -78,10 +78,14 @@ public class MapGenerator {
                 RANDOM.nextInt(map.getWidth() / 3));
         }
 
-        placeStartLocation(map);
         map.setVersion(CURRENT_MAP_VERSION);
 
-        return gameMapRepository.save(map);
+        GameMap savedMap = gameMapRepository.save(map);
+
+        LOGGER.info("Generated map {}: width={}, tileset={}",
+            savedMap.getId(), savedMap.getWidth(), savedMap.getTileset().getName());
+
+        return savedMap;
     }
 
     public GameMap updateMap(GameMap map) {
@@ -110,7 +114,7 @@ public class MapGenerator {
         return map;
     }
 
-    void placeStartLocation(GameMap map) {
+    public StartLocation placeStartLocation(GameMap map) {
         Tile tile;
         int tries = 0;
         int x;
@@ -136,7 +140,14 @@ public class MapGenerator {
 
         startLocation.setLocation(location);
 
-        startLocationRepository.save(startLocation);
+        StartLocation saved = startLocationRepository.save(startLocation);
+
+        LOGGER.info("Created start location: map={} ({},{})",
+            saved.getLocation().getGameMap().getId(),
+            saved.getLocation().getX(),
+            saved.getLocation().getY());
+
+        return saved;
     }
 
     void floodFill(GameMap map, List<Tile> tiles) {
