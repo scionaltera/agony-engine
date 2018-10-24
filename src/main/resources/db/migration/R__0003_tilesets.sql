@@ -1,31 +1,3 @@
-INSERT INTO tileset (id, name)
-VALUES ('e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'The Temple') ON CONFLICT (id) DO
-UPDATE SET name=EXCLUDED.name;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('3e4d15e1-27b4-402f-a160-7c9758c9ca04', 0, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'The Origin', 'A building of smooth polished stones has been constructed around a circular spot on the floor. A white glow emanates from the spot, radiating glowing particles up into the air.', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('ce38de4f-b5d5-4b76-bbb3-98f46c03557c', 1, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Colonnade', 'The covered colonnade is built from smooth polished stone. The open sides look out into the evergreen forest beyond, providing only minimal protection from the elements.', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('4b50f352-ef71-4fc0-a8d6-b237bc30bf5d', 2, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Vestibule', 'This small vestibule serves as a place for visitors to remove their wet or dirty clothing before proceeding further into the temple. ', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('bca5bbea-1431-40ab-b7a7-89ea68381034', 3, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Courtyard', 'A small, but carefully maintained courtyard contains many examples of the local flora, arranged beautifully by some master gardener.', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('23355f3d-1e43-4c84-88db-fc7d25e4d869', 4, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Armory', 'Weapon and armor racks line the walls, and a practice dummy stands forlornly in the corner.', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
-INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
-VALUES ('6ad8680b-1539-429a-b6c8-6d86e8465088', 5, 'e75bb6e1-a6e9-45cf-bfb4-a9eea1e3b4be', 'Lounge', 'Several couches and overstuffed chairs have been arranged here, offering comfort to weary travellers.', 0) ON CONFLICT (id) DO
-UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
-
 INSERT INTO tileset (id, name, flags)
 VALUES ('6b9cdb5b-0560-4dde-b40b-89dd1b928844', 'Temperate Rain Forest', 1) ON CONFLICT (id) DO
 UPDATE SET name=EXCLUDED.name, flags=EXCLUDED.flags;
@@ -50,9 +22,9 @@ INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
 VALUES ('bb698d2f-2d69-448c-92f2-1abe8874e3b2', 4, '6b9cdb5b-0560-4dde-b40b-89dd1b928844', 'Dense Evergreen Forest', 'A tangle of young to medium sized evergreen trees makes up the forest here. Vines and shrubs grow between them, sucking up any rays of light that shine through the canopy and drawing nutrients from the larger trees themselves. Movement is made quite difficult in some places by the encroaching vines and branches.', 2) ON CONFLICT (id) DO
 UPDATE SET tileset_id=EXCLUDED.tileset_id, room_title=EXCLUDED.room_title, room_description=EXCLUDED.room_description, flags=EXCLUDED.flags;
 
-INSERT INTO tileset (id, name)
-VALUES ('429a3d68-7658-47b0-bba7-8a1d52fb097e', 'Inside Someone''s Inventory') ON CONFLICT (id) DO
-UPDATE SET name=EXCLUDED.name;
+INSERT INTO tileset (id, name, flags)
+VALUES ('429a3d68-7658-47b0-bba7-8a1d52fb097e', 'Inside Someone''s Inventory', 0) ON CONFLICT (id) DO
+UPDATE SET name=EXCLUDED.name, flags=EXCLUDED.flags;
 
 INSERT INTO tile (id, index, tileset_id, room_title, room_description, flags)
 VALUES ('c825d1c5-1930-46f7-9b03-2eb7b891f049', 0, '429a3d68-7658-47b0-bba7-8a1d52fb097e', 'Carried', 'You are being carried by someone.', 0) ON CONFLICT (id) DO
