@@ -32,6 +32,7 @@ out/
 # Gradle
 .gradle/
 build/
+.gradletasknamecache
 
 # Codeship
 codeship.aes
