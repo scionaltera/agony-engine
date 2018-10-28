@@ -1,6 +1,4 @@
-CREATE EXTENSION IF NOT EXISTS "citext";
-
-ALTER TABLE actor ADD COLUMN account CITEXT;
+ALTER TABLE actor ADD COLUMN account VARCHAR(191);
 
 -- 1. Migrate 'account' field from PAT to Actor where an Actor exists.
 UPDATE actor SET account=(SELECT account FROM player_actor_template WHERE actor.actor_template_id=player_actor_template.id);
@@ -17,5 +15,5 @@ INSERT INTO actor (id, account, name, pronoun_subject)
 -- roll back and have a usable database. Once everything is confirmed to be working, we can run the SQL statements
 -- below to drop the unused elements from the database.
 
---ALTER TABLE actor DROP COLUMN actor_template_id;
---DROP TABLE player_actor_template;
+-- ALTER TABLE actor DROP COLUMN actor_template_id;
+-- DROP TABLE player_actor_template;

@@ -1,1 +1,1 @@
-ALTER TABLE tile RENAME COLUMN tileset TO tileset_id;
+ALTER TABLE tile CHANGE tileset tileset_id BINARY(16);
