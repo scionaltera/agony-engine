@@ -1,7 +1,8 @@
 package com.agonyengine.model.actor;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,8 +19,9 @@ import java.util.UUID;
 @Entity
 public class BodyPart {
     @Id
-    @GeneratedValue
-    @Type(type = "pg-uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     private String name;

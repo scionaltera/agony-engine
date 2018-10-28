@@ -1,7 +1,7 @@
 package com.agonyengine.model.map;
 
 import com.agonyengine.model.util.Location;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AttributeOverride;
@@ -18,8 +18,9 @@ import java.util.UUID;
 @Entity
 public class Exit {
     @Id
-    @GeneratedValue
-    @Type(type = "pg-uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     private String direction;

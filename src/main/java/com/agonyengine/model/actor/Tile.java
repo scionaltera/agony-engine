@@ -1,8 +1,9 @@
 package com.agonyengine.model.actor;
 
 import com.agonyengine.util.FormattingUtils;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,8 +16,9 @@ import java.util.UUID;
 @Entity
 public class Tile {
     @Id
-    @GeneratedValue
-    @Type(type = "pg-uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
     private int index;
     private String roomTitle;
