@@ -11,4 +11,4 @@ UPDATE game_map SET version = -1;
 ALTER TABLE game_map MODIFY version INTEGER NOT NULL;
 
 -- Fix any inventory maps that are already in the game with the wrong tile number
-UPDATE game_map SET tiles = unhex('00') WHERE tileset_id = unhex(replace('429a3d68-7658-47b0-bba7-8a1d52fb097e', '-', ''));
+UPDATE game_map SET tiles = unhex('00') WHERE tileset_id = uuid_bin('429a3d68-7658-47b0-bba7-8a1d52fb097e');

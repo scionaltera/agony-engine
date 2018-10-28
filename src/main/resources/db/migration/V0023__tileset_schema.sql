@@ -17,4 +17,4 @@ CREATE TABLE tile (
 
 ALTER TABLE game_map ADD COLUMN tileset_id BINARY(16);
 
-UPDATE game_map SET tileset_id=unhex(replace('429a3d68-7658-47b0-bba7-8a1d52fb097e', '-', ''));
+UPDATE game_map SET tileset_id=uuid_bin('429a3d68-7658-47b0-bba7-8a1d52fb097e');

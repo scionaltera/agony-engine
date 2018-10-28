@@ -13,7 +13,7 @@ ALTER TABLE actor ADD COLUMN connection_id BINARY(16);
 ALTER TABLE actor ADD CONSTRAINT actor_connection_fk FOREIGN KEY (connection_id) REFERENCES connection (id);
 
 INSERT INTO connection (id, actor_id, account, session_username, session_id, remote_ip_address, disconnected_date)
-  SELECT unhex(replace(uuid(), '-', '')), id, account, session_username, session_id, remote_ip_address, disconnected_date
+  SELECT uuid_bin(uuid()), id, account, session_username, session_id, remote_ip_address, disconnected_date
   FROM actor
   WHERE account IS NOT NULL;
 

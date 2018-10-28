@@ -15,7 +15,7 @@ ALTER TABLE body_part ADD CONSTRAINT body_part_armor_fk FOREIGN KEY (armor_id) R
 
 -- create item_info rows for existing items and link them to the correct actors
 INSERT INTO item_info (id, actor_id, wear_locations)
-  SELECT unhex(replace(uuid(), '-', '')), id, 0
+  SELECT uuid_bin(uuid()), id, 0
   FROM actor
   WHERE connection_id IS NULL;
 
