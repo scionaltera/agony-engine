@@ -5,7 +5,7 @@ CREATE TABLE connection (
   session_username VARCHAR(191),
   session_id VARCHAR(191),
   remote_ip_address VARCHAR(16),
-  disconnected_date TIMESTAMP,
+  disconnected_date TIMESTAMP NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4, COLLATE=utf8mb4_unicode_ci;
 

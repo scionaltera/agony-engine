@@ -1,4 +1,4 @@
-CREATE TABLE `exit` (
+CREATE TABLE `map_exit` (
   id BINARY(16) NOT NULL,
   direction VARCHAR(191),
   location_map_id BINARY(16),
