@@ -1,1 +1,1 @@
-ALTER TABLE tile CHANGE tileset tileset_id BINARY(16);
+ALTER TABLE tile CHANGE tileset tileset_id BINARY(16), ALGORITHM=INPLACE;
