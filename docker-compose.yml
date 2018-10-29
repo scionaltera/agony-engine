@@ -8,18 +8,20 @@ services:
      - "8080:8080"
      - "5005:5005"
     links:
-     - postgres
+     - mysql
      - activemq
     env_file:
      - agonyengine.env
-  postgres:
-    image: postgres:9.6
+  mysql:
+    image: mysql:5.6
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
-     - "5432:5432"
+      - "3306:3306"
     environment:
-      POSTGRES_USER: agonyengine
-      POSTGRES_PASSWORD: agonyengine
-      POSTGRES_DB: agonyengine
+      MYSQL_ROOT_PASSWORD: agonyengine
+      MYSQL_USER: agonyengine
+      MYSQL_PASSWORD: agonyengine
+      MYSQL_DATABASE: agonyengine
   activemq:
     image: webcenter/activemq:5.14.3
     ports:

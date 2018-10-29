@@ -1,8 +1,9 @@
 package com.agonyengine.model.actor;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,8 +19,9 @@ public class CreatureInfo {
     public static final int BODY_VERSION = 1;
 
     @Id
-    @GeneratedValue
-    @Type(type = "pg-uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

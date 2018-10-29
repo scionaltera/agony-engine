@@ -1,8 +1,9 @@
 package com.agonyengine.model.map;
 
 import com.agonyengine.model.util.Location;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,8 +14,9 @@ import java.util.UUID;
 @Entity
 public class StartLocation {
     @Id
-    @GeneratedValue
-    @Type(type = "pg-uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Embedded
