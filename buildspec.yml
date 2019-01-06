@@ -20,8 +20,15 @@ phases:
       - docker tag scionaltera/agony-engine:latest scionaltera/agony-engine:${PROJECT_VERSION}
   post_build:
     commands:
-      - docker push scionaltera/agony-engine:latest
-      - docker push scionaltera/agony-engine:${PROJECT_VERSION}
+      - echo "CodeBuild Initiator is ${CODEBUILD_INITIATOR}"
+      - |
+        if expr "${CODEBUILD_INITIATOR}": "codepipeline*" >/dev/null; then
+          docker push scionaltera/agony-engine:latest
+        fi
+      - |
+        if expr "${CODEBUILD_INITIATOR}" : "codepipeline*" >/dev/null; then
+          docker push scionaltera/agony-engine:${PROJECT_VERSION}
+        fi
       - printf '[{"name":"agonyengine","imageUri":"%s"}]' scionaltera/agony-engine:${PROJECT_VERSION} > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
