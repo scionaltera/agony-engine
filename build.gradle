@@ -22,7 +22,7 @@ buildscript {
         classpath group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.0.3.RELEASE'
         classpath group: 'se.transmode.gradle', name: 'gradle-docker', version: '1.2'
         classpath group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: '1.3.0'
-        classpath group: 'org.owasp', name: 'dependency-check-gradle', version: '3.3.2'
+        classpath group: 'org.owasp', name: 'dependency-check-gradle', version: '4.0.1'
         classpath group: 'org.kordamp.gradle', name: 'stats-gradle-plugin', version: '0.2.2'
     }
 }
