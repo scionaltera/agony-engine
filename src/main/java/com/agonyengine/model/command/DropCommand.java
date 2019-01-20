@@ -38,6 +38,8 @@ public class DropCommand {
             actor, item);
 
         item.setGameMap(null);
+        item.setX(actor.getX());
+        item.setY(actor.getY());
         item.setRoomId(actor.getRoomId());
 
         actorRepository.save(item);
