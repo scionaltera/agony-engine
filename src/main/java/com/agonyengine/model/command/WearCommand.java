@@ -42,14 +42,12 @@ public class WearCommand {
 
         List<BodyPart> wearLocations = new ArrayList<>();
 
-        for (int i = 0; i < Long.SIZE; i++) {
-            final int bit = i;
-
-            if (item.getItemInfo().getWearLocations().contains(WearLocation.values()[i])) {
+        for (WearLocation wearLocation : WearLocation.values()) {
+            if (item.getItemInfo().getWearLocations().contains(wearLocation)) {
                 List<BodyPart> parts = actor.getCreatureInfo().getBodyParts().stream()
                     .filter(part -> part.getArmor() == null)
                     .filter(part -> part.getWearLocation() != null)
-                    .filter(part -> part.getWearLocation().ordinal() == bit)
+                    .filter(part -> part.getWearLocation().ordinal() == wearLocation.getIndex())
                     .collect(Collectors.toList());
 
                 if (parts.isEmpty()) {

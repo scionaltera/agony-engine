@@ -3,9 +3,11 @@ package com.agonyengine.model.command;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.map.Exit;
+import com.agonyengine.model.map.Room;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.ExitRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.springframework.context.ApplicationContext;
@@ -20,7 +22,7 @@ import static com.agonyengine.model.actor.BodyPartCapability.WALK;
 public class MoveCommand {
     private Direction direction;
     private ActorRepository actorRepository;
-    private ExitRepository exitRepository;
+    private RoomRepository roomRepository;
     private InvokerService invokerService;
     private CommService commService;
     private ApplicationContext applicationContext;
@@ -33,7 +35,7 @@ public class MoveCommand {
     @PostConstruct
     void postConstruct() {
         this.actorRepository = applicationContext.getBean("actorRepository", ActorRepository.class);
-        this.exitRepository = applicationContext.getBean("exitRepository", ExitRepository.class);
+        this.roomRepository = applicationContext.getBean("roomRepository", RoomRepository.class);
         this.invokerService = applicationContext.getBean("invokerService", InvokerService.class);
         this.commService = applicationContext.getBean("commService", CommService.class);
     }
@@ -46,18 +48,25 @@ public class MoveCommand {
             return;
         }
 
-        int newX = actor.getX();
-        int newY = actor.getY();
-        Exit exit = exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY());
+        Room currentRoom = roomRepository
+            .findById(actor.getRoomId())
+            .orElse(null);
 
-        if (exit == null) {
-            newX = actor.getX() + direction.getX();
-            newY = actor.getY() + direction.getY();
+        if (currentRoom == null) {
+            output.append("[black]You are floating in the void, and unable to move!");
+            return;
+        }
 
-            if (!actor.getGameMap().hasTile(newX, newY) || actor.getGameMap().getTile(newX, newY).getFlags().contains(TileFlag.IMPASSABLE)) {
-                output.append("[default]Alas, you cannot go that way.");
-                return;
-            }
+        Room destinationRoom = roomRepository
+            .findByLocationXAndLocationYAndLocationZ(
+                currentRoom.getLocation().getX() + direction.getX(),
+                currentRoom.getLocation().getY() + direction.getY(),
+                currentRoom.getLocation().getZ()
+            ).orElse(null);
+
+        if (destinationRoom == null) {
+            output.append("[default]Alas, you cannot go that way.");
+            return;
         }
 
         commService.echoToRoom(
@@ -65,14 +74,7 @@ public class MoveCommand {
             new GameOutput(String.format("[default]%s leaves to the %s.", StringUtils.capitalize(actor.getName()), direction.getName())),
             actor);
 
-        if (exit != null) {
-            actor.setGameMap(exit.getDestination().getGameMap());
-            actor.setX(exit.getDestination().getX());
-            actor.setY(exit.getDestination().getY());
-        } else {
-            actor.setX(newX);
-            actor.setY(newY);
-        }
+        actor.setRoomId(destinationRoom.getId());
 
         actorRepository.save(actor);
 

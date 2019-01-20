@@ -109,30 +109,37 @@ public class Actor {
         this.itemInfo = itemInfo;
     }
 
+    @Deprecated
     public GameMap getGameMap() {
         return gameMap;
     }
 
+    @Deprecated
     public void setGameMap(GameMap gameMap) {
         this.gameMap = gameMap;
     }
 
+    @Deprecated
     public Tile getTile() {
         return getGameMap().getTile(x, y);
     }
 
+    @Deprecated
     public Integer getX() {
         return x;
     }
 
+    @Deprecated
     public void setX(Integer x) {
         this.x = x;
     }
 
+    @Deprecated
     public Integer getY() {
         return y;
     }
 
+    @Deprecated
     public void setY(Integer y) {
         this.y = y;
     }

@@ -12,9 +12,11 @@ import java.util.UUID;
 public interface ActorRepository extends JpaRepository<Actor, UUID> {
     Actor findByConnectionSessionUsernameAndConnectionSessionId(String sessionUsername, String sessionId);
     List<Actor> findByRoomId(UUID roomId);
+    List<Actor> findByConnectionIsNotNullAndRoomIdIsNotNull(Sort sort);
+    List<Actor> findByConnectionDisconnectedDateIsBeforeAndRoomIdIsNotNull(Date cutoff);
+
+    @Deprecated
     List<Actor> findByGameMap(GameMap gameMap);
-    List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
+
     List<Actor> findByConnectionAccount(String account);
-    List<Actor> findByConnectionIsNotNullAndGameMapIsNotNull(Sort sort);
-    List<Actor> findByConnectionDisconnectedDateIsBeforeAndGameMapIsNotNull(Date cutoff);
 }

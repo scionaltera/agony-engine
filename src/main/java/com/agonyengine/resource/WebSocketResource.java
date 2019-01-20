@@ -7,11 +7,13 @@ import com.agonyengine.model.actor.Tileset;
 import com.agonyengine.model.actor.TilesetFlag;
 import com.agonyengine.model.generator.BodyGenerator;
 import com.agonyengine.model.generator.MapGenerator;
+import com.agonyengine.model.map.Room;
 import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.GameMapRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.repository.StartLocationRepository;
 import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
@@ -54,6 +56,7 @@ public class WebSocketResource {
     private Date applicationBootDate;
     private UUID inventoryTilesetId;
     private InputTokenizer inputTokenizer;
+    private RoomRepository roomRepository;
     private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
@@ -71,6 +74,7 @@ public class WebSocketResource {
         Date applicationBootDate,
         UUID inventoryTilesetId,
         InputTokenizer inputTokenizer,
+        RoomRepository roomRepository,
         GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
@@ -85,6 +89,7 @@ public class WebSocketResource {
         this.applicationBootDate = applicationBootDate;
         this.inventoryTilesetId = inventoryTilesetId;
         this.inputTokenizer = inputTokenizer;
+        this.roomRepository = roomRepository;
         this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
@@ -110,6 +115,18 @@ public class WebSocketResource {
         Actor actor = actorRepository.findById(UUID.fromString(actorId))
             .orElseThrow(() -> new NoSuchActorException("Actor not found: " + actorUuid.toString()));
 
+        // Create a Room if the game doesn't have one already.
+        if (roomRepository.findAll().isEmpty()) {
+            Room room = new Room();
+
+            room.getLocation().setX(0L);
+            room.getLocation().setY(0L);
+            room.getLocation().setZ(0L);
+
+            roomRepository.save(room);
+        }
+
+        // Attach an inventory if the Actor doesn't have one.
         if (actor.getInventory() == null) {
             GameMap inventoryMap = new GameMap();
 
@@ -163,16 +180,12 @@ public class WebSocketResource {
 
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
-        if (actor.getGameMap() == null) {
-            StartLocation startLocation = startLocationRepository
-                .findAll()
-                .stream()
-                .findFirst()
-                .orElseGet(this::generateStartingMap);
+        if (actor.getRoomId() == null) {
+            Room startRoom = roomRepository
+                .findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)
+                .orElseThrow(() -> new NullPointerException("No start room!"));
 
-            actor.setGameMap(startLocation.getLocation().getGameMap());
-            actor.setX(startLocation.getLocation().getX());
-            actor.setY(startLocation.getLocation().getY());
+            actor.setRoomId(startRoom.getId());
 
             greeting.forEach(line -> {
                 if (line.startsWith("*")) {

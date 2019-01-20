@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.ExitRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +25,10 @@ public class LookCommandTest {
     private GameOutput output;
 
     @Mock
-    private ExitRepository exitRepository;
+    private ActorRepository actorRepository;
 
     @Mock
-    private ActorRepository actorRepository;
+    private RoomRepository roomRepository;
 
     @Mock
     private CommService commService;
@@ -41,8 +42,8 @@ public class LookCommandTest {
         MockitoAnnotations.initMocks(this);
 
         lookCommand = new LookCommand(
-            exitRepository,
             actorRepository,
+            roomRepository,
             commService,
             directions
         );

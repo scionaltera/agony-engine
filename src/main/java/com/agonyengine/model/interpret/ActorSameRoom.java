@@ -26,7 +26,7 @@ public class ActorSameRoom implements ArgumentBinding {
     public boolean bind(Actor actor, String token) {
         this.token = token;
 
-        target = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY())
+        target = actorRepository.findByRoomId(actor.getRoomId())
             .stream()
             .filter(t -> !t.equals(actor) && Arrays.stream(t.getNameTokens()).anyMatch(word -> word.toUpperCase().startsWith(token.toUpperCase())))
             .findFirst()

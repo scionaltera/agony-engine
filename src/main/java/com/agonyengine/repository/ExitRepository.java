@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
+@Deprecated
 public interface ExitRepository extends JpaRepository<Exit, UUID> {
     Exit findByDirectionAndLocationGameMapAndLocationXAndLocationY(String direction, GameMap gameMap, Integer x, Integer y);
 }

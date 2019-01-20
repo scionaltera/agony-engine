@@ -47,7 +47,7 @@ public class ReaperServiceTest {
             actors.add(actor);
         }
 
-        when(actorRepository.findByConnectionDisconnectedDateIsBeforeAndGameMapIsNotNull(any(Date.class))).thenReturn(actors);
+        when(actorRepository.findByConnectionDisconnectedDateIsBeforeAndRoomIdIsNotNull(any(Date.class))).thenReturn(actors);
 
         reaperService = new ReaperService(actorRepository, commService);
     }
@@ -56,12 +56,12 @@ public class ReaperServiceTest {
     public void testReap() {
         reaperService.reapLinkDeadActors();
 
-        verify(actorRepository).findByConnectionDisconnectedDateIsBeforeAndGameMapIsNotNull(dateArgumentCaptor.capture());
+        verify(actorRepository).findByConnectionDisconnectedDateIsBeforeAndRoomIdIsNotNull(dateArgumentCaptor.capture());
         verify(actorRepository).saveAll(actors);
 
         actors.forEach(actor -> {
             verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-            verify(actor).setGameMap(isNull());
+            verify(actor).setRoomId(isNull());
         });
 
         Date cutoff = dateArgumentCaptor.getValue();

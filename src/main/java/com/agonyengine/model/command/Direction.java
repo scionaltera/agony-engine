@@ -5,12 +5,14 @@ public class Direction {
     private String opposite;
     private int x;
     private int y;
+    private int z;
 
-    public Direction(String name, String opposite, int x, int y) {
+    public Direction(String name, String opposite, int x, int y, int z) {
         this.name = name;
         this.opposite = opposite;
         this.x = x;
         this.y = y;
+        this.z = z;
     }
 
     public String getName() {
@@ -27,5 +29,9 @@ public class Direction {
 
     public int getY() {
         return y;
+    }
+
+    public int getZ() {
+        return z;
     }
 }

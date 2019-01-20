@@ -57,7 +57,7 @@ public class WhoCommandTest {
 
         onlineActors.add(actor);
 
-        when(actorRepository.findByConnectionIsNotNullAndGameMapIsNotNull(any(Sort.class))).thenReturn(onlineActors);
+        when(actorRepository.findByConnectionIsNotNullAndRoomIdIsNotNull(any(Sort.class))).thenReturn(onlineActors);
 
         whoCommand = new WhoCommand(actorRepository);
     }
@@ -66,7 +66,7 @@ public class WhoCommandTest {
     public void testInvoke() {
         whoCommand.invoke(actor, output);
 
-        verify(actorRepository).findByConnectionIsNotNullAndGameMapIsNotNull(any(Sort.class));
+        verify(actorRepository).findByConnectionIsNotNullAndRoomIdIsNotNull(any(Sort.class));
 
         verify(output).append(contains("Who is Online"));
 
@@ -84,7 +84,7 @@ public class WhoCommandTest {
 
         whoCommand.invoke(actor, output);
 
-        verify(actorRepository).findByConnectionIsNotNullAndGameMapIsNotNull(any(Sort.class));
+        verify(actorRepository).findByConnectionIsNotNullAndRoomIdIsNotNull(any(Sort.class));
 
         verify(output).append(contains("Who is Online"));
         verify(output).append(contains("Kadne"));
@@ -97,7 +97,7 @@ public class WhoCommandTest {
 
         whoCommand.invoke(actor, output);
 
-        verify(actorRepository).findByConnectionIsNotNullAndGameMapIsNotNull(any(Sort.class));
+        verify(actorRepository).findByConnectionIsNotNullAndRoomIdIsNotNull(any(Sort.class));
 
         verify(output).append(contains("Who is Online"));
 

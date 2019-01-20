@@ -19,7 +19,7 @@ public class Room {
     private UUID id;
 
     @Embedded
-    private RoomLocation location;
+    private RoomLocation location = new RoomLocation();
 
     public UUID getId() {
         return id;

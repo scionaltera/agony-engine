@@ -47,6 +47,7 @@ public class GetCommand {
         item.setGameMap(actor.getInventory());
         item.setX(0);
         item.setY(0);
+        item.setRoomId(null);
 
         actorRepository.save(item);
 
