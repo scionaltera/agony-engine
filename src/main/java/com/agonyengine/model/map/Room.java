@@ -1,6 +1,5 @@
 package com.agonyengine.model.map;
 
-import com.agonyengine.model.util.Location;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -11,9 +10,8 @@ import javax.persistence.Id;
 import java.util.Objects;
 import java.util.UUID;
 
-@Deprecated
 @Entity
-public class StartLocation {
+public class Room {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
@@ -21,7 +19,7 @@ public class StartLocation {
     private UUID id;
 
     @Embedded
-    private Location location;
+    private RoomLocation location;
 
     public UUID getId() {
         return id;
@@ -31,24 +29,25 @@ public class StartLocation {
         this.id = id;
     }
 
-    public Location getLocation() {
+    public RoomLocation getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(RoomLocation location) {
         this.location = location;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof StartLocation)) return false;
-        StartLocation that = (StartLocation) o;
-        return Objects.equals(getId(), that.getId());
+        if (!(o instanceof Room)) return false;
+        Room room = (Room) o;
+        return Objects.equals(getId(), room.getId()) &&
+            Objects.equals(getLocation(), room.getLocation());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getLocation());
     }
 }

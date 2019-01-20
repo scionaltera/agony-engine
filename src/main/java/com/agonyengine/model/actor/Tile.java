@@ -13,6 +13,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
+@Deprecated
 @Entity
 public class Tile {
     @Id

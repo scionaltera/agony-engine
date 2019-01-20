@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import java.util.Objects;
 import java.util.UUID;
 
+@Deprecated
 @Entity
 @Table(name = "map_exit")
 public class Exit {

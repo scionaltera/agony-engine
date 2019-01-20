@@ -5,6 +5,7 @@ import com.agonyengine.model.actor.GameMap;
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
 
+@Deprecated
 @Embeddable
 public class Location {
     @ManyToOne

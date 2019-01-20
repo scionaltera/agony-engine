@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import java.util.Objects;
 import java.util.UUID;
 
+@Deprecated
 @Entity
 public class GameMap {
     public static final int CURRENT_MAP_VERSION = 1;

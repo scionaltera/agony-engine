@@ -3,6 +3,7 @@ package com.agonyengine.model.actor;
 import com.agonyengine.model.converter.BaseEnumSetConverter;
 import com.agonyengine.model.converter.PersistentEnum;
 
+@Deprecated
 public enum TilesetFlag implements PersistentEnum {
     START_MAP(0);
 

@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface ActorRepository extends JpaRepository<Actor, UUID> {
     Actor findByConnectionSessionUsernameAndConnectionSessionId(String sessionUsername, String sessionId);
+    List<Actor> findByRoomId(UUID roomId);
     List<Actor> findByGameMap(GameMap gameMap);
     List<Actor> findByGameMapAndXAndY(GameMap gameMap, Integer x, Integer y);
     List<Actor> findByConnectionAccount(String account);

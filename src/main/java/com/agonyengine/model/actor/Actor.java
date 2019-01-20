@@ -43,6 +43,8 @@ public class Actor {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private GameMap inventory;
 
+    private UUID roomId;
+
     public UUID getId() {
         return id;
     }
@@ -141,6 +143,14 @@ public class Actor {
 
     public void setInventory(GameMap inventory) {
         this.inventory = inventory;
+    }
+
+    public UUID getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(UUID roomId) {
+        this.roomId = roomId;
     }
 
     @Override

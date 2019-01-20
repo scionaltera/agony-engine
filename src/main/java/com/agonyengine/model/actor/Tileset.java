@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+@Deprecated
 @Entity
 public class Tileset {
     @Id
