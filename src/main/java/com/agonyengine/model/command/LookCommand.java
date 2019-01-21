@@ -1,12 +1,12 @@
 package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.actor.Tile;
-import com.agonyengine.model.actor.TileFlag;
 import com.agonyengine.model.interpret.ActorSameRoom;
+import com.agonyengine.model.map.Direction;
+import com.agonyengine.model.map.Room;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
-import com.agonyengine.repository.ExitRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -20,20 +20,20 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 public class LookCommand {
-    private ExitRepository exitRepository;
     private ActorRepository actorRepository;
+    private RoomRepository roomRepository;
     private CommService commService;
     private List<Direction> directions;
 
     @Inject
     public LookCommand(
-        ExitRepository exitRepository,
         ActorRepository actorRepository,
+        RoomRepository roomRepository,
         CommService commservice,
         List<Direction> directions) {
 
-        this.exitRepository = exitRepository;
         this.actorRepository = actorRepository;
+        this.roomRepository = roomRepository;
         this.commService = commservice;
         this.directions = directions;
     }
@@ -46,19 +46,26 @@ public class LookCommand {
             return;
         }
 
-        List<Actor> actors = actorRepository.findByGameMapAndXAndY(actor.getGameMap(), actor.getX(), actor.getY());
-        Tile tile = actor.getTile();
+        Room room = roomRepository.findById(actor.getRoomId()).orElse(null);
 
-        output.append(String.format("[yellow]%s", tile.getRoomTitle()));
-        output.append(String.format("[default]%s", tile.getRoomDescription()));
+        if (room == null) {
+            output.append("[black]You are floating in the void. There is nothing to see here.");
+            return;
+        }
+
+        output.append(String.format("[yellow]%s", "A Room"));
+        output.append(String.format("[default]%s", "This is a placeholder for the room description."));
 
         output.append(directions.stream()
-            .filter(direction -> exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(direction.getName(), actor.getGameMap(), actor.getX(), actor.getY()) != null
-                || (actor.getGameMap().hasTile(actor.getX() + direction.getX(), actor.getY() + direction.getY())
-                    && !(actor.getGameMap().getTile(actor.getX() + direction.getX(), actor.getY() + direction.getY()).getFlags().contains(TileFlag.IMPASSABLE)))
-            )
+            .filter(direction -> roomRepository.findByLocationXAndLocationYAndLocationZ(
+                room.getLocation().getX() + direction.getX(),
+                room.getLocation().getY() + direction.getY(),
+                room.getLocation().getZ() + direction.getZ())
+                .isPresent())
             .map(Direction::getName)
             .collect(joining(" ", "[cyan]Exits: ", "")));
+
+        List<Actor> actors = actorRepository.findByRoomId(actor.getRoomId());
 
         actors.stream()
             .filter(target -> !actor.equals(target))

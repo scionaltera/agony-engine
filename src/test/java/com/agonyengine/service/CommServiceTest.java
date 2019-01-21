@@ -57,7 +57,7 @@ public class CommServiceTest {
             observers.add(o);
         }
 
-        when(actorRepository.findByGameMapAndXAndY(isNull(), anyInt(), anyInt())).thenReturn(observers);
+        when(actorRepository.findByRoomId(isNull())).thenReturn(observers);
 
         commService = new CommService(actorRepository, simpMessagingTemplate);
     }

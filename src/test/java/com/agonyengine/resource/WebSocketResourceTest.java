@@ -3,24 +3,16 @@ package com.agonyengine.resource;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Connection;
 import com.agonyengine.model.actor.CreatureInfo;
-import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.actor.Pronoun;
-import com.agonyengine.model.actor.Tile;
-import com.agonyengine.model.actor.Tileset;
-import com.agonyengine.model.actor.TilesetFlag;
 import com.agonyengine.model.command.SayCommand;
 import com.agonyengine.model.generator.BodyGenerator;
-import com.agonyengine.model.generator.MapGenerator;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.interpret.Verb;
-import com.agonyengine.model.map.StartLocation;
+import com.agonyengine.model.map.Room;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
-import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.ActorRepository;
-import com.agonyengine.repository.GameMapRepository;
-import com.agonyengine.repository.StartLocationRepository;
-import com.agonyengine.repository.TilesetRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
@@ -44,15 +36,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.agonyengine.model.actor.CreatureInfo.BODY_VERSION;
-import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,9 +49,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class WebSocketResourceTest {
-    private static final int START_X = 2;
-    private static final int START_Y = 3;
-
     @Mock
     private ApplicationContext applicationContext;
 
@@ -70,19 +56,13 @@ public class WebSocketResourceTest {
     private InputTokenizer inputTokenizer;
 
     @Mock
-    private GameMapRepository gameMapRepository;
+    private RoomRepository roomRepository;
 
     @Mock
     private SessionRepository sessionRepository;
 
     @Mock
     private ActorRepository actorRepository;
-
-    @Mock
-    private TilesetRepository tilesetRepository;
-
-    @Mock
-    private StartLocationRepository startLocationRepository;
 
     @Mock
     private VerbRepository verbRepository;
@@ -98,15 +78,6 @@ public class WebSocketResourceTest {
 
     @Mock
     private Pronoun pronoun;
-
-    @Mock
-    private GameMap gameMap;
-
-    @Mock
-    private Tileset tileset;
-
-    @Mock
-    private Tile tile;
 
     @Mock
     private Session session;
@@ -126,16 +97,10 @@ public class WebSocketResourceTest {
     @Mock
     private BodyGenerator bodyGenerator;
 
-    @Mock
-    private MapGenerator mapGenerator;
-
     @Captor
     private ArgumentCaptor<List> listCaptor;
 
-    @Captor
-    private ArgumentCaptor<GameMap> gameMapCaptor;
-
-    private UUID defaultMapId = UUID.randomUUID();
+    private Room startRoom = new Room();
     private List<List<String>> sentences = new ArrayList<>();
     private UUID sessionId = UUID.randomUUID();
     private UUID actorId = UUID.randomUUID();
@@ -143,7 +108,6 @@ public class WebSocketResourceTest {
     private Map<String, Object> sessionAttributes = new HashMap<>();
     private Message<byte[]> message;
     private List<Verb> verbs;
-    private StartLocation startLocation = new StartLocation();
 
     private WebSocketResource resource;
 
@@ -154,25 +118,21 @@ public class WebSocketResourceTest {
         sentences.add(Collections.singletonList("ABLE"));
         message = buildMockMessage(sessionId.toString());
 
-        Location location = new Location();
-
-        location.setGameMap(gameMap);
-        location.setX(START_X);
-        location.setY(START_Y);
-
-        startLocation.setLocation(location);
+        startRoom.setId(UUID.randomUUID());
+        startRoom.getLocation().setX(0L);
+        startRoom.getLocation().setY(0L);
+        startRoom.getLocation().setZ(0L);
 
         when(principal.getName()).thenReturn("Shepherd");
         when(actor.getConnection()).thenReturn(connection);
         when(actor.getCreatureInfo()).thenReturn(creatureInfo);
+        when(actor.getInventoryId()).thenReturn(UUID.randomUUID());
         when(actorRepository.findByConnectionSessionUsernameAndConnectionSessionId(eq("Shepherd"), eq(sessionId.toString()))).thenReturn(actor);
         when(actorRepository.findById(eq(actorId))).thenReturn(Optional.of(actor));
         when(sessionRepository.findById(eq(sessionId.toString()))).thenReturn(session);
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn("10.11.12.13");
-        when(gameMapRepository.getOne(eq(defaultMapId))).thenReturn(gameMap);
-        when(tilesetRepository.getOne(any(UUID.class))).thenReturn(tileset);
-        when(tileset.getTile(anyInt())).thenReturn(tile);
-        when(startLocationRepository.findAll()).thenReturn(Collections.singletonList(startLocation));
+        when(roomRepository.findAll()).thenReturn(Collections.singletonList(startRoom));
+        when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)).thenReturn(Optional.of(startRoom));
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);
@@ -182,12 +142,12 @@ public class WebSocketResourceTest {
             return a;
         });
 
-        when(gameMapRepository.save(any(GameMap.class))).thenAnswer(i -> {
-            GameMap m = i.getArgument(0);
+        when(roomRepository.save(any(Room.class))).thenAnswer(i -> {
+            Room r = i.getArgument(0);
 
-            m.setId(UUID.randomUUID());
+            r.setId(UUID.randomUUID());
 
-            return m;
+            return r;
         });
 
         verbs = buildMockVerbs();
@@ -195,33 +155,24 @@ public class WebSocketResourceTest {
         resource = new WebSocketResource(
             "0.1.2-UNIT-TEST",
             new Date(),
-            defaultMapId,
             inputTokenizer,
-            gameMapRepository,
+            roomRepository,
             sessionRepository,
             actorRepository,
-            tilesetRepository,
-            startLocationRepository,
             invokerService,
             commService,
-            bodyGenerator,
-            mapGenerator);
+            bodyGenerator);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testOnSubscribeReconnectInWorld() {
-        GameMap inventory = mock(GameMap.class);
-
-        when(actor.getInventory()).thenReturn(inventory);
-        when(actor.getGameMap()).thenReturn(gameMap);
+        when(actor.getRoomId()).thenReturn(startRoom.getId());
 
         GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
 
-        verify(actor, never()).setInventory(any());
-        verify(actor, never()).setGameMap(any());
-        verify(actor, never()).setX(any());
-        verify(actor, never()).setY(any());
+        verify(actor, never()).setInventoryId(any(UUID.class));
+        verify(actor, never()).setRoomId(any(UUID.class));
 
         verify(connection).setSessionUsername(eq("Shepherd"));
         verify(connection).setSessionId(anyString());
@@ -250,17 +201,12 @@ public class WebSocketResourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testOnSubscribeReconnectInVoid() {
-        GameMap inventory = mock(GameMap.class);
-
-        when(actor.getInventory()).thenReturn(inventory);
-        when(actor.getGameMap()).thenReturn(null);
+        when(actor.getRoomId()).thenReturn(null);
 
         GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
 
-        verify(actor, never()).setInventory(any());
-        verify(actor).setGameMap(eq(gameMap));
-        verify(actor).setX(START_X);
-        verify(actor).setY(START_Y);
+        verify(actor, never()).setInventoryId(any(UUID.class));
+        verify(actor).setRoomId(any(UUID.class));
 
         verify(connection).setSessionUsername(eq("Shepherd"));
         verify(connection).setSessionId(anyString());
@@ -290,15 +236,12 @@ public class WebSocketResourceTest {
     public void testOnSubscribeFirstTimeConnect() {
         when(connection.getAccount()).thenReturn("Shepherd");
         when(actor.getPronoun()).thenReturn(pronoun);
-        when(actor.getInventory()).thenReturn(null);
-        when(actor.getGameMap()).thenReturn(null);
+        when(actor.getInventoryId()).thenReturn(null);
 
         GameOutput output = resource.onSubscribe(principal, message, actorId.toString());
 
-        verify(actor).setInventory(gameMapCaptor.capture());
-        verify(actor).setGameMap(eq(gameMap));
-        verify(actor).setX(START_X);
-        verify(actor).setY(START_Y);
+        verify(actor).setInventoryId(any(UUID.class));
+        verify(actor).setRoomId(any(UUID.class));
 
         verify(connection).setSessionUsername(eq("Shepherd"));
         verify(connection).setSessionId(anyString());
@@ -315,14 +258,6 @@ public class WebSocketResourceTest {
 
         assertEquals(1, invokeList.size());
         assertEquals("look", invokeList.get(0));
-
-        GameMap inventory = gameMapCaptor.getValue();
-
-        assertEquals(NO_UPDATE_VERSION, inventory.getVersion());
-        assertEquals(1, inventory.getWidth());
-        assertEquals(tileset, inventory.getTileset());
-        assertEquals((byte)0x00, inventory.getTiles()[0]);
-        assertEquals(tile, inventory.getTile(0, 0));
 
         assertTrue(output.getOutput().stream()
             .anyMatch(line -> line.equals("Non Breaking Space Greeting.".replace(" ", "&nbsp;"))));
@@ -355,51 +290,6 @@ public class WebSocketResourceTest {
     @Test(expected = NoSuchActorException.class)
     public void testOnSubscribeNoTemplate() {
         when(actorRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-
-        resource.onSubscribe(principal, message, actorId.toString());
-    }
-
-    @Test
-    public void testOnSubscribeNoStartLocationsDuringBodyUpgrade() {
-        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
-        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
-
-        //noinspection unchecked
-        when(startLocationRepository.findAll()).thenReturn(
-            Collections.emptyList(),
-            Collections.singletonList(startLocation));
-
-        resource.onSubscribe(principal, message, actorId.toString());
-
-        verify(mapGenerator).generateMap(eq(tileset));
-        verify(actor).setCreatureInfo(isNull());
-    }
-
-    @Test
-    public void testOnSubscribeNoStartLocationDuringMapTransfer() {
-        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
-        when(tileset.getFlags()).thenReturn(EnumSet.of(TilesetFlag.START_MAP));
-        when(actor.getCreatureInfo()).thenReturn(creatureInfo);
-        when(creatureInfo.getBodyVersion()).thenReturn(BODY_VERSION);
-
-        //noinspection unchecked
-        when(startLocationRepository.findAll()).thenReturn(
-            Collections.emptyList(),
-            Collections.singletonList(startLocation));
-
-        when(mapGenerator.generateMap(any(Tileset.class))).thenReturn(gameMap);
-        when(mapGenerator.placeStartLocation(any(GameMap.class))).thenReturn(startLocation);
-
-        resource.onSubscribe(principal, message, actorId.toString());
-
-        verify(actor).setGameMap(any(GameMap.class));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testOnSubscribeNoEligibleZones() {
-        when(tilesetRepository.findAll()).thenReturn(Collections.singletonList(tileset));
-        when(tileset.getFlags()).thenReturn(EnumSet.noneOf(TilesetFlag.class));
-        when(startLocationRepository.findAll()).thenReturn(Collections.emptyList());
 
         resource.onSubscribe(principal, message, actorId.toString());
     }

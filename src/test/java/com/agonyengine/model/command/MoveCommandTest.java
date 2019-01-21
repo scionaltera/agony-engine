@@ -3,14 +3,12 @@ package com.agonyengine.model.command;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.actor.CreatureInfo;
-import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.actor.Tile;
-import com.agonyengine.model.actor.TileFlag;
-import com.agonyengine.model.map.Exit;
+import com.agonyengine.model.map.Direction;
+import com.agonyengine.model.map.Room;
+import com.agonyengine.model.map.Location;
 import com.agonyengine.model.stomp.GameOutput;
-import com.agonyengine.model.util.Location;
 import com.agonyengine.repository.ActorRepository;
-import com.agonyengine.repository.ExitRepository;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
 import org.junit.Before;
@@ -21,8 +19,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +35,7 @@ public class MoveCommandTest {
     private ActorRepository actorRepository;
 
     @Mock
-    private ExitRepository exitRepository;
+    private RoomRepository roomRepository;
 
     @Mock
     private InvokerService invokerService;
@@ -45,16 +44,7 @@ public class MoveCommandTest {
     private CommService commService;
 
     @Mock
-    private Actor actor;
-
-    @Mock
     private CreatureInfo creatureInfo;
-
-    @Mock
-    private GameMap gameMap;
-
-    @Mock
-    private Tile tile;
 
     @Mock
     private GameOutput output;
@@ -62,7 +52,10 @@ public class MoveCommandTest {
     @Captor
     private ArgumentCaptor<List<String>> listCaptor;
 
-    private Direction direction = new Direction("north", "south", 0, 1);
+    private Actor actor = new Actor();
+    private Direction direction = new Direction("north", "south", 0, 1, 0);
+    private Room currentRoom = new Room();
+    private Room destinationRoom = new Room();
 
     private MoveCommand moveCommand;
 
@@ -70,23 +63,25 @@ public class MoveCommandTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        currentRoom.setId(UUID.randomUUID());
+        currentRoom.setLocation(new Location(0L, 0L));
+
+        destinationRoom.setId(UUID.randomUUID());
+        destinationRoom.setLocation(new Location((long)direction.getX(), (long)direction.getY()));
+
+        actor.setName("Frank");
+        actor.setRoomId(currentRoom.getId());
+        actor.setCreatureInfo(creatureInfo);
+
         when(applicationContext.getBean(eq("actorRepository"), eq(ActorRepository.class))).thenReturn(actorRepository);
-        when(applicationContext.getBean(eq("exitRepository"), eq(ExitRepository.class))).thenReturn(exitRepository);
+        when(applicationContext.getBean(eq("roomRepository"), eq(RoomRepository.class))).thenReturn(roomRepository);
         when(applicationContext.getBean(eq("invokerService"), eq(InvokerService.class))).thenReturn(invokerService);
         when(applicationContext.getBean(eq("commService"), eq(CommService.class))).thenReturn(commService);
 
-        when(actor.getName()).thenReturn("Frank");
-        when(actor.getGameMap()).thenReturn(gameMap);
-        when(actor.getCreatureInfo()).thenReturn(creatureInfo);
-        when(actor.getX()).thenReturn(0);
-        when(actor.getY()).thenReturn(0);
+        when(roomRepository.findById(eq(currentRoom.getId()))).thenReturn(Optional.of(currentRoom));
+        when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.of(destinationRoom));
 
         when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
-
-        when(tile.getFlags()).thenReturn(EnumSet.noneOf(TileFlag.class));
-
-        when(gameMap.hasTile(anyInt(), anyInt())).thenReturn(true);
-        when(gameMap.getTile(anyInt(), anyInt())).thenReturn(tile);
 
         moveCommand = new MoveCommand(direction, applicationContext);
         moveCommand.postConstruct();
@@ -96,12 +91,9 @@ public class MoveCommandTest {
     public void testInvoke() {
         moveCommand.invoke(actor, output);
 
-        verify(gameMap).hasTile(0, 1);
-
         verify(commService, times(2)).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
 
-        verify(actor).setX(0);
-        verify(actor).setY(1);
+        assertEquals(destinationRoom.getId(), actor.getRoomId());
 
         verify(actorRepository).save(actor);
 
@@ -115,7 +107,7 @@ public class MoveCommandTest {
 
     @Test
     public void testInvokeNonCreature() {
-        when(actor.getCreatureInfo()).thenReturn(null);
+        actor.setCreatureInfo(null);
 
         moveCommand.invoke(actor, output);
 
@@ -123,72 +115,16 @@ public class MoveCommandTest {
     }
 
     @Test
-    public void testExit() {
-        GameMap map = new GameMap();
-        Exit exit = new Exit();
-        Location destination = new Location();
-
-        destination.setGameMap(map);
-        destination.setX(4);
-        destination.setY(5);
-
-        exit.setDirection("north");
-        exit.setDestination(destination);
-
-        when(exitRepository.findByDirectionAndLocationGameMapAndLocationXAndLocationY(any(), any(), any(), any())).thenReturn(exit);
-
-        moveCommand.invoke(actor, output);
-
-        verify(commService, times(2)).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-
-        verify(actor).setGameMap(eq(map));
-        verify(actor).setX(eq(destination.getX()));
-        verify(actor).setY(eq(destination.getY()));
-
-        verify(actorRepository).save(actor);
-
-        verify(invokerService).invoke(eq(actor), eq(output), isNull(), listCaptor.capture());
-
-        List<String> args = listCaptor.getValue();
-
-        assertEquals(1, args.size());
-        assertEquals("look", args.get(0));
-    }
-
-    @Test
     public void testInvokeIntoNonexistentRoom() {
-        when(gameMap.hasTile(0, 1)).thenReturn(false);
+        when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.empty());
 
         moveCommand.invoke(actor, output);
 
         verify(output).append(contains("Alas, you cannot go that way."));
 
-        verify(gameMap).hasTile(anyInt(), anyInt());
-
         verify(commService, never()).echoToRoom(any(), any(), any());
 
-        verify(actor, never()).setX(anyInt());
-        verify(actor, never()).setY(anyInt());
-
-        verify(actorRepository, never()).save(any());
-
-        verify(invokerService, never()).invoke(any(), any(), any(), any());
-    }
-
-    @Test
-    public void testInvokeIntoImpassableRoom() {
-        when(tile.getFlags()).thenReturn(EnumSet.of(TileFlag.IMPASSABLE));
-
-        moveCommand.invoke(actor, output);
-
-        verify(output).append(contains("Alas, you cannot go that way."));
-
-        verify(gameMap).hasTile(anyInt(), anyInt());
-
-        verify(commService, never()).echoToRoom(any(), any(), any());
-
-        verify(actor, never()).setX(anyInt());
-        verify(actor, never()).setY(anyInt());
+        assertEquals(currentRoom.getId(), actor.getRoomId());
 
         verify(actorRepository, never()).save(any());
 
@@ -204,9 +140,6 @@ public class MoveCommandTest {
         verify(output).append(contains("Alas, you are unable to walk."));
 
         verify(commService, never()).echoToRoom(any(), any(), any());
-
-        verify(actor, never()).setX(anyInt());
-        verify(actor, never()).setY(anyInt());
 
         verify(actorRepository, never()).save(any());
 

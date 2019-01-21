@@ -35,13 +35,8 @@ public class Actor {
     @OneToOne(cascade = CascadeType.ALL)
     private ItemInfo itemInfo;
 
-    @ManyToOne
-    private GameMap gameMap;
-    private Integer x;
-    private Integer y;
-
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private GameMap inventory;
+    private UUID inventoryId;
+    private UUID roomId;
 
     public UUID getId() {
         return id;
@@ -107,40 +102,20 @@ public class Actor {
         this.itemInfo = itemInfo;
     }
 
-    public GameMap getGameMap() {
-        return gameMap;
+    public UUID getInventoryId() {
+        return inventoryId;
     }
 
-    public void setGameMap(GameMap gameMap) {
-        this.gameMap = gameMap;
+    public void setInventoryId(UUID inventoryId) {
+        this.inventoryId = inventoryId;
     }
 
-    public Tile getTile() {
-        return getGameMap().getTile(x, y);
+    public UUID getRoomId() {
+        return roomId;
     }
 
-    public Integer getX() {
-        return x;
-    }
-
-    public void setX(Integer x) {
-        this.x = x;
-    }
-
-    public Integer getY() {
-        return y;
-    }
-
-    public void setY(Integer y) {
-        this.y = y;
-    }
-
-    public GameMap getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(GameMap inventory) {
-        this.inventory = inventory;
+    public void setRoomId(UUID roomId) {
+        this.roomId = roomId;
     }
 
     @Override

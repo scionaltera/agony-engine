@@ -21,7 +21,7 @@ public class InventoryCommand {
     public void invoke(Actor actor, GameOutput output) {
         output.append("[default]Items in your inventory:");
 
-        actorRepository.findByGameMap(actor.getInventory())
+        actorRepository.findByRoomId(actor.getInventoryId())
             .forEach(item -> output.append("[default]" + item.getName()));
     }
 }

@@ -26,7 +26,7 @@ public class ActorInventory implements ArgumentBinding {
     public boolean bind(Actor actor, String token) {
         this.token = token;
 
-        target = actorRepository.findByGameMap(actor.getInventory())
+        target = actorRepository.findByRoomId(actor.getInventoryId())
             .stream()
             .filter(t -> !t.equals(actor) && Arrays.stream(t.getNameTokens()).anyMatch(word -> word.toUpperCase().startsWith(token.toUpperCase())))
             .findFirst()

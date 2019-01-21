@@ -36,7 +36,7 @@ public class CommService {
 
         addPrompt(message);
 
-        actorRepository.findByGameMapAndXAndY(source.getGameMap(), source.getX(), source.getY())
+        actorRepository.findByRoomId(source.getRoomId())
             .stream()
             .filter(t -> t.getConnection() != null)
             .filter(t -> !excludeList.contains(t))

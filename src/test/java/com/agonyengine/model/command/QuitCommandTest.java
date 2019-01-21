@@ -2,7 +2,6 @@ package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Connection;
-import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.model.interpret.QuotedString;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
@@ -11,8 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
@@ -33,12 +30,6 @@ public class QuitCommandTest {
     private Connection connection;
 
     @Mock
-    private Actor item;
-
-    @Mock
-    private GameMap inventory;
-
-    @Mock
     private GameOutput output;
 
     @Mock
@@ -53,9 +44,6 @@ public class QuitCommandTest {
         when(quotedString.getToken()).thenReturn("NOW");
         when(actor.getConnection()).thenReturn(connection);
         when(actor.getName()).thenReturn("Scion");
-        when(actor.getInventory()).thenReturn(inventory);
-        when(item.getName()).thenReturn("a flux capacitor");
-        when(actorRepository.findByGameMap(inventory)).thenReturn(Collections.singletonList(item));
 
         quitCommand = new QuitCommand(actorRepository, commService);
     }
@@ -66,7 +54,7 @@ public class QuitCommandTest {
 
         quitCommand.invoke(actor, output, quotedString);
 
-        verify(actor, never()).setGameMap(isNull());
+        verify(actor, never()).setRoomId(isNull());
         verify(commService, never()).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
         verify(actorRepository, never()).save(eq(actor));
         verify(output, never()).append(contains("window.location"));
@@ -79,7 +67,7 @@ public class QuitCommandTest {
         verify(output).append(contains("Goodbye, Scion!"));
         verify(output).append(contains("window.location"));
         verify(commService).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
-        verify(actor).setGameMap(isNull());
+        verify(actor).setRoomId(isNull());
         verify(actorRepository).save(eq(actor));
     }
 }

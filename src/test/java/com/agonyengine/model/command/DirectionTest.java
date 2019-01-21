@@ -1,5 +1,6 @@
 package com.agonyengine.model.command;
 
+import com.agonyengine.model.map.Direction;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -13,7 +14,7 @@ public class DirectionTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        direction = new Direction("west", "east", -1, 0);
+        direction = new Direction("west", "east", -1, 1, 0);
     }
 
     @Test
@@ -33,6 +34,11 @@ public class DirectionTest {
 
     @Test
     public void testY() {
-        assertEquals(0, direction.getY());
+        assertEquals(1, direction.getY());
+    }
+
+    @Test
+    public void testZ() {
+        assertEquals(0, direction.getZ());
     }
 }

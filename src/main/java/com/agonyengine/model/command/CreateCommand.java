@@ -41,9 +41,7 @@ public class CreateCommand {
 
         item.setName(itemName.getToken());
         item.setPronoun(pronounRepository.getOne("it"));
-        item.setGameMap(actor.getGameMap());
-        item.setX(actor.getX());
-        item.setY(actor.getY());
+        item.setRoomId(actor.getRoomId());
         item.setItemInfo(itemInfo);
 
         item = actorRepository.save(item);
