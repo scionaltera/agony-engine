@@ -1,7 +1,6 @@
 package com.agonyengine.repository;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.actor.GameMap;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,9 +13,5 @@ public interface ActorRepository extends JpaRepository<Actor, UUID> {
     List<Actor> findByRoomId(UUID roomId);
     List<Actor> findByConnectionIsNotNullAndRoomIdIsNotNull(Sort sort);
     List<Actor> findByConnectionDisconnectedDateIsBeforeAndRoomIdIsNotNull(Date cutoff);
-
-    @Deprecated
-    List<Actor> findByGameMap(GameMap gameMap);
-
     List<Actor> findByConnectionAccount(String account);
 }

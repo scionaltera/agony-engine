@@ -37,9 +37,6 @@ public class DropCommand {
             new GameOutput(String.format("[default]%s drops %s[default].", StringUtils.capitalize(actor.getName()), item.getName())),
             actor, item);
 
-        item.setGameMap(null);
-        item.setX(actor.getX());
-        item.setY(actor.getY());
         item.setRoomId(actor.getRoomId());
 
         actorRepository.save(item);

@@ -44,10 +44,7 @@ public class GetCommand {
             new GameOutput(String.format("[default]%s gets %s[default].", StringUtils.capitalize(actor.getName()), item.getName())),
             actor, item);
 
-        item.setGameMap(actor.getInventory());
-        item.setX(0);
-        item.setY(0);
-        item.setRoomId(null);
+        item.setRoomId(actor.getInventoryId());
 
         actorRepository.save(item);
 

@@ -69,7 +69,9 @@ public class WearCommand {
         }
 
         wearLocations.forEach(part -> part.setArmor(item));
-        item.setGameMap(null);
+
+        item.setRoomId(null);
+        item.setInventoryId(null);
 
         actorRepository.save(actor);
         actorRepository.save(item);

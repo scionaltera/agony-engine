@@ -19,7 +19,7 @@ public class Room {
     private UUID id;
 
     @Embedded
-    private RoomLocation location = new RoomLocation();
+    private Location location = new Location();
 
     public UUID getId() {
         return id;
@@ -29,11 +29,11 @@ public class Room {
         this.id = id;
     }
 
-    public RoomLocation getLocation() {
+    public Location getLocation() {
         return location;
     }
 
-    public void setLocation(RoomLocation location) {
+    public void setLocation(Location location) {
         this.location = location;
     }
 

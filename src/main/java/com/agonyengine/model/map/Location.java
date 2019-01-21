@@ -2,24 +2,23 @@ package com.agonyengine.model.map;
 
 import javax.persistence.Embeddable;
 
-// TODO rename to Location after the other Location is gone
 @Embeddable
-public class RoomLocation {
+public class Location {
     private Long x;
     private Long y;
     private Long z;
 
-    public RoomLocation() {
+    public Location() {
         // this method intentionally left blank
     }
 
-    public RoomLocation(Long x, Long y) {
+    public Location(Long x, Long y) {
         setX(x);
         setY(y);
         setZ(0L);
     }
 
-    public RoomLocation(Long x, Long y, Long z) {
+    public Location(Long x, Long y, Long z) {
         setX(x);
         setY(y);
         setZ(z);

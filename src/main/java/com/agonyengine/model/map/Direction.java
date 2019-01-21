@@ -1,4 +1,4 @@
-package com.agonyengine.model.command;
+package com.agonyengine.model.map;
 
 public class Direction {
     private String name;

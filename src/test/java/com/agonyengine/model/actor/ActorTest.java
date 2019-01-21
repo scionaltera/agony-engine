@@ -10,7 +10,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ActorTest {
     @Mock
@@ -114,41 +113,11 @@ public class ActorTest {
     }
 
     @Test
-    public void testGameMap() {
-        GameMap gameMap = mock(GameMap.class);
-
-        actor.setGameMap(gameMap);
-
-        assertEquals(gameMap, actor.getGameMap());
-    }
-
-    @Test
-    public void testGetTile() {
-        GameMap map = mock(GameMap.class);
-        Tile tile = mock(Tile.class);
-
-        actor.setGameMap(map);
-
-        when(map.getTile(0, 0)).thenReturn(tile);
-
-        assertEquals(tile, map.getTile(0, 0));
-    }
-
-    @Test
-    public void testXY() {
-        actor.setX(3);
-        actor.setY(2);
-
-        assertEquals(3, (int)actor.getX());
-        assertEquals(2, (int)actor.getY());
-    }
-
-    @Test
     public void testInventory() {
-        GameMap gameMap = mock(GameMap.class);
+        UUID roomId = UUID.randomUUID();
 
-        actor.setInventory(gameMap);
+        actor.setInventoryId(roomId);
 
-        assertEquals(gameMap, actor.getInventory());
+        assertEquals(roomId, actor.getInventoryId());
     }
 }

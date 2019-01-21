@@ -2,20 +2,12 @@ package com.agonyengine.resource;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.CreatureInfo;
-import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.actor.Tileset;
-import com.agonyengine.model.actor.TilesetFlag;
 import com.agonyengine.model.generator.BodyGenerator;
-import com.agonyengine.model.generator.MapGenerator;
 import com.agonyengine.model.map.Room;
-import com.agonyengine.model.map.StartLocation;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
-import com.agonyengine.repository.GameMapRepository;
 import com.agonyengine.repository.RoomRepository;
-import com.agonyengine.repository.StartLocationRepository;
-import com.agonyengine.repository.TilesetRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
@@ -44,7 +36,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.agonyengine.model.actor.CreatureInfo.BODY_VERSION;
-import static com.agonyengine.model.actor.GameMap.NO_UPDATE_VERSION;
 
 @Controller
 public class WebSocketResource {
@@ -54,51 +45,36 @@ public class WebSocketResource {
 
     private String applicationVersion;
     private Date applicationBootDate;
-    private UUID inventoryTilesetId;
     private InputTokenizer inputTokenizer;
     private RoomRepository roomRepository;
-    private GameMapRepository gameMapRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
-    private TilesetRepository tilesetRepository;
-    private StartLocationRepository startLocationRepository;
     private InvokerService invokerService;
     private CommService commService;
     private BodyGenerator bodyGenerator;
-    private MapGenerator mapGenerator;
     private List<String> greeting;
 
     @Inject
     public WebSocketResource(
         String applicationVersion,
         Date applicationBootDate,
-        UUID inventoryTilesetId,
         InputTokenizer inputTokenizer,
         RoomRepository roomRepository,
-        GameMapRepository gameMapRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
-        TilesetRepository tilesetRepository,
-        StartLocationRepository startLocationRepository,
         InvokerService invokerService,
         CommService commService,
-        BodyGenerator bodyGenerator,
-        MapGenerator mapGenerator) {
+        BodyGenerator bodyGenerator) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
-        this.inventoryTilesetId = inventoryTilesetId;
         this.inputTokenizer = inputTokenizer;
         this.roomRepository = roomRepository;
-        this.gameMapRepository = gameMapRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
-        this.tilesetRepository = tilesetRepository;
-        this.startLocationRepository = startLocationRepository;
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
-        this.mapGenerator = mapGenerator;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -127,36 +103,26 @@ public class WebSocketResource {
         }
 
         // Attach an inventory if the Actor doesn't have one.
-        if (actor.getInventory() == null) {
-            GameMap inventoryMap = new GameMap();
+        if (actor.getInventoryId() == null) {
+            Room room = new Room();
+            Room savedRoom = roomRepository.save(room);
 
-            inventoryMap.setVersion(NO_UPDATE_VERSION);
-            inventoryMap.setWidth(1);
-            inventoryMap.setTiles(new byte[] { (byte)0x00 });
-            inventoryMap.setTileset(tilesetRepository.getOne(inventoryTilesetId));
-
-            inventoryMap = gameMapRepository.save(inventoryMap);
-
-            actor.setInventory(inventoryMap);
+            actor.setInventoryId(savedRoom.getId());
         }
 
         // Upgrade old bodies with new ones.
         // This can probably get removed at some point but for awhile there needs to be a framework to allow for
         // breaking changes. The system for bodies is complex and changing frequently.
         if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
-            final StartLocation startLocation = startLocationRepository
-                .findAll()
-                .stream()
-                .findFirst()
-                .orElseGet(this::generateStartingMap);
+            Room origin = roomRepository
+                .findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)
+                .orElseThrow(() -> new NullPointerException("No start room!"));
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
             actor.getCreatureInfo().getBodyParts().stream()
                 .filter(part -> part.getArmor() != null)
                 .forEach(part -> {
-                    part.getArmor().setX(0);
-                    part.getArmor().setY(0);
-                    part.getArmor().setGameMap(startLocation.getLocation().getGameMap());
+                    part.getArmor().setRoomId(origin.getId());
                     part.setArmor(null);
 
                     actorRepository.save(part.getArmor());
@@ -256,18 +222,6 @@ public class WebSocketResource {
             .append("[dwhite]> ");
 
         return output;
-    }
-
-    private StartLocation generateStartingMap() {
-        Tileset tileset = tilesetRepository.findAll()
-            .stream()
-            .filter(t -> t.getFlags().contains(TilesetFlag.START_MAP))
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("No tilesets exist with START_MAP flag!"));
-
-        GameMap map = mapGenerator.generateMap(tileset);
-
-        return mapGenerator.placeStartLocation(map);
     }
 
     private Session getSpringSession(Message<byte[]> message) {

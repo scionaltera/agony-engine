@@ -2,6 +2,7 @@ package com.agonyengine.model.command;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.interpret.ActorSameRoom;
+import com.agonyengine.model.map.Direction;
 import com.agonyengine.model.map.Room;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;

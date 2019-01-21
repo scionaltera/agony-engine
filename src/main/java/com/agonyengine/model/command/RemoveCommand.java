@@ -26,7 +26,7 @@ public class RemoveCommand {
         Actor equipped = equippedBinding.getTarget();
 
         equippedBinding.getWearLocations().forEach(part -> part.setArmor(null));
-        equipped.setGameMap(actor.getInventory());
+        equipped.setInventoryId(actor.getInventoryId());
 
         actorRepository.save(actor);
         actorRepository.save(equipped);

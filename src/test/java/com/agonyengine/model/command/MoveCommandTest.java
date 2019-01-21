@@ -3,11 +3,9 @@ package com.agonyengine.model.command;
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.BodyPartCapability;
 import com.agonyengine.model.actor.CreatureInfo;
-import com.agonyengine.model.actor.GameMap;
-import com.agonyengine.model.actor.Tile;
-import com.agonyengine.model.actor.TileFlag;
+import com.agonyengine.model.map.Direction;
 import com.agonyengine.model.map.Room;
-import com.agonyengine.model.map.RoomLocation;
+import com.agonyengine.model.map.Location;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
@@ -21,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,12 +47,6 @@ public class MoveCommandTest {
     private CreatureInfo creatureInfo;
 
     @Mock
-    private GameMap gameMap;
-
-    @Mock
-    private Tile tile;
-
-    @Mock
     private GameOutput output;
 
     @Captor
@@ -73,16 +64,13 @@ public class MoveCommandTest {
         MockitoAnnotations.initMocks(this);
 
         currentRoom.setId(UUID.randomUUID());
-        currentRoom.setLocation(new RoomLocation(0L, 0L));
+        currentRoom.setLocation(new Location(0L, 0L));
 
         destinationRoom.setId(UUID.randomUUID());
-        destinationRoom.setLocation(new RoomLocation((long)direction.getX(), (long)direction.getY()));
+        destinationRoom.setLocation(new Location((long)direction.getX(), (long)direction.getY()));
 
         actor.setName("Frank");
         actor.setRoomId(currentRoom.getId());
-        actor.setGameMap(gameMap);
-        actor.setX(0);
-        actor.setY(0);
         actor.setCreatureInfo(creatureInfo);
 
         when(applicationContext.getBean(eq("actorRepository"), eq(ActorRepository.class))).thenReturn(actorRepository);
@@ -94,11 +82,6 @@ public class MoveCommandTest {
         when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.of(destinationRoom));
 
         when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
-
-        when(tile.getFlags()).thenReturn(EnumSet.noneOf(TileFlag.class));
-
-        when(gameMap.hasTile(anyInt(), anyInt())).thenReturn(true);
-        when(gameMap.getTile(anyInt(), anyInt())).thenReturn(tile);
 
         moveCommand = new MoveCommand(direction, applicationContext);
         moveCommand.postConstruct();
@@ -157,9 +140,6 @@ public class MoveCommandTest {
         verify(output).append(contains("Alas, you are unable to walk."));
 
         verify(commService, never()).echoToRoom(any(), any(), any());
-
-        assertEquals(0L, (long)actor.getX());
-        assertEquals(0L, (long)actor.getY());
 
         verify(actorRepository, never()).save(any());
 

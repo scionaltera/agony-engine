@@ -43,7 +43,6 @@ public class QuitCommand {
 
         commService.echoToRoom(actor, new GameOutput(String.format("[yellow]%s disappears in a puff of smoke!", StringUtils.capitalize(actor.getName()))), actor);
 
-        actor.setGameMap(null);
         actor.setRoomId(null);
         actorRepository.save(actor);
     }

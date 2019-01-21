@@ -1,8 +1,8 @@
 CREATE TABLE room (
   id BINARY(16) NOT NULL,
-  x INT NOT NULL,
-  y INT NOT NULL,
-  z INT NOT NULL,
+  x INT,
+  y INT,
+  z INT,
   PRIMARY KEY (id),
   INDEX idx_room_location (x, y, z)
 );

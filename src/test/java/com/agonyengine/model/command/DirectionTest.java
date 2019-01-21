@@ -1,5 +1,6 @@
 package com.agonyengine.model.command;
 
+import com.agonyengine.model.map.Direction;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;

@@ -1,7 +1,6 @@
 package com.agonyengine.model.interpret;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.actor.GameMap;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
 import org.junit.Test;
