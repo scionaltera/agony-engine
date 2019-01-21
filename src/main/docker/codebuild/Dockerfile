@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-oraclejdk8:slim as build
+FROM frolvlad/alpine-oraclejdk8-temporary:slim as build
 MAINTAINER Peter Keeler <scion@agonyengine.com>
 WORKDIR /opt/build
 COPY . /opt/build/
