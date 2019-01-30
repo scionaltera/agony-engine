@@ -17,43 +17,23 @@ public class MovementConfiguration {
         this.applicationContext = applicationContext;
     }
 
-    @Bean(name = "northDirection")
-    public Direction northDirection() {
-        return new Direction("north", "south", 0, 1, 0);
-    }
-
-    @Bean(name = "eastDirection")
-    public Direction eastDirection() {
-        return new Direction("east", "west", 1, 0, 0);
-    }
-
-    @Bean(name = "southDirection")
-    public Direction southDirection() {
-        return new Direction("south", "north", 0, -1, 0);
-    }
-
-    @Bean(name = "westDirection")
-    public Direction westDirection() {
-        return new Direction("west", "east", -1, 0, 0);
-    }
-
     @Bean(name = "northCommand")
     public MoveCommand northCommand() {
-        return new MoveCommand(northDirection(), applicationContext);
+        return new MoveCommand(Direction.NORTH, applicationContext);
     }
 
     @Bean(name = "eastCommand")
     public MoveCommand eastCommand() {
-        return new MoveCommand(eastDirection(), applicationContext);
+        return new MoveCommand(Direction.EAST, applicationContext);
     }
 
     @Bean(name = "southCommand")
     public MoveCommand southCommand() {
-        return new MoveCommand(southDirection(), applicationContext);
+        return new MoveCommand(Direction.SOUTH, applicationContext);
     }
 
     @Bean(name = "westCommand")
     public MoveCommand westCommand() {
-        return new MoveCommand(westDirection(), applicationContext);
+        return new MoveCommand(Direction.WEST, applicationContext);
     }
 }

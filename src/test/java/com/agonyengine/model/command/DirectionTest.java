@@ -14,7 +14,7 @@ public class DirectionTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        direction = new Direction("west", "east", -1, 1, 0);
+        direction = Direction.WEST;
     }
 
     @Test
@@ -34,7 +34,7 @@ public class DirectionTest {
 
     @Test
     public void testY() {
-        assertEquals(1, direction.getY());
+        assertEquals(0, direction.getY());
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.agonyengine.model.actor.BodyPartCapability.SEE;
@@ -23,19 +24,16 @@ public class LookCommand {
     private ActorRepository actorRepository;
     private RoomRepository roomRepository;
     private CommService commService;
-    private List<Direction> directions;
 
     @Inject
     public LookCommand(
         ActorRepository actorRepository,
         RoomRepository roomRepository,
-        CommService commservice,
-        List<Direction> directions) {
+        CommService commservice) {
 
         this.actorRepository = actorRepository;
         this.roomRepository = roomRepository;
         this.commService = commservice;
-        this.directions = directions;
     }
 
     @Transactional
@@ -56,7 +54,7 @@ public class LookCommand {
         output.append(String.format("[yellow]%s", "A Room"));
         output.append(String.format("[default]%s", "This is a placeholder for the room description."));
 
-        output.append(directions.stream()
+        output.append(Arrays.stream(Direction.values())
             .filter(direction -> roomRepository.findByLocationXAndLocationYAndLocationZ(
                 room.getLocation().getX() + direction.getX(),
                 room.getLocation().getY() + direction.getY(),

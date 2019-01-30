@@ -53,7 +53,7 @@ public class MoveCommandTest {
     private ArgumentCaptor<List<String>> listCaptor;
 
     private Actor actor = new Actor();
-    private Direction direction = new Direction("north", "south", 0, 1, 0);
+    private Direction direction = Direction.NORTH;
     private Room currentRoom = new Room();
     private Room destinationRoom = new Room();
 
