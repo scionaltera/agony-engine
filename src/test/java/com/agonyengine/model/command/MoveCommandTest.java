@@ -64,6 +64,7 @@ public class MoveCommandTest {
         MockitoAnnotations.initMocks(this);
 
         currentRoom.setId(UUID.randomUUID());
+        currentRoom.getExits().add(Direction.NORTH);
         currentRoom.setLocation(new Location(0L, 0L));
 
         destinationRoom.setId(UUID.randomUUID());
@@ -112,6 +113,23 @@ public class MoveCommandTest {
         moveCommand.invoke(actor, output);
 
         verify(output).append(contains("Alas"));
+    }
+
+    @Test
+    public void testInvokeNoExit() {
+        currentRoom.getExits().clear();
+
+        moveCommand.invoke(actor, output);
+
+        verify(output).append(contains("Alas, you cannot go that way."));
+
+        verify(commService, never()).echoToRoom(any(), any(), any());
+
+        assertEquals(currentRoom.getId(), actor.getRoomId());
+
+        verify(actorRepository, never()).save(any());
+
+        verify(invokerService, never()).invoke(any(), any(), any(), any());
     }
 
     @Test

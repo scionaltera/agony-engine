@@ -8,6 +8,8 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
@@ -18,6 +20,8 @@ import java.util.Collections;
 import static com.agonyengine.model.actor.BodyPartCapability.WALK;
 
 public class MoveCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MoveCommand.class);
+
     private Direction direction;
     private ActorRepository actorRepository;
     private RoomRepository roomRepository;
@@ -46,24 +50,30 @@ public class MoveCommand {
             return;
         }
 
-        Room currentRoom = roomRepository
-            .findById(actor.getRoomId())
-            .orElse(null);
+        Room currentRoom;
+        Room destinationRoom;
 
-        if (currentRoom == null) {
-            output.append("[black]You are floating in the void, and unable to move!");
-            return;
-        }
+        try {
+            currentRoom = roomRepository
+                .findById(actor.getRoomId())
+                .orElseThrow(() -> new NullPointerException("[black]You are floating in the void, and unable to move!"));
 
-        Room destinationRoom = roomRepository
-            .findByLocationXAndLocationYAndLocationZ(
-                currentRoom.getLocation().getX() + direction.getX(),
-                currentRoom.getLocation().getY() + direction.getY(),
-                currentRoom.getLocation().getZ()
-            ).orElse(null);
+            if (!currentRoom.getExits().contains(direction)) {
+                LOGGER.trace("Unable to move Actor {} because room has no exit to the {}", actor.getId(), direction.getName());
+                throw new NullPointerException("[default]Alas, you cannot go that way.");
+            }
 
-        if (destinationRoom == null) {
-            output.append("[default]Alas, you cannot go that way.");
+            destinationRoom = roomRepository
+                .findByLocationXAndLocationYAndLocationZ(
+                    currentRoom.getLocation().getX() + direction.getX(),
+                    currentRoom.getLocation().getY() + direction.getY(),
+                    currentRoom.getLocation().getZ()
+                ).orElseThrow(() -> {
+                    LOGGER.trace("Unable to move Actor {} because destination room to the {} does not yet exist", actor.getId(), direction.getName());
+                    return new NullPointerException("[default]Alas, you cannot go that way.");
+                });
+        } catch (NullPointerException e) {
+            output.append(e.getMessage());
             return;
         }
 
