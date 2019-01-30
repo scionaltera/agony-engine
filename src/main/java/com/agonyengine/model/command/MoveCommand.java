@@ -8,6 +8,7 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -27,6 +28,7 @@ public class MoveCommand {
     private RoomRepository roomRepository;
     private InvokerService invokerService;
     private CommService commService;
+    private RoomFactory roomFactory;
     private ApplicationContext applicationContext;
 
     public MoveCommand(Direction direction, ApplicationContext applicationContext) {
@@ -40,6 +42,7 @@ public class MoveCommand {
         this.roomRepository = applicationContext.getBean("roomRepository", RoomRepository.class);
         this.invokerService = applicationContext.getBean("invokerService", InvokerService.class);
         this.commService = applicationContext.getBean("commService", CommService.class);
+        this.roomFactory = applicationContext.getBean("roomFactory", RoomFactory.class);
     }
 
     @Transactional
@@ -51,9 +54,12 @@ public class MoveCommand {
         }
 
         Room currentRoom;
-        Room destinationRoom;
 
         try {
+            if (actor.getRoomId() == null) {
+                throw new NullPointerException("[black]You are floating in the void, and unable to move!");
+            }
+
             currentRoom = roomRepository
                 .findById(actor.getRoomId())
                 .orElseThrow(() -> new NullPointerException("[black]You are floating in the void, and unable to move!"));
@@ -62,20 +68,12 @@ public class MoveCommand {
                 LOGGER.trace("Unable to move Actor {} because room has no exit to the {}", actor.getId(), direction.getName());
                 throw new NullPointerException("[default]Alas, you cannot go that way.");
             }
-
-            destinationRoom = roomRepository
-                .findByLocationXAndLocationYAndLocationZ(
-                    currentRoom.getLocation().getX() + direction.getX(),
-                    currentRoom.getLocation().getY() + direction.getY(),
-                    currentRoom.getLocation().getZ()
-                ).orElseThrow(() -> {
-                    LOGGER.trace("Unable to move Actor {} because destination room to the {} does not yet exist", actor.getId(), direction.getName());
-                    return new NullPointerException("[default]Alas, you cannot go that way.");
-                });
         } catch (NullPointerException e) {
             output.append(e.getMessage());
             return;
         }
+
+        Room destinationRoom = roomFactory.getOrBuild(currentRoom, direction);
 
         commService.echoToRoom(
             actor,
@@ -84,13 +82,13 @@ public class MoveCommand {
 
         actor.setRoomId(destinationRoom.getId());
 
-        actorRepository.save(actor);
+        Actor savedActor = actorRepository.save(actor);
 
         commService.echoToRoom(
-            actor,
-            new GameOutput(String.format("[default]%s arrives from the %s.", StringUtils.capitalize(actor.getName()), direction.getOpposite())),
-            actor);
+            savedActor,
+            new GameOutput(String.format("[default]%s arrives from the %s.", StringUtils.capitalize(savedActor.getName()), direction.getOpposite())),
+            savedActor);
 
-        invokerService.invoke(actor, output, null, Collections.singletonList("look"));
+        invokerService.invoke(savedActor, output, null, Collections.singletonList("look"));
     }
 }

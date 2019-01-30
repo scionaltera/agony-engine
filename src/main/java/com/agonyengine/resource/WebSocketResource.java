@@ -7,10 +7,10 @@ import com.agonyengine.model.map.Room;
 import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.model.stomp.UserInput;
 import com.agonyengine.repository.ActorRepository;
-import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -46,12 +46,12 @@ public class WebSocketResource {
     private String applicationVersion;
     private Date applicationBootDate;
     private InputTokenizer inputTokenizer;
-    private RoomRepository roomRepository;
     private SessionRepository sessionRepository;
     private ActorRepository actorRepository;
     private InvokerService invokerService;
     private CommService commService;
     private BodyGenerator bodyGenerator;
+    private RoomFactory roomFactory;
     private List<String> greeting;
 
     @Inject
@@ -59,22 +59,22 @@ public class WebSocketResource {
         String applicationVersion,
         Date applicationBootDate,
         InputTokenizer inputTokenizer,
-        RoomRepository roomRepository,
         SessionRepository sessionRepository,
         ActorRepository actorRepository,
         InvokerService invokerService,
         CommService commService,
-        BodyGenerator bodyGenerator) {
+        BodyGenerator bodyGenerator,
+        RoomFactory roomFactory) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
         this.inputTokenizer = inputTokenizer;
-        this.roomRepository = roomRepository;
         this.sessionRepository = sessionRepository;
         this.actorRepository = actorRepository;
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
+        this.roomFactory = roomFactory;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -91,32 +91,16 @@ public class WebSocketResource {
         Actor actor = actorRepository.findById(UUID.fromString(actorId))
             .orElseThrow(() -> new NoSuchActorException("Actor not found: " + actorUuid.toString()));
 
-        // Create a Room if the game doesn't have one already.
-        if (roomRepository.findAll().isEmpty()) {
-            Room room = new Room();
-
-            room.getLocation().setX(0L);
-            room.getLocation().setY(0L);
-            room.getLocation().setZ(0L);
-
-            roomRepository.save(room);
-        }
-
         // Attach an inventory if the Actor doesn't have one.
         if (actor.getInventoryId() == null) {
-            Room room = new Room();
-            Room savedRoom = roomRepository.save(room);
-
-            actor.setInventoryId(savedRoom.getId());
+            actor.setInventoryId(roomFactory.build().getId());
         }
 
         // Upgrade old bodies with new ones.
         // This can probably get removed at some point but for awhile there needs to be a framework to allow for
         // breaking changes. The system for bodies is complex and changing frequently.
         if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
-            Room origin = roomRepository
-                .findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)
-                .orElseThrow(() -> new NullPointerException("No start room!"));
+            Room origin = roomFactory.getOrBuild(0L, 0L, 0L);
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
             actor.getCreatureInfo().getBodyParts().stream()
@@ -144,12 +128,11 @@ public class WebSocketResource {
             actor.setCreatureInfo(creatureInfo);
         }
 
+        //noinspection ConstantConditions
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
         if (actor.getRoomId() == null) {
-            Room startRoom = roomRepository
-                .findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)
-                .orElseThrow(() -> new NullPointerException("No start room!"));
+            Room startRoom = roomFactory.getOrBuild(0L, 0L, 0L);
 
             actor.setRoomId(startRoom.getId());
 
