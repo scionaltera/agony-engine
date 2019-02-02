@@ -1,12 +1,13 @@
 package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.interpret.ArgumentBinding;
-import com.agonyengine.model.interpret.QuotedString;
-import com.agonyengine.model.interpret.Verb;
-import com.agonyengine.model.stomp.GameOutput;
-import com.agonyengine.model.stomp.UserInput;
+import com.agonyengine.model.command.binding.ArgumentBinding;
+import com.agonyengine.model.command.binding.QuotedString;
+import com.agonyengine.model.command.binding.Verb;
+import com.agonyengine.stomp.model.GameOutput;
+import com.agonyengine.stomp.model.UserInput;
 import com.agonyengine.repository.VerbRepository;
+import com.agonyengine.util.FormattingUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -88,7 +89,7 @@ public class InvokerService {
             } else if (verb.isQuoting()) { // verb automatically quotes the rest of the input (e.g. SAY)
                 QuotedString quoted = applicationContext.getBean(QuotedString.class);
 
-                if (quoted.bind(actor, UserInput.removeFirstWord(rawInput.getInput()))) {
+                if (quoted.bind(actor, FormattingUtils.removeFirstWord(rawInput.getInput()))) {
                     ReflectionUtils.invokeMethod(method, verbBean, actor, output, quoted);
                     return;
                 }

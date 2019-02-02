@@ -1,7 +1,7 @@
 package com.agonyengine.model.map;
 
-import com.agonyengine.model.converter.BaseEnumSetConverter;
-import com.agonyengine.model.converter.PersistentEnum;
+import com.agonyengine.model.util.BaseEnumSetConverter;
+import com.agonyengine.model.util.PersistentEnum;
 
 public enum Direction implements PersistentEnum {
     NORTH(0, "north", "south", 0, 1, 0),

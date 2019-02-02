@@ -1,13 +1,13 @@
 package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.command.LookCommand;
-import com.agonyengine.model.command.SayCommand;
-import com.agonyengine.model.interpret.ActorSameRoom;
-import com.agonyengine.model.interpret.QuotedString;
-import com.agonyengine.model.interpret.Verb;
-import com.agonyengine.model.stomp.GameOutput;
-import com.agonyengine.model.stomp.UserInput;
+import com.agonyengine.model.command.impl.LookCommand;
+import com.agonyengine.model.command.impl.SayCommand;
+import com.agonyengine.model.command.binding.ActorSameRoom;
+import com.agonyengine.model.command.binding.QuotedString;
+import com.agonyengine.model.command.binding.Verb;
+import com.agonyengine.stomp.model.GameOutput;
+import com.agonyengine.stomp.model.UserInput;
 import com.agonyengine.repository.VerbRepository;
 import org.junit.Before;
 import org.junit.Test;

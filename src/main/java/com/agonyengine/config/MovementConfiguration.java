@@ -1,7 +1,7 @@
 package com.agonyengine.config;
 
 import com.agonyengine.model.map.Direction;
-import com.agonyengine.model.command.MoveCommand;
+import com.agonyengine.model.command.impl.MoveCommand;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
