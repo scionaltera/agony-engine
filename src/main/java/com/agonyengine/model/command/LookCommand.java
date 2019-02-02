@@ -57,11 +57,11 @@ public class LookCommand {
         }
 
         output.append("[yellow]Smooth Gray Stones");
-        output.append(FormattingUtils.softWrap("[default]The sky is black and featureless. Ambient light shines dimly, but " +
-            "its source is unclear. The floor is made of unnaturally smooth, gray stones packed together with nearly " +
+        output.append(FormattingUtils.softWrap("[default]The sky is black and featureless. Ambient light shines dimly but " +
+            "its source is unclear. The floor is made of unnaturally smooth gray stones packed together with nearly " +
             "perfect hairline seams running off in every direction. " +
-            "In some places the stone gives way to an empty, black void. It seems like you could fall forever from " +
-            "one of these precipices. Time itself feels like it has stopped in this place. Or perhaps, it simply never started."));
+            "In some places the stone gives way to a yawning black void. It seems like you could fall forever from " +
+            "one of these precipices. Time itself feels like it has stopped in this place. Or perhaps, it never started."));
 
         output.append(room.getExits().stream()
             .map(Direction::getName)

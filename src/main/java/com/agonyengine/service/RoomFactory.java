@@ -28,13 +28,6 @@ public class RoomFactory {
             from.getLocation().getY() + to.getY(),
             from.getLocation().getZ() + to.getZ());
 
-        // if the "from" room doesn't have an exit into the new room, add one
-        if (!from.getExits().contains(to)) {
-            from.getExits().add(to);
-
-            roomRepository.save(from);
-        }
-
         // make sure the new room has an exit into the original room too
         Direction opposite = Direction.valueOf(to.getOpposite().toUpperCase());
 
@@ -70,6 +63,21 @@ public class RoomFactory {
                     .forEach(direction -> {
                         if (random.nextBoolean()) {
                             r.getExits().add(direction);
+
+                            // If there is a neighbor in the direction we just added an exit to
+                            // make sure it has a reciprocal exit back to us so we don't create one way exits.
+                            roomRepository
+                                .findByLocationXAndLocationYAndLocationZ(
+                                    r.getLocation().getX() + direction.getX(),
+                                    r.getLocation().getY() + direction.getY(),
+                                    r.getLocation().getZ() + direction.getZ())
+                                .ifPresent(neighbor -> {
+                                    Direction opposite = Direction.valueOf(direction.getOpposite().toUpperCase());
+
+                                    neighbor.getExits().add(opposite);
+
+                                    roomRepository.save(neighbor);
+                                });
                         }
                 });
 
