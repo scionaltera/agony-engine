@@ -3,6 +3,8 @@ package com.agonyengine.service;
 import com.agonyengine.model.map.Direction;
 import com.agonyengine.model.map.Room;
 import com.agonyengine.repository.RoomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -10,6 +12,8 @@ import java.util.Random;
 
 @Component
 public class RoomFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoomFactory.class);
+
     private Random random;
     private RoomRepository roomRepository;
 
@@ -28,12 +32,7 @@ public class RoomFactory {
             from.getLocation().getY() + to.getY(),
             from.getLocation().getZ() + to.getZ());
 
-        // make sure the new room has an exit into the original room too
-        Direction opposite = Direction.valueOf(to.getOpposite().toUpperCase());
-
-        if (!room.getExits().contains(opposite)) {
-            room.getExits().add(opposite);
-        }
+        room.getExits().add(to.toOpposite());
 
         return roomRepository.save(room);
     }
@@ -58,6 +57,8 @@ public class RoomFactory {
                 r.getLocation().setY(y);
                 r.getLocation().setZ(z);
 
+                LOGGER.debug("Created new Room at {}", r.getLocation());
+
                 Arrays
                     .stream(Direction.values())
                     .forEach(direction -> {
@@ -72,9 +73,7 @@ public class RoomFactory {
                                     r.getLocation().getY() + direction.getY(),
                                     r.getLocation().getZ() + direction.getZ())
                                 .ifPresent(neighbor -> {
-                                    Direction opposite = Direction.valueOf(direction.getOpposite().toUpperCase());
-
-                                    neighbor.getExits().add(opposite);
+                                    neighbor.getExits().add(direction.toOpposite());
 
                                     roomRepository.save(neighbor);
                                 });

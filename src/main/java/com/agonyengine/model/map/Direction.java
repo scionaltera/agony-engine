@@ -33,6 +33,10 @@ public enum Direction implements PersistentEnum {
         return opposite;
     }
 
+    public Direction toOpposite() {
+        return Direction.valueOf(getOpposite().toUpperCase());
+    }
+
     public int getX() {
         return x;
     }
