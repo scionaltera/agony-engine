@@ -61,4 +61,24 @@ public final class FormattingUtils {
 
         return buf.toString();
     }
+
+    /**
+     * Return the input string starting at the first space.
+     *
+     * @param in The string to remove the first word from.
+     * @return The modified string.
+     */
+    public static String removeFirstWord(String in) {
+        if (in.indexOf(' ') != -1) {
+            int i = in.indexOf(' ');
+
+            while (i < in.length() &&  in.charAt(i) == ' ') {
+                i++;
+            }
+
+            return in.substring(i);
+        }
+
+        return "";
+    }
 }

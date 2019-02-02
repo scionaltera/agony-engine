@@ -1,6 +1,6 @@
 package com.agonyengine.config;
 
-import com.agonyengine.resource.UniqueHandshakeHandler;
+import com.agonyengine.web.UniqueHandshakeHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.config.StompBrokerRelayRegistration;

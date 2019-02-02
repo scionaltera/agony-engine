@@ -1,7 +1,7 @@
 package com.agonyengine.model.actor;
 
-import com.agonyengine.model.converter.BaseEnumSetConverter;
-import com.agonyengine.model.converter.PersistentEnum;
+import com.agonyengine.model.util.BaseEnumSetConverter;
+import com.agonyengine.model.util.PersistentEnum;
 
 public enum WearLocation implements PersistentEnum {
     HEAD(0),

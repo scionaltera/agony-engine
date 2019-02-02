@@ -1,6 +1,6 @@
 package com.agonyengine.repository;
 
-import com.agonyengine.model.interpret.Verb;
+import com.agonyengine.model.command.binding.Verb;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 

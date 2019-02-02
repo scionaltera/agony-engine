@@ -1,7 +1,7 @@
 package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
-import com.agonyengine.model.stomp.GameOutput;
+import com.agonyengine.stomp.model.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,7 @@ package com.agonyengine.service;
 
 import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.actor.Connection;
-import com.agonyengine.model.stomp.GameOutput;
+import com.agonyengine.stomp.model.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +13,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
