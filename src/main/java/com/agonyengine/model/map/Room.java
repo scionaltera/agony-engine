@@ -3,10 +3,12 @@ package com.agonyengine.model.map;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,6 +22,9 @@ public class Room {
 
     @Embedded
     private Location location = new Location();
+
+    @Convert(converter = Direction.Converter.class)
+    private EnumSet<Direction> exits = EnumSet.noneOf(Direction.class);
 
     public UUID getId() {
         return id;
@@ -37,17 +42,24 @@ public class Room {
         this.location = location;
     }
 
+    public EnumSet<Direction> getExits() {
+        return exits;
+    }
+
+    public void setExits(EnumSet<Direction> exits) {
+        this.exits = exits;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Room)) return false;
         Room room = (Room) o;
-        return Objects.equals(getId(), room.getId()) &&
-            Objects.equals(getLocation(), room.getLocation());
+        return Objects.equals(getId(), room.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLocation());
+        return Objects.hash(getId());
     }
 }

@@ -17,6 +17,7 @@ import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.agonyengine.resource.WebSocketResource.SPRING_SESSION_ID_KEY;
@@ -51,6 +53,9 @@ import static org.mockito.Mockito.*;
 public class WebSocketResourceTest {
     @Mock
     private ApplicationContext applicationContext;
+
+    @Mock
+    private Random random;
 
     @Mock
     private InputTokenizer inputTokenizer;
@@ -115,6 +120,8 @@ public class WebSocketResourceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        RoomFactory roomFactory = new RoomFactory(random, roomRepository);
+
         sentences.add(Collections.singletonList("ABLE"));
         message = buildMockMessage(sessionId.toString());
 
@@ -156,12 +163,12 @@ public class WebSocketResourceTest {
             "0.1.2-UNIT-TEST",
             new Date(),
             inputTokenizer,
-            roomRepository,
             sessionRepository,
             actorRepository,
             invokerService,
             commService,
-            bodyGenerator);
+            bodyGenerator,
+            roomFactory);
     }
 
     @SuppressWarnings("unchecked")

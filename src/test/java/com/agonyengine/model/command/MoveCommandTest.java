@@ -11,6 +11,7 @@ import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +32,9 @@ import static org.mockito.Mockito.*;
 public class MoveCommandTest {
     @Mock
     private ApplicationContext applicationContext;
+
+    @Mock
+    private Random random;
 
     @Mock
     private ActorRepository actorRepository;
@@ -52,8 +57,11 @@ public class MoveCommandTest {
     @Captor
     private ArgumentCaptor<List<String>> listCaptor;
 
+    @Captor
+    private ArgumentCaptor<Room> roomCaptor;
+
     private Actor actor = new Actor();
-    private Direction direction = new Direction("north", "south", 0, 1, 0);
+    private Direction direction = Direction.NORTH;
     private Room currentRoom = new Room();
     private Room destinationRoom = new Room();
 
@@ -63,7 +71,10 @@ public class MoveCommandTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        RoomFactory roomFactory = new RoomFactory(random, roomRepository);
+
         currentRoom.setId(UUID.randomUUID());
+        currentRoom.getExits().add(Direction.NORTH);
         currentRoom.setLocation(new Location(0L, 0L));
 
         destinationRoom.setId(UUID.randomUUID());
@@ -77,11 +88,32 @@ public class MoveCommandTest {
         when(applicationContext.getBean(eq("roomRepository"), eq(RoomRepository.class))).thenReturn(roomRepository);
         when(applicationContext.getBean(eq("invokerService"), eq(InvokerService.class))).thenReturn(invokerService);
         when(applicationContext.getBean(eq("commService"), eq(CommService.class))).thenReturn(commService);
+        when(applicationContext.getBean(eq("roomFactory"), eq(RoomFactory.class))).thenReturn(roomFactory);
 
         when(roomRepository.findById(eq(currentRoom.getId()))).thenReturn(Optional.of(currentRoom));
         when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.of(destinationRoom));
 
         when(creatureInfo.hasCapability(eq(BodyPartCapability.WALK))).thenReturn(true);
+
+        when(roomRepository.save(any(Room.class))).thenAnswer(i -> {
+            Room room = i.getArgument(0);
+
+            if (room.getId() == null) {
+                room.setId(UUID.randomUUID());
+            }
+
+            return room;
+        });
+
+        when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
+            Actor actor = i.getArgument(0);
+
+            if (actor.getId() == null) {
+                actor.setId(UUID.randomUUID());
+            }
+
+            return actor;
+        });
 
         moveCommand = new MoveCommand(direction, applicationContext);
         moveCommand.postConstruct();
@@ -95,6 +127,7 @@ public class MoveCommandTest {
 
         assertEquals(destinationRoom.getId(), actor.getRoomId());
 
+        verify(roomRepository).save(destinationRoom);
         verify(actorRepository).save(actor);
 
         verify(invokerService).invoke(eq(actor), eq(output), isNull(), listCaptor.capture());
@@ -103,6 +136,29 @@ public class MoveCommandTest {
 
         assertEquals(1, args.size());
         assertEquals("look", args.get(0));
+    }
+
+    @Test
+    public void testInvokeIntoNonexistentRoom() {
+        when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.empty());
+
+        moveCommand.invoke(actor, output);
+
+        verify(commService, times(2)).echoToRoom(eq(actor), any(GameOutput.class), eq(actor));
+
+        verify(roomRepository).save(roomCaptor.capture());
+        verify(actorRepository).save(actor);
+
+        verify(invokerService).invoke(eq(actor), eq(output), isNull(), listCaptor.capture());
+
+        List<String> args = listCaptor.getValue();
+
+        assertEquals(1, args.size());
+        assertEquals("look", args.get(0));
+
+        Room createdRoom = roomCaptor.getValue();
+
+        assertEquals(createdRoom.getId(), actor.getRoomId());
     }
 
     @Test
@@ -115,8 +171,8 @@ public class MoveCommandTest {
     }
 
     @Test
-    public void testInvokeIntoNonexistentRoom() {
-        when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 1L, 0L)).thenReturn(Optional.empty());
+    public void testInvokeNoExit() {
+        currentRoom.getExits().clear();
 
         moveCommand.invoke(actor, output);
 

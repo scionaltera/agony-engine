@@ -47,4 +47,9 @@ public class Location {
     public void setZ(Long z) {
         this.z = z;
     }
+
+    @Override
+    public String toString() {
+        return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
+    }
 }

@@ -8,6 +8,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
+import com.agonyengine.util.FormattingUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -23,19 +24,16 @@ public class LookCommand {
     private ActorRepository actorRepository;
     private RoomRepository roomRepository;
     private CommService commService;
-    private List<Direction> directions;
 
     @Inject
     public LookCommand(
         ActorRepository actorRepository,
         RoomRepository roomRepository,
-        CommService commservice,
-        List<Direction> directions) {
+        CommService commservice) {
 
         this.actorRepository = actorRepository;
         this.roomRepository = roomRepository;
         this.commService = commservice;
-        this.directions = directions;
     }
 
     @Transactional
@@ -46,6 +44,11 @@ public class LookCommand {
             return;
         }
 
+        if (actor.getRoomId() == null) {
+            output.append("[black]You are floating in the void. There is nothing to see here.");
+            return;
+        }
+
         Room room = roomRepository.findById(actor.getRoomId()).orElse(null);
 
         if (room == null) {
@@ -53,15 +56,14 @@ public class LookCommand {
             return;
         }
 
-        output.append(String.format("[yellow]%s", "A Room"));
-        output.append(String.format("[default]%s", "This is a placeholder for the room description."));
+        output.append("[yellow]Smooth Gray Stones");
+        output.append(FormattingUtils.softWrap("[default]The sky is black and featureless. Ambient light shines dimly but " +
+            "its source is unclear. The floor is made of unnaturally smooth gray stones packed together with nearly " +
+            "perfect hairline seams running off in every direction. " +
+            "In some places the stone gives way to a yawning black void. It seems like you could fall forever from " +
+            "one of these precipices. Time itself feels like it has stopped in this place. Or perhaps, it never started."));
 
-        output.append(directions.stream()
-            .filter(direction -> roomRepository.findByLocationXAndLocationYAndLocationZ(
-                room.getLocation().getX() + direction.getX(),
-                room.getLocation().getY() + direction.getY(),
-                room.getLocation().getZ() + direction.getZ())
-                .isPresent())
+        output.append(room.getExits().stream()
             .map(Direction::getName)
             .collect(joining(" ", "[cyan]Exits: ", "")));
 
