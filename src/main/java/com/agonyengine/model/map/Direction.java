@@ -4,10 +4,10 @@ import com.agonyengine.model.converter.BaseEnumSetConverter;
 import com.agonyengine.model.converter.PersistentEnum;
 
 public enum Direction implements PersistentEnum {
-    NORTH(1, "north", "south", 0, 1, 0),
-    EAST(2, "east", "west", 1, 0, 0),
-    SOUTH(3, "south", "north", 0, -1, 0),
-    WEST(4, "west", "east", -1, 0, 0);
+    NORTH(0, "north", "south", 0, 1, 0),
+    EAST(1, "east", "west", 1, 0, 0),
+    SOUTH(2, "south", "north", 0, -1, 0),
+    WEST(3, "west", "east", -1, 0, 0);
 
     private int index;
     private String name;
