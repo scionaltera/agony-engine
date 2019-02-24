@@ -2,6 +2,8 @@ package com.agonyengine.service;
 
 import com.agonyengine.config.WorldConfiguration;
 import com.agonyengine.model.map.Biome;
+import com.agonyengine.model.map.Room;
+import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.util.noise.FbmParameters;
 import com.agonyengine.util.noise.MapFactory;
 import org.slf4j.Logger;
@@ -14,12 +16,15 @@ import javax.inject.Named;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class BiomeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BiomeService.class);
 
     private MapFactory mapFactory;
+    private RoomRepository roomRepository;
 
     private FbmParameters grossElevationParameters;
     private FbmParameters elevationParameters;
@@ -31,10 +36,12 @@ public class BiomeService {
     private long rainfallLoWater = 10;
 
     public BiomeService(MapFactory mapFactory,
+                        RoomRepository roomRepository,
                         @Named("grossElevationParameters") FbmParameters grossElevationParameters,
                         @Named("elevationParameters") FbmParameters elevationParameters,
                         @Named("rainfallParameters") FbmParameters rainfallParameters) {
         this.mapFactory = mapFactory;
+        this.roomRepository = roomRepository;
         this.grossElevationParameters = grossElevationParameters;
         this.elevationParameters = elevationParameters;
         this.rainfallParameters = rainfallParameters;
@@ -42,16 +49,16 @@ public class BiomeService {
 
     @PostConstruct
     public void setup() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Writing world map image...");
-            debugImages();
+//        if (LOGGER.isDebugEnabled()) {
+            LOGGER.warn("Writing world map image. This will take a long time...");
+            writeWorldMap();
 
             LOGGER.debug("Elevation lo/hi: {}/{}", elevationLoWater, elevationHiWater);
             LOGGER.debug("Rainfall lo/hi: {}/{}", rainfallLoWater, rainfallHiWater);
-        }
+//        }
     }
 
-    private void debugImages() {
+    private void writeWorldMap() {
         final int IMG_WIDTH = 1024 * 2;
         final int IMG_HEIGHT = 1024 * 2;
         final int IMG_START_X = (int)(WorldConfiguration.WIDTH / 2L) - (IMG_WIDTH / 2);
@@ -65,6 +72,7 @@ public class BiomeService {
         try {
             BufferedImage biomeImage = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
+            LOGGER.info("Writing biome information to image...");
             for (int x = 0; x < IMG_WIDTH; x++) {
                 for (int y = 0; y < IMG_HEIGHT; y++) {
                     long[] climate = computeClimate(IMG_START_X + x, IMG_START_Y + y);
@@ -73,6 +81,23 @@ public class BiomeService {
                 }
             }
 
+            LOGGER.info("Writing rooms to image...");
+            roomRepository.findAll()
+                .forEach(room -> {
+                    if (room.getLocation() != null
+                        && room.getLocation().getX() != null
+                        && room.getLocation().getY() != null
+                        && room.getLocation().getZ() != null
+                        && room.getLocation().getZ() == 0) {
+
+                        biomeImage.setRGB(
+                            room.getLocation().getX().intValue() - IMG_START_X,
+                            room.getLocation().getY().intValue() - IMG_START_Y,
+                            0xFF222222);
+                    }
+                });
+
+            LOGGER.info("Writing image to disk...");
             ImageIO.write(biomeImage, "PNG", new File("images/biome.png"));
         } catch (IOException e) {
             LOGGER.error("IOE writing images!", e);

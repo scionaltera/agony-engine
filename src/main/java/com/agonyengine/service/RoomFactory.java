@@ -2,7 +2,6 @@ package com.agonyengine.service;
 
 import com.agonyengine.model.map.Biome;
 import com.agonyengine.model.map.Direction;
-import com.agonyengine.model.map.Location;
 import com.agonyengine.model.map.Room;
 import com.agonyengine.model.map.Zone;
 import com.agonyengine.repository.RoomRepository;
@@ -12,15 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 @Component
 public class RoomFactory {
-    public static int ROOMS_PER_ZONE = 100;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomFactory.class);
 
     private Random random;
@@ -38,6 +33,10 @@ public class RoomFactory {
         this.zoneRepository = zoneRepository;
         this.roomRepository = roomRepository;
         this.biomeService = biomeService;
+    }
+
+    public Optional<Room> get(Long x, Long y, Long z) {
+        return roomRepository.findByLocationXAndLocationYAndLocationZ(x, y, z);
     }
 
     public Room build() {
