@@ -60,9 +60,10 @@ public class LookCommand {
             return;
         }
 
-        output.append("[yellow]" + room.getLocation() + " " + biomeService.computeBiome(
+        output.append("[yellow]" + room.getZone() + " " + room.getLocation() + " " + biomeService.computeBiome(
             room.getLocation().getX(),
             room.getLocation().getY()).getName());
+
         output.append(FormattingUtils.softWrap("[default]The sky is black and featureless. Ambient light shines dimly but " +
             "its source is unclear. The floor is made of unnaturally smooth gray stones packed together with nearly " +
             "perfect hairline seams running off in every direction. " +

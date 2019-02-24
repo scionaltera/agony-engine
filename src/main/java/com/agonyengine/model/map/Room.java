@@ -8,6 +8,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,6 +20,9 @@ public class Room {
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
+
+    @ManyToOne
+    private Zone zone;
 
     @Embedded
     private Location location = new Location();
@@ -32,6 +36,14 @@ public class Room {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public Zone getZone() {
+        return zone;
+    }
+
+    public void setZone(Zone zone) {
+        this.zone = zone;
     }
 
     public Location getLocation() {

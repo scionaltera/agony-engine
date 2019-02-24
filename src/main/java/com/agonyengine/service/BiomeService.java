@@ -42,11 +42,13 @@ public class BiomeService {
 
     @PostConstruct
     public void setup() {
-        LOGGER.info("Writing world map image...");
-        debugImages();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Writing world map image...");
+            debugImages();
 
-        LOGGER.info("Elevation lo/hi: {}/{}", elevationLoWater, elevationHiWater);
-        LOGGER.info("Rainfall lo/hi: {}/{}", rainfallLoWater, rainfallHiWater);
+            LOGGER.debug("Elevation lo/hi: {}/{}", elevationLoWater, elevationHiWater);
+            LOGGER.debug("Rainfall lo/hi: {}/{}", rainfallLoWater, rainfallHiWater);
+        }
     }
 
     private void debugImages() {
