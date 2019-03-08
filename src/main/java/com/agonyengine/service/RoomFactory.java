@@ -1,11 +1,8 @@
 package com.agonyengine.service;
 
-import com.agonyengine.model.map.Biome;
 import com.agonyengine.model.map.Direction;
 import com.agonyengine.model.map.Room;
-import com.agonyengine.model.map.Zone;
 import com.agonyengine.repository.RoomRepository;
-import com.agonyengine.repository.ZoneRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,20 +16,14 @@ public class RoomFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomFactory.class);
 
     private Random random;
-    private ZoneRepository zoneRepository;
     private RoomRepository roomRepository;
-    private BiomeService biomeService;
 
     public RoomFactory(
         Random random,
-        ZoneRepository zoneRepository,
-        RoomRepository roomRepository,
-        BiomeService biomeService) {
+        RoomRepository roomRepository) {
 
         this.random = random;
-        this.zoneRepository = zoneRepository;
         this.roomRepository = roomRepository;
-        this.biomeService = biomeService;
     }
 
     public Optional<Room> get(Long x, Long y, Long z) {
@@ -49,21 +40,6 @@ public class RoomFactory {
             from.getLocation().getY() + to.getY(),
             from.getLocation().getZ() + to.getZ());
 
-        if (room.getZone() == null) {
-            Biome fromBiome = biomeService.computeBiome(from.getLocation().getX(), from.getLocation().getY());
-            Biome toBiome = biomeService.computeBiome(room.getLocation().getX(), room.getLocation().getY());
-
-            if (fromBiome.equals(toBiome)) {
-                room.setZone(from.getZone());
-            } else {
-                Zone zone = zoneRepository.save(new Zone());
-
-                LOGGER.debug("Created new Zone {}", zone.getId());
-
-                room.setZone(zone);
-            }
-        }
-
         room.getExits().add(to.toOpposite());
 
         return roomRepository.save(room);
@@ -71,14 +47,6 @@ public class RoomFactory {
 
     public Room getOrBuild(Long x, Long y, Long z) {
         Room room = internalGetOrBuild(x, y, z);
-
-        if (room.getZone() == null) {
-            Zone zone = zoneRepository.save(new Zone());
-
-            LOGGER.debug("Created new Zone {}", zone.getId());
-
-            room.setZone(zone);
-        }
 
         if (room.getId() == null) {
             return roomRepository.save(room);

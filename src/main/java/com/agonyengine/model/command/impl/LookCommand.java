@@ -60,7 +60,7 @@ public class LookCommand {
             return;
         }
 
-        output.append("[yellow]" + room.getZone() + " " + room.getLocation() + " " + biomeService.computeBiome(
+        output.append("[yellow]" + room.getLocation() + " " + biomeService.computeBiome(
             room.getLocation().getX(),
             room.getLocation().getY()).getName());
 
