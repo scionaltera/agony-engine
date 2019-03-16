@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Random;
 
 @Component
@@ -17,9 +18,16 @@ public class RoomFactory {
     private Random random;
     private RoomRepository roomRepository;
 
-    public RoomFactory(Random random, RoomRepository roomRepository) {
+    public RoomFactory(
+        Random random,
+        RoomRepository roomRepository) {
+
         this.random = random;
         this.roomRepository = roomRepository;
+    }
+
+    public Optional<Room> get(Long x, Long y, Long z) {
+        return roomRepository.findByLocationXAndLocationYAndLocationZ(x, y, z);
     }
 
     public Room build() {

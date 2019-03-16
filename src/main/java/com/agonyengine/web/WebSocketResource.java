@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.agonyengine.config.WorldConfiguration.*;
 import static com.agonyengine.model.actor.CreatureInfo.BODY_VERSION;
 
 @Controller
@@ -100,7 +101,7 @@ public class WebSocketResource {
         // This can probably get removed at some point but for awhile there needs to be a framework to allow for
         // breaking changes. The system for bodies is complex and changing frequently.
         if (actor.getCreatureInfo() != null && actor.getCreatureInfo().getBodyVersion() < BODY_VERSION) {
-            Room origin = roomFactory.getOrBuild(0L, 0L, 0L);
+            Room origin = roomFactory.getOrBuild(START_X, START_Y, START_Z);
 
             // Remove any equipment and return it to the start room so it doesn't get lost.
             actor.getCreatureInfo().getBodyParts().stream()
@@ -132,7 +133,7 @@ public class WebSocketResource {
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
         if (actor.getRoomId() == null) {
-            Room startRoom = roomFactory.getOrBuild(0L, 0L, 0L);
+            Room startRoom = roomFactory.getOrBuild(START_X, START_Y, START_Z);
 
             actor.setRoomId(startRoom.getId());
 

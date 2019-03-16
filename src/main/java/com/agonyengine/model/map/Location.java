@@ -48,6 +48,12 @@ public class Location {
         this.z = z;
     }
 
+    public void set(Location original) {
+        this.x = original.getX();
+        this.y = original.getY();
+        this.z = original.getZ();
+    }
+
     @Override
     public String toString() {
         return "(" + getX() + ", " + getY() + ", " + getZ() + ")";

@@ -4,6 +4,7 @@ import com.agonyengine.model.actor.Actor;
 import com.agonyengine.model.command.binding.ActorSameRoom;
 import com.agonyengine.model.map.Direction;
 import com.agonyengine.model.map.Room;
+import com.agonyengine.service.BiomeService;
 import com.agonyengine.stomp.model.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
@@ -23,16 +24,19 @@ import static java.util.stream.Collectors.joining;
 public class LookCommand {
     private ActorRepository actorRepository;
     private RoomRepository roomRepository;
+    private BiomeService biomeService;
     private CommService commService;
 
     @Inject
     public LookCommand(
         ActorRepository actorRepository,
         RoomRepository roomRepository,
+        BiomeService biomeService,
         CommService commservice) {
 
         this.actorRepository = actorRepository;
         this.roomRepository = roomRepository;
+        this.biomeService = biomeService;
         this.commService = commservice;
     }
 
@@ -56,7 +60,10 @@ public class LookCommand {
             return;
         }
 
-        output.append("[yellow]Smooth Gray Stones");
+        output.append("[yellow]" + room.getLocation() + " " + biomeService.computeBiome(
+            room.getLocation().getX(),
+            room.getLocation().getY()).getName());
+
         output.append(FormattingUtils.softWrap("[default]The sky is black and featureless. Ambient light shines dimly but " +
             "its source is unclear. The floor is made of unnaturally smooth gray stones packed together with nearly " +
             "perfect hairline seams running off in every direction. " +

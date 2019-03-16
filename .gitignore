@@ -4,20 +4,13 @@
 # Log file
 *.log
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
 # Package Files #
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
-*.war
-*.ear
 *.zip
-*.tar.gz
-*.rar
+
+# Debug Output
+*.png
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -33,11 +26,6 @@ out/
 .gradle/
 build/
 .gradletasknamecache
-
-# Codeship
-codeship.aes
-credentials.env
-dockercfg
 
 # OSX
 .DS_Store

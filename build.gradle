@@ -1,5 +1,5 @@
 group 'com.agonyengine'
-version '0.16.1-SNAPSHOT'
+version '0.17.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
@@ -92,7 +92,8 @@ build.dependsOn project.tasks.buildDocker
 pitest {
     excludedClasses = [
         'com.agonyengine.AgonyEngine',
-        'com.agonyengine.config.*'
+        'com.agonyengine.config.*',
+        'com.agonyengine.util.noise.OpenSimplexNoise'
     ]
     excludedMethods = [
         'hashCode',

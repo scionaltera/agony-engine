@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-oraclejre8:slim
+FROM openjdk:8-jdk-alpine
 MAINTAINER Peter Keeler <scion@agonyengine.com>
 EXPOSE 8080
 COPY agony-engine-*.jar /opt/mud/app.jar

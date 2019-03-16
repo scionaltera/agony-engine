@@ -1,6 +1,7 @@
 package com.agonyengine.model.command.impl;
 
 import com.agonyengine.model.actor.Actor;
+import com.agonyengine.service.BiomeService;
 import com.agonyengine.stomp.model.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
@@ -27,6 +28,9 @@ public class LookCommandTest {
     private RoomRepository roomRepository;
 
     @Mock
+    private BiomeService biomeService;
+
+    @Mock
     private CommService commService;
 
     private LookCommand lookCommand;
@@ -38,6 +42,7 @@ public class LookCommandTest {
         lookCommand = new LookCommand(
             actorRepository,
             roomRepository,
+            biomeService,
             commService
         );
     }
