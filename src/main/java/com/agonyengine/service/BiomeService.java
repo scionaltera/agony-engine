@@ -2,7 +2,6 @@ package com.agonyengine.service;
 
 import com.agonyengine.config.WorldConfiguration;
 import com.agonyengine.model.map.Biome;
-import com.agonyengine.model.map.Room;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.util.noise.FbmParameters;
 import com.agonyengine.util.noise.MapFactory;
@@ -16,8 +15,6 @@ import javax.inject.Named;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 @Component
 public class BiomeService {
@@ -49,13 +46,13 @@ public class BiomeService {
 
     @PostConstruct
     public void setup() {
-//        if (LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.warn("Writing world map image. This will take a long time...");
             writeWorldMap();
 
             LOGGER.debug("Elevation lo/hi: {}/{}", elevationLoWater, elevationHiWater);
             LOGGER.debug("Rainfall lo/hi: {}/{}", rainfallLoWater, rainfallHiWater);
-//        }
+        }
     }
 
     private void writeWorldMap() {
@@ -105,7 +102,10 @@ public class BiomeService {
     }
 
     public Biome computeBiome(long x, long y) {
-        long[] climate = computeClimate(x, y);
+        return computeBiome(computeClimate(x, y));
+    }
+
+    Biome computeBiome(long[] climate) {
         long elevation = climate[0];
         long rainfall = climate[1];
         Biome biome = new Biome();

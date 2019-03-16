@@ -1,6 +1,6 @@
 package com.agonyengine.util.noise;
 
-public class AdjustedNoise implements NoiseGenerator {
+class AdjustedNoise implements NoiseGenerator {
     private static final double NOISE_MULT_3D = 1.154;  // ~1/0.866 because -0.866 to 0.866 is the actual
                                                         // effective range of this noise. This multiplier
                                                         // will scale it to approximately -1 to 1.
