@@ -1,6 +1,8 @@
 agonyengine:
   worldgen:
-    seed: 1
+#    MAX seed: 0x8000000000000000
+#    MIN seed: 0x0000000000000000
+    seed: 0x7a920591b335d603
 
 spring:
   jpa:
